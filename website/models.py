@@ -60,6 +60,7 @@ class Attendance(db.Model):
     day = db.Column(db.String(150))
     totes = db.Column(db.Integer, default=0)
     reason = db.Column(db.Text)
+    site_name = db.Column(db.String(150), nullable=True)  # New field for site/customer name
 
 
     def total_time_worked(self):

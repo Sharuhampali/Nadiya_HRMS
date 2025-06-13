@@ -6,74 +6,157 @@
     <title>{{ user.username }}'s Profile</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 50px;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-        }
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            font-weight: 300;
-        }
-        .profile-photo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .profile-photo img {
-            margin-right: 20px;
-        }
-        .form-group label {
-            font-weight: 600;
-        }
-        .form-control-file {
-            margin-top: 10px;
-        }
-        .current-documents {
-            margin-top: 20px;
-        }
-        .list-group-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            font-size: 1.2em;
-            padding: 10px 20px;
-        }
-        .navbar{
-            background-color: #E2E2E2 !important;
-  
-        }
-        .navbar-nav .nav-link {
-      margin-right: 15px;
-      display: flex;
-      align-items: center;
-      color: #000 !important;
+body {
+    background-color: #f6f7fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #111;
+}
+  .navbar {
+    background-color: #E2E2E2 !important;
   }
-  
-  #logout {
-      color: #000;
-      text-align: center;
+  .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
   }
-  
-
+  .navbar-brand img {
+    height: 80px;
+  }
+  .profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+  }
   .navbar-nav.ml-auto {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  
-  
-      </style>
+  #logout {
+    color: #000;
+    text-align: center;
+  }
+.container {
+    max-width: 600px;
+    margin: 48px auto 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(30,136,229,0.07);
+    padding: 36px 28px 32px 28px;
+}
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 32px;
+    letter-spacing: 1px;
+    padding-left: 0;
+    position: relative;
+    text-transform: capitalize;
+}
+h1::before {
+    content: '';
+    display: block;
+    height: 7px;
+    width: 56px;
+    background: #fbc02d; /* yellow accent */
+    border-radius: 4px;
+    margin-bottom: 14px;
+}
+.profile-photo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 24px;
+}
+.profile-photo img {
+    border-radius: 50%;
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(229,57,53,0.07);
+    border: 3px solid #fffbe6;
+    background: #fafbfc;
+}
+.profile-photo p {
+    color: #888;
+    font-size: 1.1rem;
+}
+.form-group label {
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 8px;
+}
+.form-control-file, .form-control, select {
+    border: 1.5px solid #e4e7ed;
+    border-radius: 5px;
+    padding: 10px 14px;
+    font-size: 1.08rem;
+    color: #111;
+    background: #fafbfc;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+}
+.form-control-file:focus, .form-control:focus, select:focus {
+    border-color: #1e88e5; /* blue accent on focus */
+    outline: none;
+    background: #fff;
+}
+.current-documents {
+    margin-top: 24px;
+}
+.current-documents h5 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e53935; /* red accent */
+    margin-bottom: 14px;
+}
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1.5px solid #e4e7ed;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    background: #fffbe6;
+    color: #111;
+    font-size: 1.01rem;
+}
+.btn-primary {
+    background-color: #1e88e5;
+    border: none;
+    color: #fff;
+    font-size: 1.13rem;
+    font-weight: 600;
+    padding: 14px 0;
+    border-radius: 6px;
+    width: 100%;
+    letter-spacing: 0.5px;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 1px 4px rgba(30,136,229,0.06);
+    margin-top: 18px;
+}
+.btn-primary:hover {
+    background: #fbc02d;
+    color: #111;
+}
+.alert-info {
+    background: #fffbe6;
+    color: #b71c1c;
+    border: 1.5px solid #fbc02d;
+    border-radius: 5px;
+    font-weight: 500;
+}
+@media (max-width: 700px) {
+    .container { padding: 12px 2vw; }
+    h1 { font-size: 1.3rem; }
+    h1::before { width: 32px; height: 4px; }
+    .profile-photo img { width: 80px; height: 80px; }
+}
+</style>
+
   </head>
   <body>
       <nav class="navbar navbar-expand-lg navbar-light bg-light">

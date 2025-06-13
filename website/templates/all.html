@@ -5,101 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Display Users</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            text-align: center;
-        }
+  <style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #111;
+    margin: 0;
+    text-align: center;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    text-align: left;
+  }
+  h1 {
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    color: #111;
+    margin-bottom: 32px;
+    position: relative;
+    padding-left: 0;
+  }
+  h1::before {
+    content: '';
+    display: block;
+    height: 7px;
+    width: 64px;
+    background: #fbc02d; /* yellow accent */
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(30,136,229,0.06);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 14px 16px;
+    border-bottom: 1.5px solid #e4e7ed;
+    color: #111;
+    text-align: center;
+  }
+  th {
+    background-color: #fffbe6; /* subtle yellow */
+    font-weight: 700;
+    border-bottom: 3px solid #fbc02d;
+    text-align: center !important;
+  }
+  tbody tr:nth-child(odd) {
+    background-color: #f7fafd; /* subtle blue */
+  }
+  tbody tr:nth-child(even) {
+    background-color: #fff5f5; /* subtle red */
+  }
+  tbody tr:hover {
+    background-color: #fffde7; /* lighter yellow hover */
+  }
+  .delete-button {
+    color: #e53935;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .delete-button:hover {
+    color: #b71c1c;
+  }
+  .navbar {
+    background-color: #E2E2E2 !important;
+  }
+  .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+  }
+  .navbar-brand img {
+    height: 80px;
+  }
+  .profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+  }
+  .navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #logout {
+    color: #000;
+    text-align: center;
+  }
+  @media (max-width: 768px) {
+    .container {
+      padding: 10px 12px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+    }
+    th, td {
+      padding: 10px 8px;
+      font-size: 0.9rem;
+    }
+    .delete-button {
+      font-size: 16px;
+    }
+  }
+</style>
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #2596be;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-        }
-
-        th {
-            background-color: #2596be;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #e1e1e1;
-        }
-
-        .delete-button {
-            color: #dc3545;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .delete-button:hover {
-            color: #c82333;
-        }
-
-        .no-users {
-            text-align: center;
-            color: #666;
-            font-size: 18px;
-        }
-
-        .navbar {
-            background-color: #E2E2E2 !important;
-        }
-
-        .navbar-nav .nav-link {
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            color: #000 !important;
-        }
-
-        .navbar-brand img {
-            height: 80px;
-        }
-
-        .profile-photo img {
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            margin-left: 10px;
-        }
-
-        .navbar-nav.ml-auto {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #logout {
-            color: #000;
-            text-align: center;
-        }
-    </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">

@@ -139,8 +139,10 @@
                         <th>Comp Off</th>
                         <th>Entry Location</th>
                         <th>Exit Location</th>
+                        <th>Site/Customer Name</th>
                         <th>Shift</th>
                         <th>Late Entry</th>
+                        <th>Reason</th>
 
                     </tr>
                 </thead>
@@ -170,8 +172,10 @@
                                 {{ attendance.exit_location | extract_area }}
                             </a>
                         </td>
+                        <td>{{ attendance.site_name }}</td>
                         <td>{{ attendance.entry_time | determine_shift }}</td>
                         <td>{{ attendance.entry_time | is_late }}</td>
+                        <td>{{ attendance.reason }}</td>
 
                     </tr>
                     {% endfor %}

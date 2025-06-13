@@ -3,10 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <link
+    <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
       crossorigin="anonymous"
     />
     <link
@@ -14,144 +13,191 @@
       href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
       crossorigin="anonymous"
     />
-
     <style>
-    body{
-        background-color: #fff;
+    body {
+        background-color: #f6f7fa;
+        font-family: Arial, sans-serif;
     }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px 12px 40px 12px;
+    }
+    h1 {
+        color: #111;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 32px;
+        letter-spacing: 0.5px;
+        text-align: left;
+        position: relative;
+        padding-left: 18px;
+    }
+    h1::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 12px;
+        width: 8px;
+        height: 28px;
+        background: #fe413e; /* red accent */
+        border-radius: 4px;
+    }
+    .list-group {
+        border: none;
+    }
+    .leave-card {
+        border-left: 6px solid #e4e7ed;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 18px;
+        padding: 20px 24px 20px 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        transition: box-shadow 0.2s;
+    }
+    .leave-card:hover {
+        box-shadow: 0 4px 18px rgba(30,136,229,0.10);
+    }
+    .leave-card.approved { border-left-color: #1e88e5; }   /* blue */
+    .leave-card.rejected { border-left-color: #e53935; }   /* red */
+    .leave-card.pending { border-left-color: #fbc02d; }    /* yellow */
+    .leave-info {
+        flex: 1;
+        color: #111;
+        font-size: 1.07rem;
+        font-weight: 500;
+    }
+    .leave-status {
+        font-size: 0.98rem;
+        font-weight: 600;
+        padding: 7px 18px;
+        border-radius: 14px;
+        margin-left: 16px;
+        display: flex;
+        align-items: center;
+        letter-spacing: 0.2px;
+    }
+    .status-approved {
+        background: #e3f1fd;
+        color: #1e88e5;
+        border: 1.5px solid #1e88e5;
+    }
+    .status-rejected {
+        background: #ffeaea;
+        color: #e53935;
+        border: 1.5px solid #e53935;
+    }
+    .status-pending {
+        background: #fffbe6;
+        color: #fbc02d;
+        border: 1.5px solid #fbc02d;
+    }
+    .leave-status i {
+        margin-right: 7px;
+        font-size: 1.1em;
+    }
+    p {
+        margin-top: 32px;
+        font-style: italic;
+        color: #666;
+        text-align: center;
+    }
+    @media (max-width: 576px) {
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            padding: 10px 2vw 28px 2vw;
         }
-
+        .leave-card {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 16px 10px 16px 12px;
+        }
+        .leave-status {
+            margin-left: 0;
+            margin-top: 10px;
+        }
         h1 {
-            margin-bottom: 20px;
+            font-size: 1.3rem;
+            padding-left: 10px;
         }
-
-        .list-group-item {
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-            padding: 10px;
-            position: relative;
+        h1::before {
+            width: 5px;
+            height: 18px;
+            top: 8px;
         }
-
-        .list-group-item strong {
-            font-weight: bold;
-        }
-
-        .list-group-item span.badge {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-        }
-
-        .list-group-item .badge-success {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .list-group-item .badge-warning {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        .list-group-item .badge-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        p {
-            margin-top: 20px;
-            font-style: italic;
-            color: #666;
-        }
-
-        @media (max-width: 576px) {
-            .list-group-item span.badge {
-                position: static;
-                display: block;
-                margin-top: 10px;
-            }
-        }
-         .navbar{
-          background-color: #E2E2E2 !important;
-
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
-
-#logout {
-    color: #000;
-    text-align: center;
-}
-
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
-
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
+    }
+    .navbar{
+        background-color: #E2E2E2 !important;
+    }
+    .navbar-nav .nav-link {
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+        color: #000 !important;
+    }
+    #logout {
+        color: #000;
+        text-align: center;
+    }
+    .profile-photo img {
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        margin-left: 10px;
+    }
+    .navbar-nav.ml-auto {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-light">
-
-
-        <div class="navbar-nav">
-
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-
-            <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-        </div>
-
+    <div class="navbar-nav">
+        <a class="navbar-brand" href="/">
+            <img src="static/logo.png" alt="Logo" style="height: 80px;">
+        </a>
+        <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+    </div>
 </nav>
 <br>
 <div class="container">
-    <h1>My Leaves</h1>
-
+    <h1>MY LEAVES</h1>
     {% if leaves %}
-        <ul class="list-group">
+        <div class="list-group">
             {% for leave in leaves %}
-                <li class="list-group-item d-flex flex-column">
-                    <div>Requested {{ leave.ltype }} Leave on {{ leave.start_date }}</div>
+                <div class="leave-card
+                    {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
+                    <div class="leave-info">
+                        <i class="fa fa-calendar"></i>
+                        Requested <strong>{{ leave.ltype }}</strong> Leave on <strong>{{ leave.start_date }}</strong>
+                    </div>
                     {% if leave.approved %}
-                        <span class="badge badge-success align-self-start align-self-md-end">Approved</span>
+                        <div class="leave-status status-approved">
+                            <i class="fa fa-check-circle"></i> Approved
+                        </div>
                     {% elif leave.rejected %}
-                        <span class="badge badge-danger align-self-start align-self-md-end">Rejected</span>
+                        <div class="leave-status status-rejected">
+                            <i class="fa fa-times-circle"></i> Rejected
+                        </div>
                     {% else %}
-                        <span class="badge badge-warning align-self-start align-self-md-end">Pending Approval</span>
+                        <div class="leave-status status-pending">
+                            <i class="fa fa-clock-o"></i> Pending Approval
+                        </div>
                     {% endif %}
-                </li>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
         <p>No leaves found.</p>
     {% endif %}
 </div>
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<!-- Popper.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-rbsA2Ki6F2IlgQY1FOl0a2mheV4s2yIfR9sOGB4E5lO+uTWY+o2wIlgfFCfnVr3D" crossorigin="anonymous"></script>
-<!-- Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-Wp4c0OxaPxWv1l8FFPRvTIKD1IlMl6l1h+U6hs4B5bT+Tj7LZX0LKnS4bRS9/T+N" crossorigin="anonymous"></script>
+<!-- jQuery, Popper.js, Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 </body>
 </html>

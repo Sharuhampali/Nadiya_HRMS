@@ -1,116 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Total Comp Off</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <style>
-        /* Reset default styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Body styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0; /* Light gray background */
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f6f7fa;
+            color: #111;
         }
-
-        /* Container styles */
+        .navbar {
+            background-color: #E2E2E2 !important;
+        }
+        .navbar-nav .nav-link {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            color: #000 !important;
+        }
+        #logout { color: #000; }
+        .profile-photo img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+        }
+        .navbar-nav.ml-auto {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .container {
-            max-width: 100%;
-            padding: 20px;
-            margin: 0 auto;
+            max-width: 100vh;
+            margin: 48px auto 0 auto;
+            padding: 0 18px 32px 18px;
         }
-
-        /* Heading styles */
         h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #2596be;
-            text-align: center;
+            font-size: 2.1rem;
+            letter-spacing: 2px;
+            color: #111;
+            font-weight: 700;
+            margin-bottom: 36px;
+            text-align: left;
+            text-transform: uppercase;
+            position: relative;
+            padding-left: 0;
         }
-
-        /* Table styles */
+        h1::before {
+            content: '';
+            display: block;
+            height: 7px;
+            width: 64px;
+            background: #4bbbf8; /* yellow accent */
+            border-radius: 4px;
+            margin-bottom: 14px;
+        }
         .table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(30,136,229,0.06);
+            border-radius: 8px;
+            overflow: hidden;
         }
-
-        .table th, .table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
         .table th {
-            background-color: #f0f0f0; /* Light gray header background */
-            color: #333;
+            background-color: #fffbe6;  /* subtle yellow */
+            color: #111;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 2.5px solid #fb8a2d;  /* yellow border */
+            padding: 14px 12px;
         }
-
         .table td {
-            background-color: #fff; /* White background for table cells */
+            color: #111;
+            border-bottom: 1.5px solid #e4e7ed;
+            padding: 14px 12px;
+            background: #fff;
         }
-
-        /* Button styles */
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            text-decoration: none;
-            background-color: #007bff; /* Bootstrap primary color */
-            color: #fff;
-            border-radius: 5px;
-            text-align: center;
-            transition: background-color 0.3s ease;
+        
+        .table tbody tr:hover td {
+            background: #f7fafd;
         }
-
-        .btn:hover {
-            background-color: #0056b3; /* Darker shade on hover */
-        }
-
-        /* Responsive table */
         @media (max-width: 768px) {
-            .table {
-                font-size: 14px;
-            }
-
-            .table th, .table td {
-                padding: 8px;
-            }
+            .container { padding: 0 2vw 24px 2vw; }
+            h1 { font-size: 1.2rem; }
+            h1::before { width: 32px; height: 4px; }
+            .table th, .table td { font-size: 0.97rem; padding: 8px 4px; }
         }
-         .navbar{
-          background-color: #E2E2E2 !important;
-
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
-
-#logout {
-    color: #000;
-    text-align: center;
-}
-
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
-
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
     </style>
 </head>
 <body>
@@ -120,11 +100,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navbar">
             <div class="navbar-nav">
-
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-
+                <a class="navbar-brand" href="/">
+                    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+                </a>
                 <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
                 <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
             </div>
@@ -134,8 +112,8 @@
         </div>
     </nav>
 
-    <div class="container"><br><br>
-        <h1>Total Comp Off for All Users</h1><br><br>
+    <div class="container">
+        <h1>TOTAL COMP OFF FOR ALL USERS</h1>
         <table class="table">
             <thead>
                 <tr>
@@ -153,12 +131,9 @@
             </tbody>
         </table>
     </div>
-
-    <!-- External CSS and JS Links -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 </body>
 </html>

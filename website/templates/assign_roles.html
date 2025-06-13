@@ -20,16 +20,22 @@
         }
 
         h1 {
-            text-align: center;
-            color: #333;
-        }
+        color: #111;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 28px;
+        letter-spacing: 0.5px;
+        text-align: left;
+        border-left: 6px solid #fbc02d; /* yellow accent */
+        padding-left: 14px;
+    }
 
         form {
             display: flex;
             flex-direction: column;
         }
 
-        label {
+        label { 
             margin-bottom: 5px;
             color: #555;
         }
@@ -82,7 +88,13 @@
     align-items: center;
     justify-content: center;
 }
-
+.container {
+        max-width: 90vh;
+        margin: 48px auto;
+        padding: 36px 40px ;
+        background: #fff;
+        border-radius: 10px;
+    }
 
     </style>
 </head>
@@ -123,7 +135,7 @@
     {% endwith %}
 <br>
     <div class="container mt-5">
-        <h1 class="mb-4">Assign Roles</h1><br>
+        <h1 class="mb-4">ASSIGN ROLE</h1><br>
         <form action="{{ url_for('views.assign_roles') }}" method="POST">
             <div class="form-group">
                 <label for="user_id">User:</label>

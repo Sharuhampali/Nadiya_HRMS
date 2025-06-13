@@ -80,7 +80,16 @@ def google_login():
 
 @auth.route('/login/google/callback')
 def google_callback():
+    google = oauth.create_client('google')
     token = oauth.google.authorize_access_token()
+    if google.token.is_expired():
+        new_token = google.refresh_token(
+            url='https://oauth2.googleapis.com/token',
+            client_id=google.client_id,
+            client_secret=google.client_secret
+        )
+        token = new_token
+    
     user_info = token.get('userinfo') or oauth.google.parse_id_token(token, nonce=None)
     print("User info received:", user_info)  # Debugging line to check user info
     

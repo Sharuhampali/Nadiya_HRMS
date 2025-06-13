@@ -78,7 +78,20 @@
       height: 100%;
       background-color: #007bff;
       border-radius: 2px;
-    }
+      background: linear-gradient(
+    to bottom,
+    #fbc02d 0%,      /* yellow */
+    #fbc02d 33%,
+    #1e88e5 33%,     /* blue */
+    #1e88e5 66%,
+    #e53935 66%,     /* red */
+    #e53935 100%
+  );
+}
+.list-group-item:nth-child(3n+1)::before { background: #fbc02d; } /* yellow */
+.list-group-item:nth-child(3n+2)::before { background: #1e88e5; } /* blue */
+.list-group-item:nth-child(3n)::before { background: #e53935; }   /* red */
+    
 
     .alert {
       margin-top: 20px;
@@ -193,7 +206,7 @@
   </nav>
 
   <div class="container mt-4"><br>
-    <h1>Announcements</h1><br><br>
+    <h1>ANNOUNCEMENTS</h1><br><br>
     {% if announcements %}
       <ul class="list-group">
         {% for announcement in announcements | reverse %}

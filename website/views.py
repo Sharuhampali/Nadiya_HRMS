@@ -2,7 +2,9 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from .models import User, Attendance, Leave, Document, Holiday, Announcement
 from . import db
-
+from flask import Flask, send_file
+from io import BytesIO
+import pandas as pd
 from geopy.geocoders import Nominatim
 from datetime import datetime
 from flask_uploads import UploadSet, IMAGES, UploadNotAllowed
@@ -41,6 +43,7 @@ def submit_attendance():
     latitude = request.form.get('latitude')
     longitude = request.form.get('longitude')
     entry_exit = request.form.get('entry_exit')  # 'entry' or 'exit'
+    site_name = request.form.get('site_name', None)  # Get site/customer name if provided
     user_id = current_user.id
     user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
 
@@ -48,7 +51,8 @@ def submit_attendance():
         reason = request.form['reason']
     else:
         reason = None
-
+    
+    
     india_tz = pytz.timezone('Asia/Kolkata')
     now = datetime.now(india_tz).time()  # Get current time only
 
@@ -86,7 +90,8 @@ def submit_attendance():
                 entry_time=now.replace(microsecond=0),  # Store only time
                 date=datetime.now(india_tz).date(),
                 day=datetime.now(india_tz).strftime('%A'),
-                reason=reason
+                reason=reason,
+                site_name=site_name
             )
             db.session.add(new_attendance)
 
@@ -952,3 +957,43 @@ def subtract_holidays():
     flash('Leave days edited successfully.', category='success')
     return redirect(url_for('views.show_subtract_holidays_form'))
 
+@views.route('/export', methods=['POST' , 'GET'])
+@login_required
+def export_all_data():
+    output = BytesIO()
+
+    # Create an ExcelWriter to write multiple DataFrames to separate sheets
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # Map of table names to SQLAlchemy models
+        tables = {
+            'Users': User,
+            'Documents': Document,
+            'Attendance': Attendance,
+            'Leaves': Leave,
+            'Holidays': Holiday,
+            'Announcements': Announcement
+        }
+
+        for sheet_name, model in tables.items():
+            # Query all records from the table
+            query = model.query.all()
+
+            # Convert SQLAlchemy objects to dicts
+            data = [item.__dict__.copy() for item in query]
+
+            # Remove private fields (like _sa_instance_state)
+            for row in data:
+                row.pop('_sa_instance_state', None)
+
+            # Convert to DataFrame and write to sheet
+            df = pd.DataFrame(data)
+            df.to_excel(writer, sheet_name=sheet_name[:31], index=False)  # Excel sheet names must be <=31 chars
+
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="all_data_export.xlsx",
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
