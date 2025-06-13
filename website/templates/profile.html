@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Profile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        .profile-photo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-photo img {
+            margin-right: 20px;
+        }
+        .form-group label {
+            font-weight: 600;
+        }
+        .form-control-file {
+            margin-top: 10px;
+        }
+        .current-documents {
+            margin-top: 20px;
+        }
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            font-size: 1.2em;
+            padding: 10px 20px;
+        }
+        .navbar{
+            background-color: #E2E2E2 !important;
+  
+        }
+        .navbar-nav .nav-link {
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+      color: #000 !important;
+  }
+  
+  #logout {
+      color: #000;
+      text-align: center;
+  }
+  
+
+  .navbar-nav.ml-auto {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+  
+  
+      </style>
+  </head>
+  <body>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbar">
+              <div class="navbar-nav">
+  
+          
+  
+                  <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+                  <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+              </div>
+              <div class="navbar-nav ml-auto">
+                  <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+              </div>
+          </div>
+      </nav>
+    <div class="container">
+        <h1>{{ user.first_name }}'s Profile</h1>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">
+                    <ul class="mb-0">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" enctype="multipart/form-data">
+            <div class="profile-photo">
+                {% if user.photo %}
+                    <img src="{{ url_for('static', filename='uploads/photos/' + user.photo) }}" alt="Profile Photo" width="150">
+                {% else %}
+                    <p>No photo uploaded</p>
+                {% endif %}
+                <div>
+                    <label for="photo">Upload Photo</label>
+                    <input type="file" name="photo" class="form-control-file" accept="image/*">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="document">Upload Document</label>
+                <input type="file" name="document" class="form-control-file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                <small class="form-text text-muted">Accepted formats: PDF, DOC, DOCX, JPG, JPEG, PNG</small>
+                <label for="document_type" class="mt-3">Select Document Type</label>
+                <select name="document_type" class="form-control mt-2">
+                    <option value="resume">Resume</option>
+                    <option value="education_certificate">Education Certificates</option>
+                    <option value="signed_agreements">Signed Agreements</option>
+                    <option value="job_application_form">Job Application Form</option>
+                    <option value="annual_letter_1">Annual Letter 1</option>
+                    <option value="annual_letter_2">Annual Letter 2</option>
+                    <option value="annual_letter_3">Annual Letter 3</option>
+                    <option value="annual_letter_4">Annual Letter 4</option>
+                    <option value="annual_letter_5">Annual Letter 5</option>
+                    <option value="promotion_letter">Promotion Letter</option>
+                    <option value="exit_letter">Exit Letter</option>
+                </select>
+                {% if user.documents %}
+                    <div class="current-documents mt-4">
+                        <h5>Current Documents:</h5>
+                        <ul class="list-group">
+                            {% for document in user.documents %}
+                                <li class="list-group-item">
+                                    <span>{{ document.document_type.capitalize() }}:</span>
+                                    <a href="{{ url_for('static', filename='uploads/docs/' + document.filename) }}" class="btn btn-link">{{ document.filename }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+    
+<!-- External CSS and JS Links -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+</html>

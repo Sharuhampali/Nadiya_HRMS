@@ -1,0 +1,151 @@
+{% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
+  content %}
+  <style>
+    /* Additional Styles for Sign-Up Form */
+    .form-container {
+      max-width: 600px;
+      margin: 5% auto;
+      padding: 30px;
+      background-color: #ffffff;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    
+    h3 {
+      color: #333333; /* Dark text color for better readability */
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      position: relative;
+      margin-bottom: 20px;
+      text-align: left; /* Align text labels to the left */
+    }
+    
+    .form-group label {
+      font-weight: 700;
+      color: #333333; /* Darker color for labels */
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    .form-group input {
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      padding-left: 40px; /* Space for the icon */
+      height: 50px; /* Longer text area */
+      width: 100%; /* Make the input fields take up full width */
+    }
+    
+    .form-group .form-control-feedback {
+      position: absolute;
+      top: 50%;
+      left: 15px; /* Adjust the left position */
+      transform: translateY(-50%);
+      color: #6c757d; /* Gray color for icons */
+      font-size: 18px; /* Adjust icon size */
+    }
+    
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px; /* Adjust font size */
+    }
+    
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    
+    .btn-primary:focus, .btn-primary:active {
+      box-shadow: none;
+      outline: none;
+    }
+    
+    .alert {
+      margin-top: 20px;
+    }
+    
+    .alert-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .alert-success {
+      background-color: #28a745;
+      color: white;
+    }
+    .a{
+      margin-top: 15px;
+    }
+    
+  </style>
+  
+  <div class="form-container">
+    <!-- Logo -->
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="max-width: 200px; margin-bottom: 20px;">
+  
+    <h3>Sign Up</h3>
+    <form method="POST">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <i class="fa fa-envelope form-control-feedback a"></i>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          name="email"
+          placeholder="Enter email"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <i class="fa fa-user form-control-feedback a"></i>
+        <input
+          type="text"
+          class="form-control"
+          id="firstName"
+          name="firstName"
+          placeholder="Enter first name"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="password1">Password</label>
+        <i class="fa fa-lock form-control-feedback a"></i>
+        <input
+          type="password"
+          class="form-control"
+          id="password1"
+          name="password1"
+          placeholder="Enter password"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="password2">Password (Confirm)</label>
+        <i class="fa fa-lock form-control-feedback a"></i>
+        <input
+          type="password"
+          class="form-control"
+          id="password2"
+          name="password2"
+          placeholder="Confirm password"
+          required
+        />
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  <div style="margin-top: 20px;">
+    <p>or</p>
+    <a href="{{ url_for('auth.google_login') }}" class="btn btn-danger" style="background-color: #db4437; border: none; font-size: 15px;">
+      <i class="fa fa-google" style="margin-right: 8px;"></i> Sign up with Google
+    </a>
+  </div>
+  {% endblock %}
+  

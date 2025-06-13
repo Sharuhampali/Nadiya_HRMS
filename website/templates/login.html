@@ -1,0 +1,167 @@
+
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block
+  content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+<style>
+  body {
+    background-color: #f8f9fa; /* Light background color for the whole page */
+    font-family: 'Roboto Condensed', sans-serif; /* Use the same font as other pages */
+  }
+
+  .form-container {
+    max-width: 600px;
+    margin: 5% auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  h3 {
+    color: #333333; /* Dark text color for better readability */
+  }
+
+  .form-group {
+    position: relative;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .form-group label {
+    font-weight: 700;
+    color: #333333; /* Darker color for labels */
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .form-group input {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding-left: 40px; /* Space for the icon */
+    height: 50px; /* Longer text area */
+  }
+
+  .form-group .form-control-feedback {
+    position: absolute;
+    top: 50%;
+    left: 15px; /* Adjust the left position */
+    transform: translateY(-50%);
+    color: #6c757d; /* Gray color for icons */
+    font-size: 18px; /* Adjust icon size */
+  }
+
+  .form-control {
+    width: 100%;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 16px; /* Adjust font size */
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-primary:focus, .btn-primary:active {
+    box-shadow: none;
+    outline: none;
+  }
+
+  .alert {
+    margin-top: 20px;
+  }
+
+  .alert-danger {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .alert-success {
+    background-color: #28a745;
+    color: white;
+  }
+  .a {
+
+margin-top: 15px;
+  }
+  .footer-links {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .footer-links a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+
+  .footer-links i {
+    margin-right: 8px;
+  }
+</style>
+<div class="form-container">
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="max-width: 200px; margin-bottom: 20px;">
+
+  <h3>Login</h3>
+  <form method="POST">
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <i class="fa fa-envelope form-control-feedback icon a"></i>
+      <input
+        type="email"
+        class="form-control"
+        id="email"
+        name="email"
+        placeholder="Enter email"
+
+        required
+
+      />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <i class="fa fa-lock form-control-feedback icon a"></i>
+      <input
+        type="password"
+        class="form-control"
+        id="password"
+        name="password"
+        placeholder="Enter password"
+        required
+      />
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+    
+  <div style="margin-top: 20px;">
+    <p>or</p>
+    <a href="{{ url_for('auth.google_login') }}" class="btn btn-danger" style="background-color: #db4437; border: none; font-size: 15px;">
+      <i class="fa fa-google" style="margin-right: 8px;"></i> Log in with Google
+    </a>
+  </div>
+  <p><br>
+    <a href="{{ url_for('views.forgot_password') }}">Forgot your password?</a>
+</p>
+  <div class="footer-links">
+    <a href="https://youtu.be/nUoRWVlDvhI">
+      <i class="fa fa-plane"></i> Take a Tour
+    </a>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+{% endblock %}

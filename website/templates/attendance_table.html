@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Table</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #343a40;
+            margin-top: 30px;
+        }
+        .container.custom-container {
+            padding: 0 15px;
+            max-width: 100%;
+            width: 100%;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .table {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            border: 2px solid #343a40;
+            min-width: 800px;
+            width: 100%;
+        }
+        .table thead {
+            background-color: #93C4C6;
+            color: #fff;
+            border: 2px solid #343a40;
+        }
+        .table thead th {
+            text-align: center;
+            border: 2px solid #343a40;
+        }
+        .table tbody tr {
+            transition: background-color 0.3s;
+            border: 2px solid #343a40;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .table tbody td {
+            text-align: center;
+            border: 2px solid #343a40;
+        }
+        .table tbody td:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .table tbody td:nth-child(even) {
+            background-color: #e9ecef;
+        }
+         .navbar{
+          background-color: #E2E2E2 !important;
+
+      }
+      .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+}
+
+#logout {
+    color: #000;
+    text-align: center;
+}
+
+.profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+}
+
+.navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar">
+          <div class="navbar-nav">
+
+             <a class="navbar-brand" href="/">
+    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+  </a>
+
+            <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+            <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+          </div>
+          <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container custom-container">
+        <h1>Attendance Data</h1>
+        <br>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Entry Time</th>
+
+                        <th>Entry Early By</th>
+                        <th>Entry Late By</th>
+                        <th>Exit Time</th>
+                        <th>Exit Early By</th>
+                        <th>Exit Late By</th>
+                        <th>Total Time Worked</th>
+                        <th>Extra Time Worked</th>
+                        <th>Comp Off</th>
+                        <th>Entry Location</th>
+                        <th>Exit Location</th>
+                        <th>Shift</th>
+                        <th>Late Entry</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendances | reverse %}
+                    <tr>
+                        <td>{{ attendance.name }}</td>
+                        <td>{{ attendance.date }}</td>
+                        <td>{{ attendance.day }}</td>
+                        <td>{{ attendance.entry_time }}</td>
+
+                        <td>{{ attendance.entry_time | calculate_entry_early }}</td>
+                        <td>{{ attendance.entry_time | calculate_entry_late }}</td>
+                        <td>{{ attendance.exit_time }}</td>
+                        <td>{{ attendance.exit_time | calculate_exit_early }}</td>
+                        <td>{{ attendance.exit_time | calculate_exit_late }}</td>
+                        <td>{{ attendance.total_time_worked() }}</td>
+                        <td>{{ attendance.extra_time_worked() }}</td>
+                        <td>{{ attendance.compoff }}</td>
+                        <td>
+                            <a href="{{ attendance.entry_location | maps_url }}" target="_blank">
+                                {{ attendance.entry_location | extract_area }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ attendance.exit_location | maps_url }}" target="_blank">
+                                {{ attendance.exit_location | extract_area }}
+                            </a>
+                        </td>
+                        <td>{{ attendance.entry_time | determine_shift }}</td>
+                        <td>{{ attendance.entry_time | is_late }}</td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

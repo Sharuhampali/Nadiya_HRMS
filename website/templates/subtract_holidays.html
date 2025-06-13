@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Subtract Holidays{% endblock %}
+
+{% block content %}
+<div class="container">
+    <br><br>
+    <h2>Subtract Holidays</h2>
+    <br><br>
+    <form method="POST" action="{{ url_for('views.subtract_holidays') }}">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <select class="form-control" id="username" name="username">
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.first_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="leave_type">Type of Leave:</label>
+            <select class="form-control" id="leave_type" name="leave_type">
+                <option value="earned">Earned</option>
+                <option value="medic">Medic</option>
+                <option value="pay">Pay</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="num_days">Number of Days:</label>
+            <input type="number" class="form-control" id="num_days" name="num_days" step = "0.1" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

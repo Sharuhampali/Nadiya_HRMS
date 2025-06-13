@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Announcements</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f7f9;
+      color: #333;
+    }
+
+    .navbar {
+      background-color: #343a40;
+    }
+
+    .navbar-nav .nav-link {
+      color: #ffffff;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: #e9ecef;
+    }
+
+    .container {
+      margin-top: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #007bff;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .list-group {
+      border: 1px solid #e3e6ea;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: #ffffff;
+    }
+
+    .list-group-item {
+      border: none;
+      padding: 20px;
+      position: relative;
+      border-bottom: 1px solid #e3e6ea;
+    }
+
+    .list-group-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-group-item h5 {
+      margin-bottom: 10px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .list-group-item p {
+      margin-bottom: 15px;
+      color: #666;
+    }
+
+    .list-group-item small {
+      color: #999;
+    }
+
+    .list-group-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 100%;
+      background-color: #007bff;
+      border-radius: 2px;
+    }
+
+    .alert {
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+
+    .alert-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .alert-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .alert-info {
+      background-color: #17a2b8;
+      color: white;
+    }
+
+    .alert-warning {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .no-announcements {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      background-color: #d3d3d3;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-announcements i {
+      font-size: 80px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .no-announcements p {
+      font-size: 24px;
+      color: #555;
+      font-style: italic;
+    }
+
+    .d-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 767px) {
+      .navbar-nav .nav-item {
+        text-align: center;
+      }
+    }
+   .navbar{
+          background-color: #E2E2E2 !important;
+
+      }
+      .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+}
+
+#logout {
+    color: #000;
+    text-align: center;
+}
+
+.profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+}
+
+.navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+        <div class="navbar-nav">
+             <a class="navbar-brand" href="/">
+    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+  </a></div>
+   <div class="navbar-nav">
+            <a class="nav-item nav-link" id="home" href="/"><i class="fa fa-home"></i> Home</a>
+            <a class="nav-item nav-link" href="/announcements"><i class="fa fa-bullhorn"></i> Announcements</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+
+        </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4"><br>
+    <h1>Announcements</h1><br><br>
+    {% if announcements %}
+      <ul class="list-group">
+        {% for announcement in announcements | reverse %}
+          <li class="list-group-item">
+            <div class="d-flex">
+              <div>
+                <h5>{{ announcement.title }}</h5>
+              </div>
+              {% if current_user.email == "sumana@nadiya.in" or current_user.email == 'accounts@nadiya.in' %}
+                <div>
+                  <form method="POST" action="{{ url_for('views.delete_announcement', announcement_id=announcement.id) }}" class="delete-form form-inline">
+                    <div class="form-group">
+                      <input type="number" name="confirmation_id" placeholder="Enter confirmation ID" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger ml-2"><i class="fa fa-trash"></i></button>
+                  </form>
+                </div>
+              {% endif %}
+            </div>
+            <p>{{ announcement.content }}</p>
+            <small class="text-muted">Posted on {{ announcement.date_posted.strftime('%Y-%m-%d') }}</small>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="no-announcements">
+        <i class="fa fa-bullhorn"></i>
+        <p>No announcements yet</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <!-- External CSS and JS Links -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+</html>

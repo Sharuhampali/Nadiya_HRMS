@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1 class="text-center mt-4">Approved Leaves for {{ user.first_name }}</h1>
+    
+    <div class="summary-table mt-5">
+        <h2 class="text-center">Leave Summary</h2>
+        <table class="table table-striped table-hover table-bordered mt-3">
+            <thead class="thead-dark bg-primary text-white">
+                <tr>
+                    <th>Leave Type</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <td>Earned</td>
+                <td>{{ earned_sum }}</td>
+            </tr>
+            <tr>
+                <td>Medical/Sick</td>
+                <td>{{ medic_sum }}</td>
+            </tr>
+            <tr>
+                <td>Leave without Pay</td>
+                <td>{{ pay_sum }}</td>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="approved-leaves mt-5">
+        <h2 class="text-center">Approved Leaves</h2>
+        {% for leave in approved_leaves %}
+            <div class="leave-entry card mt-3">
+                <div class="card-body bg-light">
+                    <p class="card-text text-secondary"><strong>{{ leave.ltype }} Leave</strong> from {{ leave.start_date }} to {{leave.end_date}} for {{leave.days}} days- Approved by {{ leave.approved_by }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f0f2f5;
+    }
+
+    h1, h2 {
+        font-weight: 700;
+    }
+
+    .summary-table, .approved-leaves {
+        margin-top: 20px;
+    }
+
+    .table {
+        width: 100%;
+        margin: 0 auto;
+        border: 2px solid black;
+    }
+
+    .table th, .table td {
+        text-align: center;
+        
+    }
+    .table td{
+        border: 2px solid black;
+    }
+   
+
+    .leave-entry {
+        border: none;
+        margin-bottom: 10px;
+        background-color: #ffffff;
+        border-left: 5px solid #007bff;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .leave-entry p {
+        margin: 0;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .mt-5 {
+        margin-top: 3rem;
+    }
+
+    .bg-primary {
+        background-color: #007bff !important;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    .text-secondary {
+        color: #6c757d !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profiles</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f8f9fa !important;
+            margin: 0;
+        }
+
+        .navbar {
+
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem !important;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .profile-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 10px;
+            transition: box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        .profile-card img {
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin-right: 20px;
+        }
+
+        .profile-card a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            flex-grow: 1;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar-nav .nav-link {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link i {
+            margin-right: 8px; /* Space between icon and text */
+        }
+
+        .alert {
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            font-size: 24px;
+            margin-right: 10px;
+            color: #007bff;
+            margin-left: 10px;
+        }
+        .header {
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #000;
+            border-top:2px solid #000;
+            margin-bottom: 40px;
+          }
+
+          .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #000;
+          }
+
+          .header h2 {
+            font-size: 20px;
+            color: #000;
+          }
+           .profile-card h6 {
+            text-transform: capitalize !important;
+            font-size: 16px;
+            color: #666;
+            margin: 0;
+        }
+
+       .navbar{
+          background-color: #E2E2E2 !important;
+
+      }
+      .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+}
+
+#logout {
+    color: #000;
+    text-align: center;
+}
+
+.profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+}
+
+.navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+        <div class="navbar-nav">
+             <a class="navbar-brand" href="/">
+    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+  </a></div>
+   <div class="navbar-nav">
+            <a class="nav-item nav-link" id="home" href="/"><i class="fa fa-home"></i> Home</a>
+            <a class="nav-item nav-link" href="/announcements"><i class="fa fa-bullhorn"></i> Announcements</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+
+        </div>
+    </div>
+  </nav>
+
+    </header>
+
+    <div class = "header">
+        <h1>EMPLOYEE PROFILES</h1>
+    </div>
+    <div class="container">
+
+        {% if users %}
+        <div class="row">
+            {% for user in users %}
+            <div class="col-md-4">
+                <div class="profile-card">
+                    {% if user.photo %}
+                    <img src="{{ url_for('static', filename='uploads/photos/' + user.photo) }}" alt="Profile Photo" class = "img-thumbnail">
+                    {% else %}
+                    <img src="data:image/png;base64,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" alt="Profile Photo">
+                    {% endif %}
+
+                    <a href="{{ url_for('views.profile', user_id=user.id) }}">{{ user.first_name.upper() }}</a>
+                   
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No Users</p>
+        {% endif %}
+    </div>
+
+    <!-- External CSS and JS Links -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

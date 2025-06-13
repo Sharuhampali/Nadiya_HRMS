@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Users</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2596be;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #2596be;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e1e1e1;
+        }
+
+        .delete-button {
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .delete-button:hover {
+            color: #c82333;
+        }
+
+        .no-users {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .navbar {
+            background-color: #E2E2E2 !important;
+        }
+
+        .navbar-nav .nav-link {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            color: #000 !important;
+        }
+
+        .navbar-brand img {
+            height: 80px;
+        }
+
+        .profile-photo img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+        }
+
+        .navbar-nav.ml-auto {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #logout {
+            color: #000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+        <div class="navbar-nav">
+            <a class="navbar-brand" href="/">
+                <img src="static/logo.png" alt="Logo">
+            </a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-item nav-link" id="home" href="/"><i class="fa fa-home"></i> Home</a>
+            <a class="nav-item nav-link" href="/announcements"><i class="fa fa-bullhorn"></i> Announcements</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+        </div>
+    </div>
+  </nav>
+
+  <div class="container"><br>
+    <h1>List of Employees</h1><br><br>
+    {% if user %}
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Action</th>
+            </tr>
+            {% for user in user %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td><a href="{{ url_for('views.delete_user', user_id=user.id) }}" class="delete-button" onclick="return confirmDelete()"><i class="fa fa-trash"></i></a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p class="no-users">No users found.</p>
+    {% endif %}
+  </div>
+
+  <!-- External CSS and JS Links -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script>
+      function confirmDelete() {
+          var confirmationId = prompt("Please enter the confirmation ID to delete this user:", "");
+          if (confirmationId === "24") {
+              return true;
+          } else {
+              alert("Incorrect confirmation ID. User not deleted.");
+              return false;
+          }
+      }
+  </script>
+</body>
+</html>

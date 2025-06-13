@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+
+    body {
+        background-color: #eef2f7;
+        font-family: Arial, sans-serif;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        color: #4a90e2;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    input[type="date"],
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        color: #555;
+    }
+
+    .btn-primary {
+        background-color: #4a90e2;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 16px;
+        border-radius: 5px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #357ab8;
+    }
+</style>
+
+
+<div class="container">
+    <h1>Apply for Leave</h1>
+
+    <form id="leaveForm" method="POST">
+        <div class="form-group">
+            <label for="start_date"> Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ today }}" min="{{ today }}" required>
+        </div>
+        <div class="form-group">
+            <label for="end_date"> End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ today }}" min="{{ today }}" required>
+        </div> <div class="form-group">
+            <label for="days">No. Of Days:</label>
+            <input type="number" id="days" name="days" step="any" value=0 required>
+        </div>
+        <div class="form-group">
+            <label for="reason">Reason (Optional):</label>
+            <input type="text" id="reason" name="reason" >
+        </div>
+
+        <div class="form-group">
+            <label for="ltype">Leave Type:</label>
+            <select id="ltype" name="ltype" required>
+                <option value="">Select Leave Type</option>
+                <option value="Compoff">Compoff Leave</option>
+                <option value="Earned">Earned Leave</option>
+                <option value="Medical/Sick">Medical/Sick Leave</option>
+                {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
+                    <option value="Leave w/o Pay">Leave w/o Pay</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Apply</button>
+    </form>
+    <table class="table table-striped table-hover table-bordered mt-3">
+        <thead class="thead-dark bg-primary text-white">
+            <tr>
+                <th>Leave Type</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Earned</td>
+                <td>{{ 15 - user.earned | round(2)}}</td>
+            </tr>
+            <tr>
+                <td>Medical/Sick</td>
+                <td>{{ 6 - user.medic | round(2)}}</td>
+            </tr>
+            <tr>
+                <td>Leave without Pay</td>
+                <td>{{10 - user.pay | round(2)}}</td>
+            </tr>
+            <tr>
+                <td>Compoff Leaves</td>
+                <td>{{current_user.total_compoff}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: ['dayGrid'],
+            initialView: 'dayGridMonth',
+            selectable: true,
+            select: function(info) {
+                document.getElementById('start_date').value = info.startStr;
+                calendar.unselect();
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

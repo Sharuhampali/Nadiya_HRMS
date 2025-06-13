@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      crossorigin="anonymous"
+    />
+
+    <style>
+    body{
+        background-color: #fff;
+    }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .list-group-item {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .list-group-item strong {
+            font-weight: bold;
+        }
+
+        .list-group-item span.badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .list-group-item .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .list-group-item .badge-warning {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .list-group-item .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        p {
+            margin-top: 20px;
+            font-style: italic;
+            color: #666;
+        }
+
+        @media (max-width: 576px) {
+            .list-group-item span.badge {
+                position: static;
+                display: block;
+                margin-top: 10px;
+            }
+        }
+         .navbar{
+          background-color: #E2E2E2 !important;
+
+      }
+      .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+}
+
+#logout {
+    color: #000;
+    text-align: center;
+}
+
+.profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+}
+
+.navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-light">
+
+
+        <div class="navbar-nav">
+
+             <a class="navbar-brand" href="/">
+    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+  </a>
+
+            <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+        </div>
+
+</nav>
+<br>
+<div class="container">
+    <h1>My Leaves</h1>
+
+    {% if leaves %}
+        <ul class="list-group">
+            {% for leave in leaves %}
+                <li class="list-group-item d-flex flex-column">
+                    <div>Requested {{ leave.ltype }} Leave on {{ leave.start_date }}</div>
+                    {% if leave.approved %}
+                        <span class="badge badge-success align-self-start align-self-md-end">Approved</span>
+                    {% elif leave.rejected %}
+                        <span class="badge badge-danger align-self-start align-self-md-end">Rejected</span>
+                    {% else %}
+                        <span class="badge badge-warning align-self-start align-self-md-end">Pending Approval</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No leaves found.</p>
+    {% endif %}
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<!-- Popper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-rbsA2Ki6F2IlgQY1FOl0a2mheV4s2yIfR9sOGB4E5lO+uTWY+o2wIlgfFCfnVr3D" crossorigin="anonymous"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-Wp4c0OxaPxWv1l8FFPRvTIKD1IlMl6l1h+U6hs4B5bT+Tj7LZX0LKnS4bRS9/T+N" crossorigin="anonymous"></script>
+</body>
+</html>

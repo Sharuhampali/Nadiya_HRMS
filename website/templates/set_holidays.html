@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Holidays</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      crossorigin="anonymous"
+    />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light background for the page */
+        }
+
+        .navbar {
+            margin-bottom: 20px; /* Space below the navbar */
+        }
+
+        .navbar-nav .nav-link {
+            padding: 0.5rem 1rem; /* Padding for better spacing */
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #007bff; /* Bootstrap primary color */
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* White background for the form area */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #333; /* Darker color for labels */
+        }
+
+        .form-control {
+            border-radius: 4px; /* Rounded corners for inputs */
+            border: 1px solid #ced4da; /* Light border color */
+            box-shadow: none; /* Remove default shadow */
+        }
+
+        .form-control:focus {
+            border-color: #80bdff; /* Focus border color */
+            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25); /* Focus shadow */
+        }
+
+        .btn-primary {
+            background-color: #007bff; /* Bootstrap primary color */
+            border-color: #007bff; /* Match border color */
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+            border-color: #004085; /* Darker border color on hover */
+        }
+        hr {
+            border: 0;
+            height: 2px; /* Adjust height as needed */
+            background-color: #333; /* Darker color for the horizontal line */
+            margin: 20px 0; /* Add some spacing above and below */
+        }
+         .navbar{
+          background-color: #E2E2E2 !important;
+
+      }
+      .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+}
+
+#logout {
+    color: #000;
+    text-align: center;
+}
+
+.profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+}
+
+.navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar">
+            <div class="navbar-nav">
+             <a class="navbar-brand" href="/">
+    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+  </a>
+
+                <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+                <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Set Holidays</h1>
+        <form action="/set_holidays" method="POST">
+            {% for i in range(20) %}
+            <div class="form-group">
+                <label for="holiday_name_{{ i }}">NAME: </label>
+                <input type="text" class="form-control" id="holiday_name_{{ i }}" name="holiday_name_{{ i }}" placeholder="Enter holiday">
+                <br><label for="holiday_date_{{ i }}">DATE: </label>
+                <input type="date" class="form-control" id="holiday_date_{{ i }}" name="holiday_date_{{ i }}">
+                <hr>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <!-- External CSS and JS Links -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

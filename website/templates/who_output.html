@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            padding: 0;
+            margin: 0;
+        }
+        h1 {
+            font-weight: 700;
+            text-align: center;
+            margin: 30px 0 20px;
+            color: #343a40;
+        }
+        .container.custom-container {
+            padding: 0 15px;
+            max-width: 100%;
+            width: 100%;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .table {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            border: 2px solid black;
+            min-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .table thead {
+            background-color: #93C4C6;
+            color: #fff;
+            border: 2px solid black;
+        }
+        .table thead th {
+            text-align: center;
+            border: 2px solid black;
+        }
+        .table tbody tr {
+            transition: background-color 0.3s;
+            border: 2px solid black;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .table tbody td {
+            text-align: center;
+            border: 2px solid black;
+        }
+        .table tbody td:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .table tbody td:nth-child(even) {
+            background-color: #e9ecef;
+        }
+        .a{
+            width: 40% !important;
+        }
+        .a th{
+            width: 50% !important;
+        }
+         .navbar{
+          background-color: #E2E2E2 !important;
+
+      }
+      .navbar-nav .nav-link {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    color: #000 !important;
+}
+
+#logout {
+    color: #000;
+    text-align: center;
+}
+
+.profile-photo img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+}
+
+.navbar-nav.ml-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar">
+          <div class="navbar-nav">
+             <a class="navbar-brand" href="/">
+    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+  </a>
+
+            <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+            <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+          </div>
+          <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container custom-container">
+
+        <h1>Attendance Records for {{ name }}</h1>
+        <br>
+        <table  class="table a">
+            <tr>
+                <th>
+                    <h5>Total Late Entries:</h5>
+                </th>
+                <td>
+                    <h5>{{ (late_entries - 4, 0) | max }}</h5>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    {% if attendances %}
+                        <h5>Total Compoff:</h5>
+                </th>
+                <td>
+                        <h5>{{ attendances[-1].user.total_compoff }}</h5>
+                </td>
+                    {% endif %}
+            </tr>
+        </table>
+
+        <br>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Entry Time</th>
+
+                        <th>Entry Early By</th>
+                        <th>Entry Late By</th>
+                        <th>Exit Time</th>
+                        <th>Exit Early By</th>
+                        <th>Exit Late By</th>
+                        <th>Total Time Worked</th>
+                        <th>Extra Time Worked</th>
+                        <th>Comp Off</th>
+                        <th>Entry Location</th>
+                        <th>Exit Location</th>
+                        <th>Shift</th>
+                        <th>Late Entry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendances | reverse %}
+                    <tr>
+                        <td>{{ attendance.name }}</td>
+                        <td>{{ attendance.date }}</td>
+                        <td>{{ attendance.day }}</td>
+                        <td>{{ attendance.entry_time }}</td>
+
+                        <td>{{ attendance.entry_time | calculate_entry_early }}</td>
+                        <td>{{ attendance.entry_time | calculate_entry_late }}</td>
+                        <td>{{ attendance.exit_time }}</td>
+                        <td>{{ attendance.exit_time | calculate_exit_early }}</td>
+                        <td>{{ attendance.exit_time | calculate_exit_late }}</td>
+                        <td>{{ attendance.total_time_worked() }}</td>
+                        <td>{{ attendance.extra_time_worked() }}</td>
+                        <td>{{ attendance.compoff }}</td>
+                        <td>
+                            <a href="{{ attendance.entry_location | maps_url }}" target="_blank">
+                                {{ attendance.entry_location | extract_area }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ attendance.exit_location | maps_url }}" target="_blank">
+                                {{ attendance.exit_location | extract_area }}
+                            </a>
+                        </td>
+                        <td>{{ attendance.entry_time | determine_shift }}</td>
+                        <td>{{ attendance.entry_time | is_late }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br><br>
+        </div>
+    </div>
+
+    <!-- External JS Links -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
