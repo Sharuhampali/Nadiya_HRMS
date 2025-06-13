@@ -10,7 +10,6 @@
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
         }
-
         .container {
             max-width: 600px;
             margin: 20px auto;
@@ -19,22 +18,18 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
             color: #32BEC4;
             text-align: center;
             margin-bottom: 20px;
         }
-
         .form-group {
             margin-bottom: 20px;
         }
-
         label {
             font-weight: bold;
             color: #333;
         }
-
         input[type="text"],
         select {
             width: 100%;
@@ -44,11 +39,9 @@
             font-size: 16px;
             color: #555;
         }
-
         input[type="checkbox"] {
             margin-right: 10px;
         }
-
         .btn-primary {
             background-color: #32BEC4;
             border: none;
@@ -60,62 +53,53 @@
             width: 100%;
             transition: background-color 0.3s ease;
         }
-
         .btn-primary:hover {
             background-color: #357ab8;
         }
         .navbar{
             background-color: #E2E2E2 !important;
-  
         }
         .navbar-nav .nav-link {
-      margin-right: 15px;
-      display: flex;
-      align-items: center;
-      color: #000 !important;
-  }
-  
-  #logout {
-      color: #000;
-      text-align: center;
-  }
-  
-  .profile-photo img {
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      margin-left: 10px;
-  }
-  
-  .navbar-nav.ml-auto {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-  }
-  
-  
-      </style>
-  </head>
-  <body>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-              <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbar">
-              <div class="navbar-nav">
-  
-               <a class="navbar-brand" href="/">
-      <img src="static/logo.png" alt="Logo" style="height: 80px;">
-    </a>
-  
-                  <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-                  <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-              </div>
-              <div class="navbar-nav ml-auto">
-                  <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-              </div>
-          </div>
-      </nav>
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            color: #000 !important;
+        }
+        #logout {
+            color: #000;
+            text-align: center;
+        }
+        .profile-photo img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+        }
+        .navbar-nav.ml-auto {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar">
+            <div class="navbar-nav">
+                <a class="navbar-brand" href="/">
+                    <img src="static/logo.png" alt="Logo" style="height: 80px;">
+                </a>
+                <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+                <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
     <br><br>
     <div class="container">
         <h1>Attendance</h1>
@@ -136,7 +120,8 @@
                 <label for="reason">Reason (Optional):</label>
                 <input type="text" id="reason" name="reason" >
             </div>
-            <div class="form-group">
+            <!-- Site Name field, hidden by default -->
+            <div class="form-group" id="site_name_group" style="display: none;">
                 <label for="site_name">Place Visited:</label>
                 <input type="text" id="site_name" name="site_name" >
             </div>
@@ -147,66 +132,53 @@
                     <option value="exit">Exit</option>
                 </select>
             </div>
-           
             <button type="submit" class="btn btn-primary">Submit Attendance</button>
         </form>
     </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Geolocation logic
             if (navigator.geolocation) {
                 var options = {
-                    enableHighAccuracy: true,  // Request highest possible accuracy
-                    timeout: 5000,            // Set a timeout for retrieval
-                    maximumAge: 0             // Don't use cached location
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
                 };
-
                 navigator.geolocation.getCurrentPosition(function(position) {
                     var latitude = position.coords.latitude;
                     var longitude = position.coords.longitude;
-                    console.log("Latitude:", latitude);
-                    console.log("Longitude:", longitude);
-
-                    // Update form fields with latitude and longitude
                     document.getElementById("latitude").value = latitude;
                     document.getElementById("longitude").value = longitude;
                 }, function(error) {
-                    console.error("Error getting geolocation:", error.message);
-                    // Fallback to IP-based geolocation using a third-party service
                     fetch('https://ipapi.co/json/')
                         .then(response => response.json())
                         .then(data => {
                             document.getElementById("latitude").value = data.latitude;
                             document.getElementById("longitude").value = data.longitude;
-                        })
-                        .catch(error => {
-                            console.error("Error fetching IP-based location:", error);
-                            // Handle error (e.g., display message to user)
                         });
                 }, options);
-            } else {
-                console.log("Geolocation is not supported by this browser.");
-                // Fallback to IP-based geolocation using a third-party service
-                fetch('https://ipapi.co/json/')
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById("latitude").value = data.latitude;
-                        document.getElementById("longitude").value = data.longitude;
-                    })
-                    .catch(error => {
-                        console.error("Error fetching IP-based location:", error);
-                        // Handle error (e.g., display message to user)
-                    });
             }
+            // Show/hide Place Visited field based on Entry/Exit selection
+            function toggleSiteNameField() {
+                var entryExit = document.getElementById('entry_exit').value;
+                var siteNameGroup = document.getElementById('site_name_group');
+                if (entryExit === 'exit') {
+                    siteNameGroup.style.display = 'block';
+                } else {
+                    siteNameGroup.style.display = 'none';
+                    document.getElementById('site_name').value = '';
+                }
+            }
+            document.getElementById('entry_exit').addEventListener('change', toggleSiteNameField);
+            // Initialize on page load
+            toggleSiteNameField();
         });
     </script>
-    
-<!-- External CSS and JS Links -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
+    <!-- External CSS and JS Links -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>

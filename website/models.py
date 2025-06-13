@@ -77,14 +77,14 @@ class Attendance(db.Model):
         if total_time:
             if self.hol == 10000:
                 return total_time
-            return total_time - timedelta(hours=9)
+            return total_time - timedelta(hours=8.5)
         return None
 
     def calculate_comp_off(self):
         extra_time = self.extra_time_worked()
         if extra_time and extra_time.total_seconds() > 0:
             extra_hours = extra_time.total_seconds() / 3600
-            if extra_hours >= 9:
+            if extra_hours >= 8.5:
                 self.compoff = 1
             elif extra_hours >= 4:
                 self.compoff = 0.5
