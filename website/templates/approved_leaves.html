@@ -1,203 +1,252 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      crossorigin="anonymous"
-    />
-    <style>
-    body {
-        background-color: #f6f7fa;
-        font-family: Arial, sans-serif;
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
     }
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 24px 12px 40px 12px;
-    }
-    h1 {
-        color: #111;
+
+    .page-header h1 {
         font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 32px;
-        letter-spacing: 0.5px;
-        text-align: left;
-        position: relative;
-        padding-left: 18px;
+        margin: 0;
+        text-align: center;
     }
-    h1::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 12px;
-        width: 8px;
-        height: 28px;
-        background: #fe413e; /* red accent */
-        border-radius: 4px;
-    }
-    .list-group {
-        border: none;
-    }
-    .leave-card {
-        border-left: 6px solid #e4e7ed;
-        border-radius: 8px;
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        margin-bottom: 18px;
-        padding: 20px 24px 20px 20px;
-        position: relative;
-        display: flex;
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
         align-items: center;
-        transition: box-shadow 0.2s;
+        margin-bottom: 2rem;
     }
+
+    .back-btn:hover {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .leaves-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .leave-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px var(--shadow);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border-left: 6px solid var(--border-color);
+    }
+
     .leave-card:hover {
-        box-shadow: 0 4px 18px rgba(30,136,229,0.10);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px var(--shadow);
     }
-    .leave-card.approved { border-left-color: #1e88e5; }   /* blue */
-    .leave-card.rejected { border-left-color: #e53935; }   /* red */
-    .leave-card.pending { border-left-color: #fbc02d; }    /* yellow */
+
+    .leave-card.approved { 
+        border-left-color: #10b981; 
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.02));
+    }
+    .leave-card.rejected { 
+        border-left-color: #ef4444; 
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.02));
+    }
+    .leave-card.pending { 
+        border-left-color: #f59e0b; 
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(217, 119, 6, 0.02));
+    }
+
+    .leave-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .leave-type-badge {
+        background: var(--accent-primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
     .leave-info {
         flex: 1;
-        color: #111;
-        font-size: 1.07rem;
-        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 1.05rem;
+        line-height: 1.6;
     }
-    .leave-status {
-        font-size: 0.98rem;
+
+    .leave-info i {
+        margin-right: 0.5rem;
+        color: var(--accent-primary);
+    }
+
+    .leave-dates {
         font-weight: 600;
-        padding: 7px 18px;
-        border-radius: 14px;
-        margin-left: 16px;
-        display: flex;
-        align-items: center;
-        letter-spacing: 0.2px;
+        color: var(--text-primary);
     }
-    .status-approved {
-        background: #e3f1fd;
-        color: #1e88e5;
-        border: 1.5px solid #1e88e5;
-    }
-    .status-rejected {
-        background: #ffeaea;
-        color: #e53935;
-        border: 1.5px solid #e53935;
-    }
-    .status-pending {
-        background: #fffbe6;
-        color: #fbc02d;
-        border: 1.5px solid #fbc02d;
-    }
-    .leave-status i {
-        margin-right: 7px;
-        font-size: 1.1em;
-    }
-    p {
-        margin-top: 32px;
+
+    .leave-reason {
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
         font-style: italic;
-        color: #666;
-        text-align: center;
     }
-    @media (max-width: 576px) {
-        .container {
-            padding: 10px 2vw 28px 2vw;
-        }
-        .leave-card {
+
+    .leave-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        margin-top: 1rem;
+        width: fit-content;
+    }
+
+    .status-approved {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .no-leaves {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-primary);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    .no-leaves i {
+        font-size: 4rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .no-leaves p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .leave-header {
             flex-direction: column;
-            align-items: flex-start;
-            padding: 16px 10px 16px 12px;
+            gap: 1rem;
         }
-        .leave-status {
-            margin-left: 0;
-            margin-top: 10px;
+        
+        .leave-card {
+            padding: 1rem;
         }
-        h1 {
-            font-size: 1.3rem;
-            padding-left: 10px;
-        }
-        h1::before {
-            width: 5px;
-            height: 18px;
-            top: 8px;
+        
+        .page-header h1 {
+            font-size: 1.5rem;
         }
     }
-    .navbar{
-        background-color: #E2E2E2 !important;
-    }
-    .navbar-nav .nav-link {
-        margin-right: 15px;
-        display: flex;
-        align-items: center;
-        color: #000 !important;
-    }
-    #logout {
-        color: #000;
-        text-align: center;
-    }
-    .profile-photo img {
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        margin-left: 10px;
-    }
-    .navbar-nav.ml-auto {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    </style>
-</head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-light">
-    <div class="navbar-nav">
-        <a class="navbar-brand" href="/">
-            <img src="static/logo.png" alt="Logo" style="height: 80px;">
-        </a>
-        <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-list-check"></i> My Leave History</h1>
     </div>
-</nav>
-<br>
-<div class="container">
-    <h1>MY LEAVES</h1>
+</div>
+
+<div class="leaves-container">
+    <a href="/leaves-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Leave Management
+    </a>
+
     {% if leaves %}
-        <div class="list-group">
-            {% for leave in leaves %}
-                <div class="leave-card
-                    {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
-                    <div class="leave-info">
-                        <i class="fa fa-calendar"></i>
-                        Requested <strong>{{ leave.ltype }}</strong> Leave on <strong>{{ leave.start_date }}</strong>
-                    </div>
+        {% for leave in leaves | reverse %}
+            <div class="leave-card {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
+                <div class="leave-header">
+                    <span class="leave-type-badge">{{ leave.ltype }}</span>
                     {% if leave.approved %}
                         <div class="leave-status status-approved">
-                            <i class="fa fa-check-circle"></i> Approved
+                            <i class="fas fa-check-circle"></i> Approved
                         </div>
                     {% elif leave.rejected %}
                         <div class="leave-status status-rejected">
-                            <i class="fa fa-times-circle"></i> Rejected
+                            <i class="fas fa-times-circle"></i> Rejected
                         </div>
                     {% else %}
                         <div class="leave-status status-pending">
-                            <i class="fa fa-clock-o"></i> Pending Approval
+                            <i class="fas fa-clock"></i> Pending
                         </div>
                     {% endif %}
                 </div>
-            {% endfor %}
-        </div>
+                
+                <div class="leave-info">
+                    <div class="leave-dates">
+                        <i class="fas fa-calendar-alt"></i>
+                        <strong>{{ leave.start_date }}</strong> to <strong>{{ leave.end_date }}</strong>
+                        <span style="color: var(--text-secondary);">({{ leave.days }} day{{ 's' if leave.days > 1 else '' }})</span>
+                    </div>
+                    
+                    {% if leave.reason %}
+                        <div class="leave-reason">
+                            <i class="fas fa-comment"></i>
+                            <strong>Reason:</strong> {{ leave.reason }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if leave.approved_by %}
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                            <i class="fas fa-user-check"></i>
+                            Processed by: <strong>{{ leave.approved_by }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
     {% else %}
-        <p>No leaves found.</p>
+        <div class="no-leaves">
+            <i class="fas fa-calendar-times"></i>
+            <p>No leave applications found.</p>
+        </div>
     {% endif %}
 </div>
-<!-- jQuery, Popper.js, Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
-</body>
-</html>
+{% endblock %}

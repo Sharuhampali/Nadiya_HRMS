@@ -1,155 +1,298 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holiday List</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous"/>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--warning);
+        color: white;
+        border-color: var(--warning);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .holidays-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .holidays-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .holiday-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px var(--shadow);
+        transition: all 0.3s ease;
+        border-left: 6px solid var(--warning);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .holiday-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px var(--shadow);
+    }
+
+    .holiday-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), transparent);
+        border-radius: 0 0 0 60px;
+    }
+
+    .holiday-icon {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .holiday-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .holiday-date {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .holiday-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1rem;
+    }
+
+    .delete-form {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .delete-input {
+        width: 120px;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.85rem;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .delete-btn {
+        background: var(--danger);
+        color: white;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+        transform: scale(1.05);
+    }
+
+    .no-holidays {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-primary);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    .no-holidays i {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .no-holidays p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .stats-bar {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px var(--shadow);
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--warning);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .holidays-grid {
+            grid-template-columns: 1fr;
         }
-        .navbar {
-            margin-bottom: 20px;
-            background-color: #E2E2E2 !important;
+        
+        .stats-bar {
+            flex-direction: column;
+            gap: 1rem;
         }
-        .navbar-nav .nav-link {
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            color: #000 !important;
+        
+        .delete-form {
+            flex-direction: column;
+            gap: 0.5rem;
         }
-        #logout {
-            color: #000;
-            text-align: center;
-        }
-        .profile-photo img {
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            margin-left: 10px;
-        }
-        .navbar-nav.ml-auto {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.07);
-        }
-        h1 {
-            font-size: 2rem;
-            color: #111;
-            margin-bottom: 20px;
-            border-left: 8px solid #fe413e; /* yellow accent */
-            padding-left: 16px;
-            font-weight: 700;
-        }
-        table {
-            margin-bottom: 20px;
-            border-collapse: collapse;
+        
+        .delete-input {
             width: 100%;
-            background: #fff;
         }
-        .table th {
-            background-color: #fffbe6;  /* subtle yellow */
-            color: #111;
-            font-weight: 700;
-            text-align: center;
-            border: 2px solid #e4e7ed;  /* yellow border */
+        
+        .page-header h1 {
+            font-size: 1.5rem;
         }
-        .table td {
-            vertical-align: middle;
-            color: #111;
-            border: 1.5px solid #e4e7ed;
-            text-align: center;
-        }
-        .btn-danger {
-            background-color: #e53935;
-            border-color: #e53935;
-        }
-        .btn-danger:hover {
-            background-color: #b71c1c;
-            border-color: #b71c1c;
-        }
-        .form-group input[type="text"] {
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            padding: 10px;
-        }
-        .form-group input[type="text"]:focus {
-            border-color: #fbc02d;
-            box-shadow: 0 0 0 0.1rem rgba(251, 192, 45, 0.15);
-        }
-        .fa-calendar, .fa-home, .fa-calendar-check-o {
-            color: #0a0a0a;
-            margin-right: 6px;
-        }
-        @media (max-width: 600px) {
-            .container { padding: 10px 2vw; }
-            h1 { font-size: 1.2rem; padding-left: 8px; }
-            .table th, .table td { font-size: 0.95rem; padding: 8px 4px; }
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-            <div class="navbar-nav">
-                <a class="navbar-brand" href="/">
-                    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-                </a>
-                <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-                <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-calendar-alt"></i> Company Holiday Calendar</h1>
+    </div>
+</div>
+
+<div class="holidays-container">
+    <a href="/holidays-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Holiday Management
+    </a>
+
+    {% if holidays %}
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">{{ holidays|length }}</div>
+                <div class="stat-label">Total Holidays</div>
             </div>
-            <div class="navbar-nav ml-auto">
-                <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+            <div class="stat-item">
+                <div class="stat-number">{{ upcoming_holidays if upcoming_holidays else 0 }}</div>
+                <div class="stat-label">Upcoming</div>
             </div>
         </div>
-    </nav>
-    <div class="container">
-        <h1>HOLIDAY LIST</h1>
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Date</th>
-                    {% if current_user.email == 'sumana@nadiya.in' %}
-                    <th>Action</th>
+
+        <div class="holidays-grid">
+            {% for holiday in holidays %}
+                <div class="holiday-card">
+                    <div class="holiday-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    
+                    <h3 class="holiday-name">{{ holiday.name }}</h3>
+                    
+                    <div class="holiday-date">
+                        <i class="fas fa-calendar"></i>
+                        {{ holiday.date.strftime('%B %d, %Y') }}
+                        <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-muted);">
+                            {{ holiday.date.strftime('%A') }}
+                        </span>
+                    </div>
+
+                    {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'accounts@nadiya.in' %}
+                        <div class="holiday-actions">
+                            <form action="{{ url_for('views.delete_holiday', holiday_id=holiday.id) }}" method="POST" class="delete-form">
+                                <input type="text" name="confirmation_id" placeholder="Confirmation ID" required class="delete-input">
+                                <button type="submit" class="delete-btn">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
                     {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for holiday in holidays %}
-                <tr>
-                    <td>{{ holiday.name }}</td>
-                    <td>{{ holiday.date.strftime('%Y-%m-%d') }}</td>
-                    {% if current_user.email == 'sumana@nadiya.in' %}
-                    <td>
-                        <form action="{{ url_for('views.delete_holiday', holiday_id=holiday.id) }}" method="POST" style="display:inline;">
-                            <input type="text" name="confirmation_id" placeholder="Enter Confirmation ID" required>
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <!-- External JS Links -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-holidays">
+            <i class="fas fa-calendar-times"></i>
+            <p>No holidays have been set yet.</p>
+            {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'accounts@nadiya.in' %}
+                <a href="/set_holidays" style="color: var(--warning); text-decoration: none; font-weight: 600; margin-top: 1rem; display: inline-block;">
+                    <i class="fas fa-plus"></i> Add Holidays
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

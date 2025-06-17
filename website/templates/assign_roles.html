@@ -1,180 +1,243 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
-    <title>Assign Roles</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #fff;
-            padding-top: 70px; /* Adjust based on navbar height */
-        }
-
-        h1 {
-        color: #111;
+    .page-header h1 {
         font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 28px;
+        margin: 0;
+        text-align: center;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--info);
+        color: white;
+        border-color: var(--info);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .form-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        border-left: 6px solid #06b6d4;
+        padding-left: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 1rem;
+        text-transform: uppercase;
         letter-spacing: 0.5px;
-        text-align: left;
-        border-left: 6px solid #fbc02d; /* yellow accent */
-        padding-left: 14px;
     }
 
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label { 
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        select, .btn {
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            width: 100%;
-        }
-
-        .btn {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-         .navbar{
-          background-color: #E2E2E2 !important;
-
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
-
-#logout {
-    color: #000;
-    text-align: center;
-}
-
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
-
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.container {
-        max-width: 90vh;
-        margin: 48px auto;
-        padding: 36px 40px ;
-        background: #fff;
-        border-radius: 10px;
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+        transition: all 0.3s ease;
     }
 
-    </style>
-</head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-  <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbar">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="/"><i class="fa fa-home"></i> Home <span class="sr-only">(current)</span></a>
-      </li>
-    </ul>
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+    .form-control:focus {
+        border-color: var(--info);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    }
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-<br>
-    <div class="container mt-5">
-        <h1 class="mb-4">ASSIGN ROLE</h1><br>
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-container:hover {
+        border-color: var(--info);
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--info);
+    }
+
+    .checkbox-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+    }
+
+    .role-info {
+        background: rgba(6, 182, 212, 0.1);
+        border: 1px solid rgba(6, 182, 212, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .role-info h4 {
+        color: var(--info);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-user-cog"></i> Role Assignment</h1>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/misc-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Management
+    </a>
+
+    <div class="form-container">
+        <h2 class="form-title">Assign Employee Role</h2>
+        
+        <div class="role-info">
+            <h4><i class="fas fa-info-circle"></i> Role Assignment</h4>
+            <p>Select an employee and assign their role within the organization. Probation status affects leave entitlements.</p>
+        </div>
+
         <form action="{{ url_for('views.assign_roles') }}" method="POST">
             <div class="form-group">
-                <label for="user_id">User:</label>
-                <select class="form-control" name="user_id" id="user_id">
+                <label for="user_id">Select Employee:</label>
+                <select class="form-control" name="user_id" id="user_id" required>
+                    <option value="">Choose an employee...</option>
                     {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.first_name }}</option>
+                        <option value="{{ user.id }}">{{ user.first_name }} ({{ user.email }})</option>
                     {% endfor %}
                 </select>
             </div>
+
             <div class="form-group">
-                <label for="role">Role:</label>
-                <select class="form-control" name="role" id="role">
-                    <option value="accounts_manager">Accounts Manager</option>
-                    <option value="accounts_member">Accounts Member</option>
-                    <option value="business_manager">Business Development Manager</option>
-                    <option value="business_member">Business Development Member</option>
-                    <option value="service_manager">Service Manager</option>
-                    <option value="service_member">Service Member</option>
-                    <option value="service_emp">Service Employee</option>
-                    <option value="service_support_manager">Service Support Manager</option>
-                    <option value="service_support_member">Service Support Member</option>
-                    <option value="sales_manager">Sales Manager</option>
-                    <option value="sales_member">Sales Member</option>
-                    <option value="director">Director</option>
-                    <option value="others">Others</option>
-                    <!-- Add other roles as needed -->
+                <label for="role">Assign Role:</label>
+                <select class="form-control" name="role" id="role" required>
+                    <option value="">Select a role...</option>
+                    <optgroup label="Management">
+                        <option value="director">Director</option>
+                        <option value="accounts_manager">Accounts Manager</option>
+                        <option value="business_manager">Business Development Manager</option>
+                        <option value="service_manager">Service Manager</option>
+                        <option value="service_support_manager">Service Support Manager</option>
+                        <option value="sales_manager">Sales Manager</option>
+                    </optgroup>
+                    <optgroup label="Team Members">
+                        <option value="accounts_member">Accounts Member</option>
+                        <option value="business_member">Business Development Member</option>
+                        <option value="service_member">Service Member</option>
+                        <option value="service_support_member">Service Support Member</option>
+                        <option value="sales_member">Sales Member</option>
+                        <option value="service_emp">Service Employee</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                        <option value="others">Others</option>
+                    </optgroup>
                 </select>
             </div>
+
             <div class="form-group">
-                <label for="probation">On Probation:</label>
-                <input type="checkbox" id="probation" name="probation">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="probation" name="probation">
+                    <label for="probation" class="checkbox-label">Employee is on probation period</label>
+                </div>
             </div>
-            <button type="submit" class="btn">Assign Role</button>
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Assign Role
+            </button>
         </form>
     </div>
-
-    <!-- Bootstrap JS and dependencies (jQuery, Popper.js) -->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-</body>
-</html>
+</div>
+{% endblock %}

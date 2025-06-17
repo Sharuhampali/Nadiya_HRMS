@@ -1,311 +1,259 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nadiya</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px var(--shadow);
+    }
 
-  <link rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    crossorigin="anonymous"
-  />
-  <link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-    crossorigin="anonymous"
-  />
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    :root {
-      --nadiya-red: #e74c3c;
-      --nadiya-blue: #3498db;
-      --nadiya-yellow: #f1c40f;
-      --nadiya-green: #2ecc71;
-      --nadiya-light: #f8f9fa;
-      --nadiya-dark: #2c3e50;
-      --nadiya-gray: #95a5a6;
-      --nadiya-border: #dfe6e9;
+    .dashboard-header .date-info {
+        text-align: right;
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
     }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      overflow-x: hidden !important;
+
+    .user-info-table {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    body {
-      min-height: 100vh;
-      width: 100vw;
-      background-color: var(--nadiya-light);
-      font-family: 'Roboto', sans-serif;
-      color: var(--nadiya-dark);
+
+    .user-info-table table {
+        width: 100%;
+        color: white;
     }
-    .navbar {
-      background-color: #E2E2E2 !important;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      padding: 0.5rem 1rem;
+
+    .user-info-table th,
+    .user-info-table td {
+        padding: 0.75rem;
+        border: none;
+        text-align: left;
     }
-    .navbar-nav .nav-link {
-      margin-right: 15px;
-      display: flex;
-      align-items: center;
-      color: #000 !important;
+
+    .user-info-table th {
+        font-weight: 600;
+        opacity: 0.9;
     }
-    #logout {
-      color: #000;
-      text-align: center;
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
     }
-    .profile-photo img {
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      margin-left: 10px;
-      margin-right: 10px;
-      border: 2px solid #6c757d;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    .quick-action-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px var(--shadow);
+        position: relative;
+        overflow: hidden;
     }
-    .navbar-nav.ml-auto {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+    .quick-action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
     }
-    .header {
-      background-color: #ffffff;
-      color: #333333;
-      padding: 20px;
-      text-align: center;
-      border-bottom: 2px solid #dee2e6;
+
+    .quick-action-card:hover::before {
+        transform: scaleX(1);
     }
-    .header h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      color: #343a40;
+
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px var(--shadow);
+        border-color: var(--accent-primary);
     }
-    .header h2 {
-      font-size: 20px;
-      color: #6c757d;
+
+    .quick-action-card a {
+        text-decoration: none;
+        color: var(--text-primary);
+        display: block;
+        height: 100%;
     }
-    .right {
-      text-align: right !important;
-      color: #6c757d;
-      margin-right: 10px;
+
+    .quick-action-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
     }
-    table {
-      margin: 20px 0;
-      width: 100%;
-      max-width: 600px;
-      text-align: left;
-      border-collapse: collapse;
+
+    .quick-action-card:hover i {
+        transform: scale(1.1);
     }
-    table th,
-    table td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      width: 25%;
+
+    .quick-action-card h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
     }
-    .container {
-      padding: 20px;
+
+    .quick-action-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
     }
-    .category-container {
-      margin-bottom: 2rem;
+
+    .attendance-card i { color: #4f46e5; }
+    .leaves-card i { color: #059669; }
+    .holidays-card i { color: #f59e0b; }
+    .announcements-card i { color: #dc2626; }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
     }
-    .category-title {
-      font-size: 1.25rem;
-      font-weight: 500;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--nadiya-border);
-      color: var(--nadiya-dark);
-      display: flex;
-      align-items: center;
+
+    .stat-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 10px var(--shadow);
     }
-    .category-title i { margin-right: 0.5rem; }
-    .category-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
+
+    .stat-card .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent-primary);
+        margin-bottom: 0.5rem;
     }
-    .card {
-      border: 1px solid var(--nadiya-border);
-      border-radius: 8px;
-      overflow: hidden;
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      align-items: stretch;
+
+    .stat-card .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
     }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.10);
+
+    .welcome-section {
+        margin-bottom: 2rem;
     }
-    .card a {
-      display: flex;
-      align-items: center;
-      padding: 1.25rem 1rem;
-      text-decoration: none;
-      color: var(--nadiya-dark);
-      font-weight: 500;
-      width: 100%;
-      height: 100%;
-      transition: background-color 0.2s;
+
+    .welcome-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
     }
-    .card a:hover {
-      background-color: rgba(52, 152, 219, 0.05);
+
+    .welcome-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
     }
-    .card i {
-      margin-right: 0.75rem;
-      width: 22px;
-      text-align: center;
-      font-size: 1.2rem;
-    }
-    .attendance i { color: var(--nadiya-blue); }
-    .leaves i { color: var(--nadiya-green); }
-    .holidays i { color: var(--nadiya-yellow); }
-    .announcements i { color: var(--nadiya-red); }
+
     @media (max-width: 768px) {
-      .category-cards {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      }
-      .navbar-brand img { height: 60px; }
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .dashboard-header {
+            padding: 1.5rem;
+        }
     }
-  </style>
-</head>
-<body>
+</style>
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbar">
-      <div class="navbar-nav">
-        <a class="navbar-brand" href="/"><img src="static/logo.png" alt="Logo" style="height: 80px;"></a>
-        <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-        <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-        <a class="nav-item nav-link" href="/announcements"><i class="fa fa-bullhorn"></i> Announcements</a>
-      </div>
-      <div class="navbar-nav ml-auto">
-        <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-        <div class="profile-photo">
-          <a href="/profile/{{ user.id }}">
-            {% if user.photo %}
-              <img src="{{ url_for('static', filename='uploads/photos/' + user.photo) }}" alt="Profile Photo" class="img-thumbnail">
-            {% else %}
-              <img src="static/logo.png" alt="Profile Photo">
-            {% endif %}
-          </a>
-          
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <div class="header">
-    <div class="right">
-      Date: {{current_date}}
+<div class="container-fluid">
+    <div class="welcome-section">
+        <h1 class="welcome-title">Welcome back, {{ current_user.first_name }}!</h1>
+        <p class="welcome-subtitle">Here's what's happening with your work today.</p>
     </div>
 
-    <table>
-      <tr>
-        <th>Employee Name</th>
-        <td>{{ current_user.first_name }}</td>
-      </tr>
-      <tr>
-        <th>Designation</th>
-        <td style="text-transform: capitalize;">{{ user.role }}</td>
-      </tr>
-    </table>
-  </div>
-
-  <div class="container">
-    <!-- Attendance Category -->
-    <div class="category-container">
-      <h2 class="category-title">
-        <i class="fa fa-calendar-check-o" aria-hidden="true"></i> Attendance
-      </h2>
-      <div class="category-cards">
-        <div class="card attendance">
-          <a href="/attendance">
-            <i class="fa fa-calendar" aria-hidden="true"></i>
-            <span>Attendance</span>
-          </a>
+    <div class="dashboard-header">
+        <div class="date-info">
+            <i class="fas fa-calendar-alt"></i> {{ current_date }}
         </div>
-      </div>
+        
+        <div class="user-info-table">
+            <table>
+                <tr>
+                    <th><i class="fas fa-user"></i> Employee Name</th>
+                    <td>{{ current_user.first_name }}</td>
+                </tr>
+                <tr>
+                    <th><i class="fas fa-briefcase"></i> Designation</th>
+                    <td style="text-transform: capitalize;">{{ user.role }}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 
-    <!-- Leaves Category -->
-    <div class="category-container">
-      <h2 class="category-title">
-        <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Leaves
-      </h2>
-      <div class="category-cards">
-        <div class="card leaves">
-          <a href="/apply_leave">
-            <i class="fa fa-pencil" aria-hidden="true"></i>
-            <span>Leave Application</span>
-          </a>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ 15 - user.earned | round(2) }}</div>
+            <div class="stat-label">Earned Leaves</div>
         </div>
-        <div class="card leaves">
-          <a href="/approved_leaves">
-            <i class="fa fa-list" aria-hidden="true"></i>
-            <span>My Leaves</span>
-          </a>
+        <div class="stat-card">
+            <div class="stat-number">{{ 6 - user.medic | round(2) }}</div>
+            <div class="stat-label">Medical Leaves</div>
         </div>
-        <div class="card leaves">
-          <a href="/leave_requests">
-            <i class="fa fa-envelope" aria-hidden="true"></i>
-            <span>Leave Requests</span>
-          </a>
+        <div class="stat-card">
+            <div class="stat-number">{{ current_user.total_compoff }}</div>
+            <div class="stat-label">Comp-off Days</div>
         </div>
-      </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ 10 - user.pay | round(2) }}</div>
+            <div class="stat-label">Leave w/o Pay</div>
+        </div>
     </div>
 
-    <!-- Holidays Category -->
-    <div class="category-container">
-      <h2 class="category-title">
-        <i class="fa fa-gift" aria-hidden="true"></i> Holidays
-      </h2>
-      <div class="category-cards">
-        <div class="card holidays">
-          <a href="/display_holidays">
-            <i class="fa fa-gift" aria-hidden="true"></i>
-            <span>Holiday List</span>
-          </a>
+    <div class="quick-actions">
+        <div class="quick-action-card attendance-card">
+            <a href="/attendance">
+                <i class="fas fa-clock"></i>
+                <h4>Mark Attendance</h4>
+                <p>Clock in/out with location tracking</p>
+            </a>
         </div>
-      </div>
-    </div>
 
-    <!-- Announcements Category -->
-    <div class="category-container">
-      <h2 class="category-title">
-        <i class="fa fa-bullhorn" aria-hidden="true"></i> Announcements
-      </h2>
-      <div class="category-cards">
-        <div class="card announcements">
-          <a href="/announcements">
-            <i class="fa fa-bullhorn" aria-hidden="true"></i>
-            <span>Announcements</span>
-          </a>
+        <div class="quick-action-card leaves-card">
+            <a href="/leaves-category">
+                <i class="fas fa-calendar-times"></i>
+                <h4>Leave</h4>
+                <p>Submit new leave request</p>
+            </a>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
-</body>
-</html>
+        <div class="quick-action-card holidays-card">
+            <a href="/display_holidays">
+                <i class="fas fa-gift"></i>
+                <h4>Holiday Calendar</h4>
+                <p>View upcoming holidays</p>
+            </a>
+        </div>
+
+        <div class="quick-action-card announcements-card">
+            <a href="/announcements">
+                <i class="fas fa-bullhorn"></i>
+                <h4>Announcements</h4>
+                <p>Latest company updates</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .option-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .option-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .option-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .option-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 40px var(--shadow);
+        border-color: var(--accent-primary);
+    }
+
+    .option-card a {
+        text-decoration: none;
+        color: var(--text-primary);
+        display: block;
+        height: 100%;
+    }
+
+    .option-card i {
+        font-size: 3rem;
+        color: var(--accent-primary);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .option-card:hover i {
+        transform: scale(1.2);
+        color: var(--accent-secondary);
+    }
+
+    .option-card h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .option-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .options-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .option-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-clock"></i> Attendance Management</h1>
+        <p>Comprehensive attendance tracking and management system</p>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="options-grid">
+        <div class="option-card">
+            <a href="/attendance">
+                <i class="fas fa-calendar-check"></i>
+                <h3>Mark Attendance</h3>
+                <p>Clock in and out with location tracking. Submit your daily attendance with entry and exit times.</p>
+            </a>
+        </div>
+
+        <div class="option-card">
+            <a href="/attendance_table">
+                <i class="fas fa-table"></i>
+                <h3>Attendance Records</h3>
+                <p>View comprehensive attendance data with detailed reports and analytics for all employees.</p>
+            </a>
+        </div>
+<!-- 
+        <div class="option-card">
+            <a href="/who">
+                <i class="fas fa-user-clock"></i>
+                <h3>Employee Attendance</h3>
+                <p>Search and view individual employee attendance records with detailed time tracking information.</p>
+            </a>
+        </div> -->
+    </div>
+</div>
+{% endblock %}

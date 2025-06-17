@@ -1,149 +1,487 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Nadiya</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
-
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      crossorigin="anonymous"
-    />
-</head>
-<body>
-
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbar">
-      <div class="navbar-nav">
-
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-
-        <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-        <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-      </div>
-      <div class="navbar-nav ml-auto">
-        <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-        </div>
-    </div>
-</nav>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-
-<div class="container">
-    <br><br>
-    <h1>Leave Requests</h1>
-    <br><br>
-    {% for leave in leave_requests | reverse %}
-        <div class="leave-request">
-            <p><strong>{{ leave.user.first_name }}</strong> requests {{ leave.ltype }} Leave from {{ leave.start_date }} to {{ leave.end_date }} for {{ leave.days }} days</p>
-            {% if leave.reason %}
-                <p><strong>Reason:</strong> {{ leave.reason }}</p>
-            {% endif %}
-            {% if not leave.approved and not leave.rejected %}
-                <form class="approve-form" action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST">
-                    <input type="submit" value="Approve" class="btn btn-success">
-                </form>
-                <form class="reject-form" action="{{ url_for('views.reject', leave_id=leave.id) }}" method="POST">
-                    <input type="submit" value="Reject" class="btn btn-danger">
-                </form>
-            {% elif leave.rejected %}
-                <p class="rejected">Rejected by: {{ leave.approved_by }}</p>
-            {% else %}
-                <p class="approved">Approved by: {{ leave.approved_by }}</p>
-            {% endif %}
-        </div>
-    {% endfor %}
-</div>
-
+{% extends "base.html" %}
+{% block content %}
 <style>
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 12px 40px 12px;
+    }
+    
+    h1 {
+        color: var(--text-primary);
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 32px;
+        letter-spacing: 0.5px;
+        text-align: left;
+        position: relative;
+        padding-left: 18px;
+    }
+    
+  
     .leave-request {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin-bottom: 10px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
+        border: 1px solid var(--border-color);
+        padding: 20px;
+        margin-bottom: 20px;
+        background: var(--bg-primary);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px var(--shadow);
+        border-left: 6px solid #fbc02d;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .leave-request:hover {
+        box-shadow: 0 4px 15px var(--shadow);
+        transform: translateY(-2px);
+    }
+    
+    .leave-request.approved {
+        border-left-color: #10b981;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), transparent);
+    }
+
+    .leave-request.rejected {
+        border-left-color: #ef4444;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.03), transparent);
     }
 
     .leave-request p {
-        margin: 5px 0;
+        margin: 8px 0;
+        color: var(--text-primary);
+        font-size: 1.05rem;
+    }
+    
+    .leave-request p strong {
+        color: var(--accent-primary);
+    }
+    
+    .btn-approve {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .leave-request .btn {
-        margin-top: 5px;
+    .btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
     }
 
-    .leave-request .approved {
-        color: green;
+    .btn-reject {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .leave-request .rejected {
-        color: red;
+    .btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
     }
 
-    .approve-form,
-    .reject-form {
-        display: inline-block;
-        margin-right: 10px;
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
     }
-     .navbar{
-          background-color: #E2E2E2 !important;
 
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
+    .status-approved {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
 
-#logout {
-    color: #000;
-    text-align: center;
-}
+    .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
 
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
+    .no-requests {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+        background: var(--bg-primary);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .no-requests i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
 
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .page-header {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
 
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
 
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .requests-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        background: var(--bg-primary);
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .filter-tab {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .filter-tab.active {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+    }
+
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .employee-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .employee-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--success), #10b981);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .employee-details h4 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .leave-type-badge {
+        background: var(--accent-primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .leave-details {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .leave-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .info-item i {
+        color: var(--success);
+        width: 16px;
+    }
+
+    .reason-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .reason-text {
+        background: var(--bg-primary);
+        padding: 0.75rem;
+        border-radius: 8px;
+        border-left: 4px solid var(--accent-primary);
+        font-style: italic;
+        color: var(--text-secondary);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px 2vw 28px 2vw;
+        }
+        
+        .leave-request {
+            padding: 15px;
+        }
+        
+        .leave-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            padding-left: 10px;
+        }
+        
+        h1::before {
+            width: 5px;
+            height: 20px;
+            top: 8px;
+        }
+
+        .request-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .filter-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .leave-info {
+            grid-template-columns: 1fr;
+        }
+        
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+    }
 </style>
 
-<!-- External CSS and JS Links -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-inbox"></i> Leave Requests Management</h1>
+    </div>
+</div>
+
+<div class="requests-container">
+    <a href="/leaves-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Leave Management
+    </a>
+
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">
+            <i class="fas fa-list"></i> All Requests
+        </div>
+        <div class="filter-tab" data-filter="pending">
+            <i class="fas fa-clock"></i> Pending
+        </div>
+        <div class="filter-tab" data-filter="approved">
+            <i class="fas fa-check"></i> Approved
+        </div>
+        <div class="filter-tab" data-filter="rejected">
+            <i class="fas fa-times"></i> Rejected
+        </div>
+    </div>
+
+    {% if leave_requests %}
+        {% for leave in leave_requests | reverse %}
+            <div class="leave-request {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}" 
+                 data-status="{% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
+                
+                <div class="request-header">
+                    <div class="employee-info">
+                        <div class="employee-avatar">
+                            {{ leave.user.first_name[0].upper() }}
+                        </div>
+                        <div class="employee-details">
+                            <h4>{{ leave.user.first_name }}</h4>
+                            <span class="leave-type-badge">{{ leave.ltype }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if leave.approved %}
+                        <div class="status-badge status-approved">
+                            <i class="fas fa-check-circle"></i> Approved by {{ leave.approved_by }}
+                        </div>
+                    {% elif leave.rejected %}
+                        <div class="status-badge status-rejected">
+                            <i class="fas fa-times-circle"></i> Rejected by {{ leave.approved_by }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="leave-details">
+                    <div class="leave-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span><strong>From:</strong> {{ leave.start_date }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span><strong>To:</strong> {{ leave.end_date }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Duration:</strong> {{ leave.days }} day{{ 's' if leave.days > 1 else '' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-check"></i>
+                            <span><strong>Type:</strong> {{ leave.ltype }}</span>
+                        </div>
+                    </div>
+
+                    {% if leave.reason %}
+                        <div class="reason-section">
+                            <strong><i class="fas fa-comment"></i> Reason:</strong>
+                            <div class="reason-text">{{ leave.reason }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if not leave.approved and not leave.rejected %}
+                    <div class="action-buttons">
+                        <form class="approve-form" action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn-approve">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </form>
+                        <form class="reject-form" action="{{ url_for('views.reject', leave_id=leave.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn-reject">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-requests">
+            <i class="fas fa-inbox"></i>
+            <p>No leave requests found.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const leaveRequests = document.querySelectorAll('.leave-request');
+
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            filterTabs.forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+
+            const filter = this.dataset.filter;
+
+            // Show/hide requests based on filter
+            leaveRequests.forEach(request => {
+                if (filter === 'all' || request.dataset.status === filter) {
+                    request.style.display = 'block';
+                } else {
+                    request.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Confirmation for approve/reject actions
+    document.querySelectorAll('.btn-approve, .btn-reject').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const action = this.classList.contains('btn-approve') ? 'approve' : 'reject';
+            if (!confirm(`Are you sure you want to ${action} this leave request?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

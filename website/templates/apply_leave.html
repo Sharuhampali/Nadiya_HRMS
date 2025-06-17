@@ -1,113 +1,153 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 {% block content %}
 <style>
-    body {
-        background-color: #f6f7fa;
-        font-family: Arial, sans-serif;
+    .page-header {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
     }
 
-    .container {
-        max-width: 90vh;
-        margin: 48px auto;
-        padding: 36px 40px ;
-        background: #fff;
-        border-radius: 10px;
-    }
-
-    h1 {
-        color: #111;
+    .page-header h1 {
         font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 28px;
-        letter-spacing: 0.5px;
-        text-align: left;
-        border-left: 6px solid #fbc02d; /* yellow accent */
-        padding-left: 14px;
+        margin: 0;
+        text-align: center;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .form-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        border-left: 6px solid #fbc02d;
+        padding-left: 1rem;
     }
 
     .form-group {
-        margin-bottom: 22px;
+        margin-bottom: 1.5rem;
     }
 
-    label {
+    .form-group label {
         font-weight: 600;
-        color: #111;
-        margin-bottom: 7px;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
         display: block;
-        font-size: 1.08rem;
-        letter-spacing: 0.2px;
+        font-size: 1rem;
     }
 
-    input[type="date"],
-    input[type="number"],
-    input[type="text"],
-    select {
+    .form-control {
         width: 100%;
-        padding: 12px 14px;
-        border: 2px solid #e4e7ed;
-        border-radius: 5px;
-        font-size: 1.08rem;
-        color: #111;
-        background: #fafbfc;
-        transition: border-color 0.2s;
-        box-sizing: border-box;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+        transition: all 0.3s ease;
     }
 
-    input[type="date"]:focus,
-    input[type="number"]:focus,
-    input[type="text"]:focus,
-    select:focus {
-        border-color: #e53935; /* red accent on focus */
+    .form-control:focus {
+        border-color: var(--success);
         outline: none;
-        background: #fff;
+        background: var(--bg-primary);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
     }
 
-    .btn-primary {
-        background-color: #1e88e5; /* blue */
+    .btn-submit {
+        background: linear-gradient(135deg, #059669, #10b981);
         border: none;
-        color: #fff;
-        font-size: 1.12rem;
+        color: white;
+        font-size: 1.1rem;
         font-weight: 600;
-        padding: 14px 0;
-        border-radius: 6px;
+        padding: 0.75rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
         width: 100%;
-        letter-spacing: 0.5px;
-        transition: background 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 4px rgba(30,136,229,0.06);
-        margin-top: 8px;
     }
 
-    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+    }
+
+    .leave-balance-table {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .table-title {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
 
     .table {
-        margin-top: 36px;
+        margin: 0;
         width: 100%;
-        border-collapse: collapse;
-        background: #fff;
-    }
-
-    .table th, .table td {
-        text-align: left;
-        padding: 12px 10px;
-        border-bottom: 2px solid #fbc02d; /* yellow line */
-        color: #111;
-        font-size: 1.02rem;
-        
     }
 
     .table th {
         background: #fe413e;
-        color: #fff;
+        color: white;
         font-weight: 700;
-        border-bottom: 3px solid #fbc02d; /* yellow line under header */
+        text-align: center;
+        border: none;
+        padding: 1rem;
     }
 
-    .table tr:last-child td {
-        border-bottom: none;
+    .table td {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        text-align: center;
+        border: none;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
     }
 
-    /* Subtle yellow dot for table rows as accent */
     .table td:first-child::before {
         content: '';
         display: inline-block;
@@ -119,78 +159,151 @@
         vertical-align: middle;
     }
 
-    @media (max-width: 800px) {
-        .container {
-            padding: 18px 4vw;
+    .table tbody tr:hover td {
+        background: var(--bg-secondary);
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1.5rem;
         }
-        h1 {
-            font-size: 1.3rem;
-            padding-left: 7px;
-        }
-        .table th, .table td {
-            padding: 8px 4px;
+        
+        .page-header h1 {
+            font-size: 1.5rem;
         }
     }
 </style>
 
-<div class="container">
-    <h1>APPLY FOR LEAVE</h1>
-    <form id="leaveForm" method="POST">
-        <div class="form-group">
-            <label for="start_date">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" value="{{ today }}" min="{{ today }}" required>
-        </div>
-        <div class="form-group">
-            <label for="end_date">End Date:</label>
-            <input type="date" id="end_date" name="end_date" value="{{ today }}" min="{{ today }}" required>
-        </div>
-        <div class="form-group">
-            <label for="days">No. Of Days:</label>
-            <input type="number" id="days" name="days" step="any" value=0 required>
-        </div>
-        <div class="form-group">
-            <label for="reason">Reason (Optional):</label>
-            <input type="text" id="reason" name="reason">
-        </div>
-        <div class="form-group">
-            <label for="ltype">Leave Type:</label>
-            <select id="ltype" name="ltype" required>
-                <option value="">Select Leave Type</option>
-                <option value="Compoff">Compoff Leave</option>
-                <option value="Earned">Earned Leave</option>
-                <option value="Medical/Sick">Medical/Sick Leave</option>
-                {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
-                    <option value="Leave w/o Pay">Leave w/o Pay</option>
-                {% endif %}
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Apply</button>
-    </form>
-    <table class="table mt-3">
-        <thead>
-            <tr>
-                <th>Leave Type</th>
-                <th>Count</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Earned</td>
-                <td>{{ 15 - user.earned | round(2)}}</td>
-            </tr>
-            <tr>
-                <td>Medical/Sick</td>
-                <td>{{ 6 - user.medic | round(2)}}</td>
-            </tr>
-            <tr>
-                <td>Leave without Pay</td>
-                <td>{{10 - user.pay | round(2)}}</td>
-            </tr>
-            <tr>
-                <td>Compoff Leaves</td>
-                <td>{{current_user.total_compoff}}</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-file-plus"></i> Apply for Leave</h1>
+    </div>
 </div>
+
+<div class="container">
+    <a href="/leaves-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Leave Management
+    </a>
+
+    <div class="form-container">
+        <h2 class="form-title">Leave Application Form</h2>
+        <form id="leaveForm" method="POST">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ today }}" min="{{ today }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="end_date">End Date:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ today }}" min="{{ today }}" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="days">Number of Days:</label>
+                        <input type="number" class="form-control" id="days" name="days" step="0.5" value="0" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ltype">Leave Type:</label>
+                        <select class="form-control" id="ltype" name="ltype" required>
+                            <option value="">Select Leave Type</option>
+                            <option value="Compoff">Compoff Leave</option>
+                            <option value="Earned">Earned Leave</option>
+                            <option value="Medical/Sick">Medical/Sick Leave</option>
+                            {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
+                                <option value="Leave w/o Pay">Leave w/o Pay</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reason">Reason (Optional):</label>
+                <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason for leave..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Submit Leave Application
+            </button>
+        </form>
+    </div>
+
+    <div class="leave-balance-table">
+        <h3 class="table-title"><i class="fas fa-chart-bar"></i> Your Leave Balance</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Leave Type</th>
+                    <th>Available Days</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Earned Leave</td>
+                    <td><strong>{{ 15 - user.earned | round(2) }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Medical/Sick Leave</td>
+                    <td><strong>{{ 6 - user.medic | round(2) }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Leave without Pay</td>
+                    <td><strong>{{ 10 - user.pay | round(2) }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Compoff Leaves</td>
+                    <td><strong>{{ current_user.total_compoff }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const daysInput = document.getElementById('days');
+
+    function calculateDays() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        
+        if (startDate && endDate && endDate >= startDate) {
+            const timeDiff = endDate.getTime() - startDate.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+            daysInput.value = daysDiff;
+        } else {
+            daysInput.value = 0;
+        }
+    }
+
+    startDateInput.addEventListener('change', calculateDays);
+    endDateInput.addEventListener('change', calculateDays);
+    
+    // Update end date minimum when start date changes
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+        calculateDays();
+    });
+});
+</script>
 {% endblock %}

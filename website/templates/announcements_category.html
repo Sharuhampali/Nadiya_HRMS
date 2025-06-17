@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--danger);
+        color: white;
+        border-color: var(--danger);
+        transform: translateY(-2px);
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .option-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .option-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #dc2626, #ef4444);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .option-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .option-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 40px var(--shadow);
+        border-color: var(--danger);
+    }
+
+    .option-card a {
+        text-decoration: none;
+        color: var(--text-primary);
+        display: block;
+        height: 100%;
+    }
+
+    .option-card i {
+        font-size: 3rem;
+        color: var(--danger);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .option-card:hover i {
+        transform: scale(1.2);
+        color: #dc2626;
+    }
+
+    .option-card h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .option-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .options-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .option-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-bullhorn"></i> Communication Center</h1>
+        <p>Company announcements and communication hub</p>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="options-grid">
+        {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
+        <div class="option-card">
+            <a href="/post_announcement">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Post Announcement</h3>
+                <p>Create and publish company-wide announcements with automatic email notifications to all employees.</p>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="option-card">
+            <a href="/announcements">
+                <i class="fas fa-bell"></i>
+                <h3>View Announcements</h3>
+                <p>Read all company announcements, updates, and important communications from management.</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

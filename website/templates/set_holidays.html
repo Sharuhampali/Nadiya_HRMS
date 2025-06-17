@@ -1,154 +1,226 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Holidays</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-     <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      crossorigin="anonymous"
-    />
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa; /* Light background for the page */
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--warning);
+        color: white;
+        border-color: var(--warning);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .form-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        border-left: 6px solid #f59e0b;
+        padding-left: 1rem;
+    }
+
+    .holiday-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .holiday-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .holiday-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    .holiday-number {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        background: var(--bg-primary);
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--warning);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+    }
+
+    .instructions {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+    }
+
+    .instructions h4 {
+        color: var(--warning);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .holiday-grid {
+            grid-template-columns: 1fr;
         }
-
-        .navbar {
-            margin-bottom: 20px; /* Space below the navbar */
+        
+        .form-container {
+            padding: 1.5rem;
         }
-
-        .navbar-nav .nav-link {
-            padding: 0.5rem 1rem; /* Padding for better spacing */
+        
+        .page-header h1 {
+            font-size: 1.5rem;
         }
+    }
+</style>
 
-        h1 {
-            font-size: 28px;
-            color: #007bff; /* Bootstrap primary color */
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff; /* White background for the form area */
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-        }
-
-        .form-group label {
-            font-weight: bold;
-            color: #333; /* Darker color for labels */
-        }
-
-        .form-control {
-            border-radius: 4px; /* Rounded corners for inputs */
-            border: 1px solid #ced4da; /* Light border color */
-            box-shadow: none; /* Remove default shadow */
-        }
-
-        .form-control:focus {
-            border-color: #80bdff; /* Focus border color */
-            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25); /* Focus shadow */
-        }
-
-        .btn-primary {
-            background-color: #007bff; /* Bootstrap primary color */
-            border-color: #007bff; /* Match border color */
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3; /* Darker shade on hover */
-            border-color: #004085; /* Darker border color on hover */
-        }
-        hr {
-            border: 0;
-            height: 2px; /* Adjust height as needed */
-            background-color: #333; /* Darker color for the horizontal line */
-            margin: 20px 0; /* Add some spacing above and below */
-        }
-         .navbar{
-          background-color: #E2E2E2 !important;
-
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
-
-#logout {
-    color: #000;
-    text-align: center;
-}
-
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
-
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-            <div class="navbar-nav">
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-
-                <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-                <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-            </div>
-            <div class="navbar-nav ml-auto">
-                <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-            </div>
-        </div>
-    </nav>
-
+<div class="page-header">
     <div class="container">
-        <h1>Set Holidays</h1>
+        <h1><i class="fas fa-calendar-plus"></i> Set Company Holidays</h1>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/holidays-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Holiday Management
+    </a>
+
+    <div class="form-container">
+        <h2 class="form-title">Add New Holidays</h2>
+        
+        <div class="instructions">
+            <h4><i class="fas fa-info-circle"></i> Instructions</h4>
+            <p>Fill in the holiday name and date for each entry. You can add up to 20 holidays at once. Leave empty fields blank if you don't need all slots.</p>
+        </div>
+
         <form action="/set_holidays" method="POST">
-            {% for i in range(20) %}
-            <div class="form-group">
-                <label for="holiday_name_{{ i }}">NAME: </label>
-                <input type="text" class="form-control" id="holiday_name_{{ i }}" name="holiday_name_{{ i }}" placeholder="Enter holiday">
-                <br><label for="holiday_date_{{ i }}">DATE: </label>
-                <input type="date" class="form-control" id="holiday_date_{{ i }}" name="holiday_date_{{ i }}">
-                <hr>
+            <div class="holiday-grid">
+                {% for i in range(20) %}
+                <div class="holiday-item">
+                    <div class="holiday-number">{{ i + 1 }}</div>
+                    <div class="form-group">
+                        <label for="holiday_name_{{ i }}">Holiday Name:</label>
+                        <input type="text" class="form-control" id="holiday_name_{{ i }}" name="holiday_name_{{ i }}" placeholder="e.g., New Year's Day">
+                    </div>
+                    <div class="form-group">
+                        <label for="holiday_date_{{ i }}">Date:</label>
+                        <input type="date" class="form-control" id="holiday_date_{{ i }}" name="holiday_date_{{ i }}">
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Submit</button>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Save All Holidays
+            </button>
         </form>
     </div>
-
-    <!-- External CSS and JS Links -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}

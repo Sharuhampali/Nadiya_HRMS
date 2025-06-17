@@ -1,132 +1,626 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      crossorigin="anonymous"
-    />
-
-    <title>{% block title %}Home{% endblock %}</title>
-
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nadiya{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      .nav-item .fa {
-        margin-right: 8px; /* Space between icon and text */
-      }
-       .navbar{
-          background-color: #E2E2E2 !important;
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            --border-color: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent-primary: #0d6efd;
+            --accent-secondary: #6f42c1;
+            --success: #198754;
+            --warning: #fd7e14;
+            --danger: #dc3545;
+            --info: #0dcaf0;
+            --navbar-bg: #1a1d23;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 60px;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a1d23;
+            --bg-secondary: #2d3748;
+            --bg-tertiary: #4a5568;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent-primary: #4299e1;
+            --accent-secondary: #9f7aea;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #f56565;
+            --info: #4fd1c7;
+            --navbar-bg: #0f1419;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            padding-top: 70px;
+        }
+:root {
+    --header-bg: #ffffff;
+    --header-text: #2d3748;
+    --header-border: #7c3aed;
+        --toggle-btn-color: #7c3aed; !important
+}
 
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
+[data-theme="dark"] {
+    --header-bg: #181a1b;
+    --header-text: #f3f3f3;
+    --header-border: #7c3aed; /* You can adjust if you want a different accent for dark */
+}
+
+.top-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 70px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    z-index: 1000;
     display: flex;
     align-items: center;
-    color: #000 !important;
+    padding: 0 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    border-bottom: 3px solid var(--header-border);
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
-#logout {
-    color: #000;
-    text-align: center;
-}
 
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
 
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+        }
+        .menu-toggle:hover { background: rgba(255,255,255,0.1); }
+        .header-logo { display: flex; align-items: center; flex: 1; }
+        .header-logo img { height: 40px; margin-right: 1rem; }
+        .header-logo h1 { font-size: 1.5rem; font-weight: 600; margin: 0; }
+        .header-actions { display: flex; align-items: center; gap: 1rem; }
+        .theme-toggle {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: rgb(204, 0, 255);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem; border-radius: 8px;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: rgba(255,255,255,0.1); }
+        .user-profile img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);}
+        /* Sidebar */
+        .sidebar {
+            position: fixed; top: 70px; left: -280px;
+            width: var(--sidebar-width);
+            height: calc(100vh - 70px);
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px var(--shadow);
+            transition: left 0.3s ease, width 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+        }
+        .sidebar.open { left: 0; }
+        /* Collapsible sidebar styles */
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width) !important;
+        }
+        .sidebar-collapse-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1001;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        .sidebar-collapse-btn:hover { color: var(--accent-primary); }
+        .sidebar.collapsed .nav-link span,
+        .sidebar.collapsed .nav-section-title {
+            display: none !important;
+        }
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .sidebar-content { padding: 2rem 0; }
+        .nav-section { margin-bottom: 2rem; }
+        .nav-section-title {
+            font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 0 1.5rem; margin-bottom: 1rem;
+        }
+        .nav-item { margin-bottom: 0.5rem; }
+        .nav-link {
+            display: flex; align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .nav-link:hover {
+            background: var(--bg-secondary);
+            border-left-color: var(--accent-primary);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .nav-link.active {
+            background: var(--bg-secondary);
+            border-left-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        .nav-link i { width: 20px; margin-right: 1rem; font-size: 1.1rem; }
+        .sidebar.collapsed .nav-link i { margin-right: 0; }
+        .nav-link .badge {
+            margin-left: auto;
+            background: var(--accent-primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+        .sidebar-overlay {
+            position: fixed; top: 70px; left: 0;
+            width: 100%; height: calc(100vh - 70px);
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .sidebar-overlay.show { opacity: 1; visibility: visible; }
+        .main-content {
+            min-height: calc(100vh - 70px);
+            padding: 1rem;
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.shifted { margin-left: var(--sidebar-width); }
+        .main-content.shifted-collapsed { margin-left: var(--sidebar-collapsed-width) !important; }
+        .flash-messages {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            width: 90%; max-width: 600px;
+        }
+        .alert {
+            border-radius: 12px; border: none;
+            padding: 1rem 1.5rem; margin-bottom: 1rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .alert-success { background-color: rgba(25,135,84,0.9); color: white; border-left: 4px solid var(--success);}
+        .alert-danger { background-color: rgba(220,53,69,0.9); color: white; border-left: 4px solid var(--danger);}
+        .alert-warning { background-color: rgba(253,126,20,0.9); color: white; border-left: 4px solid var(--warning);}
+        .alert-info { background-color: rgba(13,202,240,0.9); color: white; border-left: 4px solid var(--info);}
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary);}
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted);}
+        @media (max-width: 768px) {
+            .main-content.shifted { margin-left: 0; }
+            .main-content.shifted-collapsed { margin-left: 0 !important; }
+            .header-logo h1 { display: none; }
+            .flash-messages { width: 95%; }
+        }
+        @media (min-width: 1200px) {
+            .sidebar { left: 0; }
+            .main-content { margin-left: var(--sidebar-width);}
+            .sidebar-overlay { display: none; }
+            .menu-toggle { display: none; }
+        }
+        * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;}
     </style>
-  </head>
-  <body>
-  <nav class="navbar navbar-expand-lg navbar-light">
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbar"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbar">
-        <div class="navbar-nav">
-          {% if user.is_authenticated %}
-
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-
-          <a class="nav-item nav-link" id="home" href="/">
-
-            <i class="fa fa-home"></i>Home
-          </a>
-          </div>
-                  <div class="navbar-nav ml-auto">
-
-          <a class="nav-item nav-link" id="logout" href="/logout">
-            <i class="fa fa-sign-out"></i>Logout
-          </a>
-          {% else %}
-          <a class="nav-item nav-link" id="login" href="/login">
-            <i class="fa fa-sign-in"></i>Login
-          </a>
-          <a class="nav-item nav-link" id="signUp" href="/sign-up">
-            <i class="fa fa-user-plus"></i>Sign Up
-          </a>
-          {% endif %}
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="top-header">
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Nadiya Logo">
+            
         </div>
-      </div>
+        <div class="header-actions">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+            {% if current_user.is_authenticated %}
+            <div class="user-profile" onclick="window.location.href='/profile/{{ current_user.id }}'">
+                {% if current_user.photo %}
+                    <img src="{{ url_for('views.uploaded_file', setname='photos', filename=current_user.photo) }}" alt="Profile">
+                {% else %}
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Profile">
+                {% endif %}
+                <span>{{ current_user.first_name }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
+    <span style="font-size: 1rem;">☰</span> <!-- Unicode hamburger icon -->
+    
+</button>
+    <br>
+        <div class="sidebar-content">
+            {% if current_user.is_authenticated %}
+            <!-- Main Navigation -->
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <div class="nav-item">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </div>
+            <!-- Attendance Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Attendance</div>
+                <div class="nav-item">
+                    <a href="/attendance" class="nav-link">
+                        <i class="fas fa-clock"></i>
+                        <span>Mark Attendance</span>
+                    </a>
+                </div>
+                {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
+                <div class="nav-item">
+                    <a href="/attendance-category" class="nav-link">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance Center</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/attendance_table" class="nav-link">
+                        <i class="fas fa-table"></i>
+                        <span>Attendance Records</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/who" class="nav-link">
+                        <i class="fas fa-user-clock"></i>
+                        <span>Employee Reports</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <!-- Leave Management -->
+            <div class="nav-section">
+                <div class="nav-section-title">Leave Management</div>
+                <div class="nav-item">
+                    <a href="/apply_leave" class="nav-link">
+                        <i class="fas fa-file-plus"></i>
+                        <span>Apply Leave</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/approved_leaves" class="nav-link">
+                        <i class="fas fa-list-check"></i>
+                        <span>My Leaves</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/leave_requests" class="nav-link">
+                        <i class="fas fa-inbox"></i>
+                        <span>Leave Requests</span>
+                        {% if current_user.role in ['director', 'accounts_manager', 'business_manager', 'service_manager', 'service_support_manager', 'sales_manager'] %}
+                        <span class="badge">!</span>
+                        {% endif %}
+                    </a>
+                </div>
+                {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
+                <div class="nav-item">
+                    <a href="/leaves-category" class="nav-link">
+                        <i class="fas fa-calendar-times"></i>
+                        <span>Leave Center</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/display_compoff" class="nav-link">
+                        <i class="fas fa-clock"></i>
+                        <span>Comp-off Balance</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/who1" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Leave Reports</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <!-- Holidays & Announcements -->
+            <div class="nav-section">
+                <div class="nav-section-title">Information</div>
+                <div class="nav-item">
+                    <a href="/display_holidays" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Holiday Calendar</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/announcements" class="nav-link">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Announcements</span>
+                    </a>
+                </div>
+                {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
+                <div class="nav-item">
+                    <a href="/holidays-category" class="nav-link">
+                        <i class="fas fa-gift"></i>
+                        <span>Holiday Management</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/announcements-category" class="nav-link">
+                        <i class="fas fa-megaphone"></i>
+                        <span>Communication Center</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <!-- HR Management (Admin Only) -->
+            {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
+            <div class="nav-section">
+                <div class="nav-section-title">HR Management</div>
+                <div class="nav-item">
+                    <a href="/create_user" class="nav-link">
+                        <i class="fas fa-folder-open"></i>
+                        <span>File Cabinet</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/assign_roles" class="nav-link">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Role Management</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/all" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Employee Directory</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/export" class="nav-link">
+                        <i class="fas fa-download"></i>
+                        <span>Data Export</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/misc-category" class="nav-link">
+                        <i class="fas fa-cogs"></i>
+                        <span>HR Operations</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            <!-- Account -->
+            <div class="nav-section">
+                <div class="nav-section-title">Account</div>
+                <div class="nav-item">
+                    <a href="/profile/{{ current_user.id }}" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/logout" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </nav>
-
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %} {% for category, message in messages %} {% if category ==
-    'error' %}
-    <div class="alert alert-danger alter-dismissable fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-dismiss="alert">
-        <span aria-hidden="true">&times;</span>
-      </button>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
-    {% else %}
-    <div class="alert alert-success alter-dismissable fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-dismiss="alert">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    {% endif %} {% endfor %} {% endif %} {% endwith %}
-
-    <div class="container">{% block content %} {% endblock %}</div>
-    <script
-      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-      crossorigin="anonymous"
-    ></script>
-
-
-  </body>
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </main>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Navigation Scripts -->
+    <script>
+        let sidebarOpen = window.innerWidth >= 1200;
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.getElementById('mainContent');
+            if (window.innerWidth >= 1200) {
+                sidebarOpen = !sidebarOpen;
+                if (sidebarOpen) {
+                    sidebar.classList.add('open');
+                    mainContent.classList.add('shifted');
+                } else {
+                    sidebar.classList.remove('open');
+                    mainContent.classList.remove('shifted');
+                }
+            } else {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+            }
+        }
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (window.innerWidth < 1200) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+        }
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const currentTheme = html.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        // Collapsible sidebar logic
+        function toggleSidebarCollapse() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('shifted-collapsed');
+            // Toggle chevron direction
+            const icon = document.querySelector('#sidebarCollapseBtn i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-right';
+                localStorage.setItem('sidebarCollapsed', 'true');
+            } else {
+                icon.className = 'fas fa-chevron-left';
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+        }
+        // Set active nav link
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            html.setAttribute('data-theme', savedTheme);
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            setActiveNavLink();
+            // Auto-dismiss alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+            // Initialize sidebar state for desktop
+            if (window.innerWidth >= 1200) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                sidebar.classList.add('open');
+                mainContent.classList.add('shifted');
+                // Restore collapsed state
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('shifted-collapsed');
+                    const icon = document.querySelector('#sidebarCollapseBtn i');
+                    if (icon) icon.className = 'fas fa-chevron-right';
+                }
+            }
+        });
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.getElementById('mainContent');
+            if (window.innerWidth >= 1200) {
+                sidebar.classList.add('open');
+                mainContent.classList.add('shifted');
+                overlay.classList.remove('show');
+                sidebarOpen = true;
+                // Restore collapsed state
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('shifted-collapsed');
+                    const icon = document.querySelector('#sidebarCollapseBtn i');
+                    if (icon) icon.className = 'fas fa-chevron-right';
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('shifted-collapsed');
+                    const icon = document.querySelector('#sidebarCollapseBtn i');
+                    if (icon) icon.className = 'fas fa-chevron-left';
+                }
+            } else {
+                if (!sidebar.classList.contains('open')) {
+                    mainContent.classList.remove('shifted');
+                    mainContent.classList.remove('shifted-collapsed');
+                }
+            }
+        });
+        // Close sidebar when clicking nav links on mobile
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 1200) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
 </html>

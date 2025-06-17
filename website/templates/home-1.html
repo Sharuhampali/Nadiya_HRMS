@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nadiya</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+  <link rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    crossorigin="anonymous"
+  />
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    crossorigin="anonymous"
+  />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    :root {
+      --nadiya-red: #e74c3c;
+      --nadiya-blue: #3498db;
+      --nadiya-yellow: #f1c40f;
+      --nadiya-green: #2ecc71;
+      --nadiya-light: #f8f9fa;
+      --nadiya-dark: #2c3e50;
+      --nadiya-gray: #95a5a6;
+      --nadiya-border: #dfe6e9;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      overflow-x: hidden !important;
+    }
+    body {
+      min-height: 100vh;
+      width: 100vw;
+      background-color: var(--nadiya-light);
+      font-family: 'Roboto', sans-serif;
+      color: var(--nadiya-dark);
+    }
+    .navbar {
+      background-color: #E2E2E2 !important;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 0.5rem 1rem;
+    }
+    .navbar-nav .nav-link {
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+      color: #000 !important;
+    }
+    #logout {
+      color: #000;
+      text-align: center;
+    }
+    .profile-photo img {
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin-left: 10px;
+      margin-right: 10px;
+      border: 2px solid #6c757d;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .navbar-nav.ml-auto {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header {
+      background-color: #ffffff;
+      color: #333333;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #dee2e6;
+    }
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #343a40;
+    }
+    .header h2 {
+      font-size: 20px;
+      color: #6c757d;
+    }
+    .right {
+      text-align: right !important;
+      color: #6c757d;
+      margin-right: 10px;
+    }
+    table {
+      margin: 20px 0;
+      width: 100%;
+      max-width: 600px;
+      text-align: left;
+      border-collapse: collapse;
+    }
+    table th,
+    table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      width: 25%;
+    }
+    .container {
+      padding: 20px;
+    }
+    .category-container {
+      margin-bottom: 2rem;
+    }
+    .category-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--nadiya-border);
+      color: var(--nadiya-dark);
+      display: flex;
+      align-items: center;
+    }
+    .category-title i { margin-right: 0.5rem; }
+    .category-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border: 1px solid var(--nadiya-border);
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: stretch;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.10);
+    }
+    .card a {
+      display: flex;
+      align-items: center;
+      padding: 1.25rem 1rem;
+      text-decoration: none;
+      color: var(--nadiya-dark);
+      font-weight: 500;
+      width: 100%;
+      height: 100%;
+      transition: background-color 0.2s;
+    }
+    .card a:hover {
+      background-color: rgba(52, 152, 219, 0.05);
+    }
+    .card i {
+      margin-right: 0.75rem;
+      width: 22px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+    .attendance i { color: var(--nadiya-blue); }
+    .leaves i { color: var(--nadiya-green); }
+    .holidays i { color: var(--nadiya-yellow); }
+    .announcements i { color: var(--nadiya-red); }
+    @media (max-width: 768px) {
+      .category-cards {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      .navbar-brand img { height: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+      <div class="navbar-nav">
+        <a class="navbar-brand" href="/"><img src="static/logo.png" alt="Logo" style="height: 80px;"></a>
+        <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
+        <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
+        <a class="nav-item nav-link" href="/announcements"><i class="fa fa-bullhorn"></i> Announcements</a>
+      </div>
+      <div class="navbar-nav ml-auto">
+        <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
+        <div class="profile-photo">
+          <a href="/profile/{{ user.id }}">
+            {% if user.photo %}
+              <img src="{{ url_for('static', filename='uploads/photos/' + user.photo) }}" alt="Profile Photo" class="img-thumbnail">
+            {% else %}
+              <img src="static/logo.png" alt="Profile Photo">
+            {% endif %}
+          </a>
+          
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="header">
+    <div class="right">
+      Date: {{current_date}}
+    </div>
+
+    <table>
+      <tr>
+        <th>Employee Name</th>
+        <td>{{ current_user.first_name }}</td>
+      </tr>
+      <tr>
+        <th>Designation</th>
+        <td style="text-transform: capitalize;">{{ user.role }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="container">
+    <!-- Attendance Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i> Attendance
+      </h2>
+      <div class="category-cards">
+        <div class="card attendance">
+          <a href="/attendance">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+            <span>Attendance</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaves Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Leaves
+      </h2>
+      <div class="category-cards">
+        <div class="card leaves">
+          <a href="/apply_leave">
+            <i class="fa fa-pencil" aria-hidden="true"></i>
+            <span>Leave Application</span>
+          </a>
+        </div>
+        <div class="card leaves">
+          <a href="/approved_leaves">
+            <i class="fa fa-list" aria-hidden="true"></i>
+            <span>My Leaves</span>
+          </a>
+        </div>
+        <div class="card leaves">
+          <a href="/leave_requests">
+            <i class="fa fa-envelope" aria-hidden="true"></i>
+            <span>Leave Requests</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Holidays Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-gift" aria-hidden="true"></i> Holidays
+      </h2>
+      <div class="category-cards">
+        <div class="card holidays">
+          <a href="/display_holidays">
+            <i class="fa fa-gift" aria-hidden="true"></i>
+            <span>Holiday List</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Announcements Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-bullhorn" aria-hidden="true"></i> Announcements
+      </h2>
+      <div class="category-cards">
+        <div class="card announcements">
+          <a href="/announcements">
+            <i class="fa fa-bullhorn" aria-hidden="true"></i>
+            <span>Announcements</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

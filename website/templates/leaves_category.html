@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+        transform: translateY(-2px);
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .option-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .option-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #059669, #10b981);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .option-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .option-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 40px var(--shadow);
+        border-color: var(--success);
+    }
+
+    .option-card a {
+        text-decoration: none;
+        color: var(--text-primary);
+        display: block;
+        height: 100%;
+    }
+
+    .option-card i {
+        font-size: 3rem;
+        color: var(--success);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .option-card:hover i {
+        transform: scale(1.2);
+        color: #059669;
+    }
+
+    .option-card h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .option-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .options-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .option-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-calendar-times"></i> Leave Management</h1>
+        <p>Comprehensive leave application and tracking system</p>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="options-grid">
+        <div class="option-card">
+            <a href="/apply_leave">
+                <i class="fas fa-check"></i>
+                <h3>Apply for Leave</h3>
+                <p>Submit new leave applications with automatic approval workflow and email notifications.</p>
+            </a>
+        </div>
+
+        <div class="option-card">
+            <a href="/approved_leaves">
+                <i class="fas fa-list-check"></i>
+                <h3>My Leave History</h3>
+                <p>View your personal leave history, approved requests, and remaining leave balance.</p>
+            </a>
+        </div>
+
+        <div class="option-card">
+            <a href="/who1">
+                <i class="fas fa-chart-line"></i>
+                <h3>Leave Summary</h3>
+                <p>Generate detailed leave reports and analytics for individual employees by financial year.</p>
+            </a>
+        </div>
+
+        <div class="option-card">
+            <a href="/leave_requests">
+                <i class="fas fa-inbox"></i>
+                <h3>Pending Requests</h3>
+                <p>Review and approve leave requests from team members based on your management role.</p>
+            </a>
+        </div>
+
+        <div class="option-card">
+            <a href="/display_compoff">
+                <i class="fas fa-clock"></i>
+                <h3>Comp-off Balance</h3>
+                <p>View compensatory off-day balances for all employees based on overtime work.</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

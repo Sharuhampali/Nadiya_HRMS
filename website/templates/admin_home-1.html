@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nadiya</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          crossorigin="anonymous" />
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+          crossorigin="anonymous" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+      :root {
+        --nadiya-red: #e74c3c;
+        --nadiya-blue: #3498db;
+        --nadiya-yellow: #f1c40f;
+        --nadiya-green: #2ecc71;
+        --nadiya-light: #f8f9fa;
+        --nadiya-dark: #2c3e50;
+        --nadiya-gray: #95a5a6;
+        --nadiya-border: #dfe6e9;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        min-height: 100vh; width: 100%;
+        background-color: var(--nadiya-light);
+        font-family: 'Roboto', sans-serif;
+        color: var(--nadiya-dark);
+        overflow-x: hidden;
+      }
+      .navbar {
+        background-color: #E2E2E2 !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem 1rem;
+      }
+      .navbar-nav .nav-item .nav-link {
+        color: #000 !important;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+      }
+      .navbar-nav .nav-item .nav-link:hover,
+      .navbar-nav .nav-item .nav-link:focus {
+        background-color: rgba(52, 152, 219, 0.1);
+      }
+      .navbar-nav .nav-item .nav-link i { margin-right: 6px; }
+      .profile-photo img {
+        border-radius: 50%;
+        width: 40px; height: 40px;
+        cursor: pointer;
+        border: 2px solid var(--nadiya-border);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+        margin-left: 10px;
+      }
+      .profile-photo img:hover {
+        transform: scale(1.05);
+        border-color: var(--nadiya-blue);
+      }
+      .header {
+        background-color: white;
+        color: var(--nadiya-dark);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--nadiya-border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .right {
+        text-align: right !important;
+        color: var(--nadiya-gray);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+      }
+      table {
+        margin: 1rem 0;
+        width: 100%;
+        max-width: 600px;
+        text-align: left;
+        border-collapse: collapse;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      table th, table td {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--nadiya-border);
+      }
+      table th {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--nadiya-dark);
+        font-weight: 500;
+      }
+      .container { padding: 1.5rem; }
+      .category-container { margin-bottom: 2rem; }
+      .category-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--nadiya-border);
+        color: var(--nadiya-dark);
+        display: flex;
+        align-items: center;
+      }
+      .category-title i { margin-right: 0.5rem; }
+      .category-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .card {
+        border: 1px solid var(--nadiya-border);
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .card a {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        text-decoration: none;
+        color: var(--nadiya-dark);
+        transition: background-color 0.2s ease;
+        height: 100%;
+      }
+      .card a:hover {
+        background-color: rgba(52, 152, 219, 0.05);
+      }
+      .card a:focus {
+        outline: 2px solid var(--nadiya-blue);
+        outline-offset: -2px;
+      }
+      .card i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+      }
+      .attendance i { color: var(--nadiya-blue); }
+      .leaves i { color: var(--nadiya-green); }
+      .holidays i { color: var(--nadiya-yellow); }
+      .announcements i { color: var(--nadiya-red); }
+      .misc i { color: var(--nadiya-gray); }
+      .danger-card {
+        background-color: rgba(231, 76, 60, 0.1);
+      }
+      .danger-card a {
+        color: var(--nadiya-red);
+        font-weight: 500;
+      }
+      .danger-card:hover {
+        background-color: rgba(231, 76, 60, 0.2);
+      }
+      .alert {
+        border-radius: 8px;
+        margin: 1rem 1.5rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+      a:focus, button:focus {
+        outline: 2px solid var(--nadiya-blue);
+        outline-offset: 2px;
+      }
+      @media (max-width: 768px) {
+        .category-cards {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+        .navbar-brand img { height: 60px; }
+      }
+    </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="/">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Nadiya Logo" style="height: 80px;">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" id="home" href="/" aria-current="page">
+            <i class="fa fa-home" aria-hidden="true"></i> Home
+          </a>
+        </li>
+        <!-- Attendance Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="attendanceDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-calendar-check-o"></i> Attendance
+          </a>
+          <div class="dropdown-menu" aria-labelledby="attendanceDropdown">
+            <a class="dropdown-item" href="/attendance"><i class="fa fa-calendar"></i> Attendance</a>
+            <a class="dropdown-item" href="/attendance_table"><i class="fa fa-table"></i> Attendance Table</a>
+            <a class="dropdown-item" href="/who"><i class="fa fa-user"></i> Attendance(Employee)</a>
+          </div>
+        </li>
+        <!-- Leaves Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="leavesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-pencil-square-o"></i> Leaves
+          </a>
+          <div class="dropdown-menu" aria-labelledby="leavesDropdown">
+            <a class="dropdown-item" href="/apply_leave"><i class="fa fa-pencil"></i> Leave Application</a>
+            <a class="dropdown-item" href="/approved_leaves"><i class="fa fa-list"></i> My Leaves</a>
+            <a class="dropdown-item" href="/who1"><i class="fa fa-file-text"></i> Leave Summary</a>
+            <a class="dropdown-item" href="/leave_requests"><i class="fa fa-paper-plane"></i> Leave Requests</a>
+            <a class="dropdown-item" href="/display_compoff"><i class="fa fa-calendar-plus-o"></i> Display Compoff</a>
+           <!-- <a class="dropdown-item" href="/add_compoff"><i class="fa fa-plus"></i> Add Compoff</a>-->
+          </div>
+        </li>
+        <!-- Holidays Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="holidaysDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-gift"></i> Holidays
+          </a>
+          <div class="dropdown-menu" aria-labelledby="holidaysDropdown">
+            <a class="dropdown-item" href="/set_holidays"><i class="fa fa-calendar-plus-o"></i> Set Holidays</a>
+            <a class="dropdown-item" href="/display_holidays"><i class="fa fa-gift"></i> Holiday List</a>
+           <!-- <a class="dropdown-item" href="/subtract-holidays"><i class="fa fa-calendar"></i> Cancelled Holidays</a>-->
+          </div>
+        </li>
+        <!-- Announcements Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="announcementsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-bullhorn"></i> Announcements
+          </a>
+          <div class="dropdown-menu" aria-labelledby="announcementsDropdown">
+            <a class="dropdown-item" href="/post_announcement"><i class="fa fa-bullhorn"></i> Post Announcements</a>
+            <a class="dropdown-item" href="/announcements"><i class="fa fa-bell"></i> View Announcements</a>
+          </div>
+        </li>
+        <!-- Miscellaneous Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="miscDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-cogs"></i> Miscellaneous
+          </a>
+          <div class="dropdown-menu" aria-labelledby="miscDropdown">
+            <a class="dropdown-item" href="/create_user"><i class="fa fa-file"></i> File Cabinet</a>
+            <a class="dropdown-item" href="/assign_roles"><i class="fa fa-users"></i> Assign Roles</a>
+            <a class="dropdown-item" href="/all"><i class="fa fa-list"></i> List</a>
+            <a class="dropdown-item" href="/export"><i class="fa fa-file"></i> Export Files</a>
+            <a class="dropdown-item danger-card" href="#" onclick="confirmReset()"><i class="fa fa-refresh"></i> Reset Leaves/Holidays</a>
+          </div>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" id="logout" href="/logout">
+            <i class="fa fa-sign-out" aria-hidden="true"></i> Logout
+          </a>
+        </li>
+        <li class="nav-item profile-photo">
+          <a href="/profile/{{ user.id }}" aria-label="View Profile">
+            {% if user.photo %}
+              <img src="{{ url_for('views.uploaded_file', setname='photos', filename=user.photo) }}" alt="Profile Photo">
+            {% else %}
+              <img src="{{ url_for('static', filename='logo.png') }}" alt="Profile Photo">
+            {% endif %}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="header">
+    <div class="right">
+      Date: {{current_date}}
+    </div>
+    <table>
+      <tr>
+        <th>Employee Name</th>
+        <td>{{ current_user.first_name }}</td>
+      </tr>
+      <tr>
+        <th>Designation</th>
+        <td style="text-transform: capitalize;">{{ user.role }}</td>
+      </tr>
+    </table>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="container">
+    <!-- Attendance Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i> Attendance
+      </h2>
+      <div class="category-cards">
+        <div class="card attendance">
+          <a href="/attendance">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+            <span>Attendance</span>
+          </a>
+        </div>
+        <div class="card attendance">
+          <a href="/attendance_table">
+            <i class="fa fa-table" aria-hidden="true"></i>
+            <span>Attendance Table</span>
+          </a>
+        </div>
+        <div class="card attendance">
+          <a href="/who">
+            <i class="fa fa-user" aria-hidden="true"></i>
+            <span>Attendance (Employee)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaves Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Leaves
+      </h2>
+      <div class="category-cards">
+        <div class="card leaves">
+          <a href="/apply_leave">
+            <i class="fa fa-pencil" aria-hidden="true"></i>
+            <span>Leave Application</span>
+          </a>
+        </div>
+        <div class="card leaves">
+          <a href="/approved_leaves">
+            <i class="fa fa-list" aria-hidden="true"></i>
+            <span>My Leaves</span>
+          </a>
+        </div>
+        <div class="card leaves">
+          <a href="/who1">
+            <i class="fa fa-file-text" aria-hidden="true"></i>
+            <span>Leave Summary</span>
+          </a>
+        </div>
+        <div class="card leaves">
+          <a href="/leave_requests">
+            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+            <span>Leave Requests</span>
+          </a>
+        </div>
+        <div class="card leaves">
+          <a href="/display_compoff">
+            <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+            <span>Display Compoff</span>
+          </a>
+        </div>
+       <!--  <div class="card leaves">
+          <a href="/add_compoff">
+            <i class="fa fa-plus" aria-hidden="true"></i>
+            <span>Add Compoff</span>
+          </a>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Holidays Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-gift" aria-hidden="true"></i> Holidays
+      </h2>
+      <div class="category-cards">
+        <div class="card holidays">
+          <a href="/set_holidays">
+            <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+            <span>Set Holidays</span>
+          </a>
+        </div>
+        <div class="card holidays">
+          <a href="/display_holidays">
+            <i class="fa fa-gift" aria-hidden="true"></i>
+            <span>Holiday List</span>
+          </a>
+        </div>
+      <!--  <div class="card holidays">
+          <a href="/subtract-holidays">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+            <span>Cancelled Holidays</span>
+          </a>
+        </div>-->
+      </div>
+    </div>
+
+    <!-- Announcements Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-bullhorn" aria-hidden="true"></i> Announcements
+      </h2>
+      <div class="category-cards">
+        <div class="card announcements">
+          <a href="/post_announcement">
+            <i class="fa fa-bullhorn" aria-hidden="true"></i>
+            <span>Post Announcements</span>
+          </a>
+        </div>
+        <div class="card announcements">
+          <a href="/announcements">
+            <i class="fa fa-bell" aria-hidden="true"></i>
+            <span>View Announcements</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Miscellaneous Category -->
+    <div class="category-container">
+      <h2 class="category-title">
+        <i class="fa fa-cogs" aria-hidden="true"></i> HR Permissions
+      </h2>
+      <div class="category-cards">
+        <div class="card misc">
+          <a href="/create_user">
+            <i class="fa fa-file" aria-hidden="true"></i>
+            <span>File Cabinet</span>
+          </a>
+        </div>
+        <div class="card misc">
+          <a href="/assign_roles">
+            <i class="fa fa-users" aria-hidden="true"></i>
+            <span>Assign Roles</span>
+          </a>
+        </div>
+        <div class="card misc">
+          <a href="/all">
+            <i class="fa fa-list" aria-hidden="true"></i>
+            <span>Employee List</span>
+          </a>
+        </div>
+        <div class="card misc">
+          <a href="/export">
+            <i class="fa fa-file" aria-hidden="true"></i>
+            <span>Export Files</span>
+          </a>
+        </div>
+        <div class="card danger-card">
+          <a href="#" onclick="confirmReset()">
+            <i class="fa fa-refresh" aria-hidden="true"></i>
+            <span>Reset Leaves/Holidays</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function confirmReset() {
+      var confirmationId = prompt("Please enter the confirmation ID:");
+      if (confirmationId == '24') {
+        // Redirect to the reset leaves endpoint
+        window.location.href = "{{ url_for('views.reset_leaves') }}";
+      } else {
+        alert("Confirmation ID incorrect. Please try again.");
+      }
+    }
+  </script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

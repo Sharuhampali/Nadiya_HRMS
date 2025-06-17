@@ -1,143 +1,349 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      crossorigin="anonymous"
-    />
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
 
-    <style>
-        body {
-            background-color: #f4f7f9;
-            font-family: 'Arial', sans-serif;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #2596be;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            font-weight: bold;
-            color: #333;
-        }
-        .form-control {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-        .btn-primary {
-            background-color: #2596be;
-            border-color: #007bff;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            border-radius: 4px;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #00408d;
-        }
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
-        }
-        .navbar-toggler-icon {
-            background-image: url('data:image/svg+xml;charset=utf8,<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg"><path stroke="currentColor" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>');
-        }
-         .navbar{
-          background-color: #E2E2E2 !important;
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
 
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
 
-#logout {
-    color: #000;
-    text-align: center;
-}
+    .back-btn:hover {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
 
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
 
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .search-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
 
+    .search-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
 
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-          <div class="navbar-nav">
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
+    .search-box {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
 
-            <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-            <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-          </div>
-          <div class="navbar-nav ml-auto">
-            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-          </div>
-        </div>
-    </nav>
+    .search-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
 
+    .search-input:focus {
+        outline: none;
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .employee-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .employee-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .employee-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px var(--shadow);
+        border-color: var(--success);
+    }
+
+    .employee-card.selected {
+        border-color: var(--success);
+        background: rgba(5, 150, 105, 0.05);
+    }
+
+    .employee-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--success), #10b981);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .employee-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .employee-role {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: capitalize;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #059669, #10b981);
+        border: none;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--success);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .employee-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+        
+        .search-container {
+            padding: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="page-header">
     <div class="container">
-        <h1>Leave Summary</h1>
-        <form id="who" method="post" action="/who1_output">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" id="name" name="name">
-            </div>
+        <h1><i class="fas fa-chart-line"></i> Employee Leave Summary</h1>
+    </div>
+</div>
 
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+<div class="container">
+    <a href="/leaves-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Leave Management
+    </a>
+
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ users|length if users else 0 }}</div>
+            <div class="stat-label">Total Employees</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_leaves if active_leaves else 0 }}</div>
+            <div class="stat-label">Active Leaves</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_requests if pending_requests else 0 }}</div>
+            <div class="stat-label">Pending Requests</div>
+        </div>
     </div>
 
+    <div class="search-container">
+        <h2 class="search-title">Select Employee for Leave Summary</h2>
+        
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="employeeSearch" placeholder="Search employees by name or role...">
+        </div>
 
-<!-- External CSS and JS Links -->
+        <form id="leaveReportForm" method="post" action="/who1_output">
+            <input type="hidden" id="selectedEmployee" name="name" required>
+            
+            <div class="employee-grid" id="employeeGrid">
+                {% if users %}
+                    {% for user in users %}
+                    <div class="employee-card" data-name="{{ user.first_name }}" data-role="{{ user.role }}">
+                        <div class="employee-avatar">
+                            {{ user.first_name[0].upper() }}
+                        </div>
+                        <div class="employee-name">{{ user.first_name }}</div>
+                        <div class="employee-role">{{ user.role.replace('_', ' ') }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No employees found.</p>
+                    </div>
+                {% endif %}
+            </div>
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                <i class="fas fa-chart-bar"></i> Generate Leave Report
+            </button>
+        </form>
+    </div>
+</div>
 
-</body>
-</html>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('employeeSearch');
+    const employeeGrid = document.getElementById('employeeGrid');
+    const employeeCards = document.querySelectorAll('.employee-card');
+    const selectedEmployeeInput = document.getElementById('selectedEmployee');
+    const submitBtn = document.getElementById('submitBtn');
+    let selectedCard = null;
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        employeeCards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const role = card.dataset.role.toLowerCase();
+            
+            if (name.includes(searchTerm) || role.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Employee selection
+    employeeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove previous selection
+            if (selectedCard) {
+                selectedCard.classList.remove('selected');
+            }
+            
+            // Select current card
+            this.classList.add('selected');
+            selectedCard = this;
+            
+            // Update form
+            selectedEmployeeInput.value = this.dataset.name;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Form submission
+    document.getElementById('leaveReportForm').addEventListener('submit', function(e) {
+        if (!selectedEmployeeInput.value) {
+            e.preventDefault();
+            alert('Please select an employee first.');
+        }
+    });
+
+    // Keyboard navigation
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const visibleCards = Array.from(employeeCards).filter(card => 
+                card.style.display !== 'none'
+            );
+            if (visibleCards.length === 1) {
+                visibleCards[0].click();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

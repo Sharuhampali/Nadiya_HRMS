@@ -115,11 +115,11 @@ class Announcement(db.Model):
     content = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-class Upload(db.Model):
-    __tablename__ = 'uploads'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    filename = db.Column(db.String(255), nullable=False)
-    bucket_name = db.Column(db.String(50), nullable=False)  # 'photos' or 'docs'
-    file_path = db.Column(db.String(512), nullable=False)
-    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+# class Upload(db.Model):
+#     __tablename__ = 'uploads'
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     filename = db.Column(db.String(255), nullable=False)
+#     bucket_name = db.Column(db.String(50), nullable=False)  # 'photos' or 'docs'
+#     file_path = db.Column(db.String(512), nullable=False)
+#     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)

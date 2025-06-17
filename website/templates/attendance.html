@@ -1,184 +1,234 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .navbar {
+        background-color: var(--navbar-bg) !important;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 2px 10px var(--shadow);
+        padding: 1rem 0;
+    }
+
+    .attendance-container {
+        margin: 1rem auto;
+        padding: 2rem;
+        background: var(--bg-primary);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        border-radius: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
+
+    .form-control[readonly] {
+        background: var(--bg-tertiary);
+        cursor: not-allowed;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #32BEC4, #2596be);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(50, 190, 196, 0.3);
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .attendance-container {
+            margin: 1rem;
+            padding: 1.5rem;
         }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #32BEC4;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: bold;
-            color: #333;
-        }
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            color: #555;
-        }
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        .btn-primary {
-            background-color: #32BEC4;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            font-size: 16px;
-            border-radius: 4px;
-            width: 100%;
-            transition: background-color 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #357ab8;
-        }
-        .navbar{
-            background-color: #E2E2E2 !important;
-        }
-        .navbar-nav .nav-link {
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            color: #000 !important;
-        }
-        #logout {
-            color: #000;
-            text-align: center;
-        }
-        .profile-photo img {
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            margin-left: 10px;
-        }
-        .navbar-nav.ml-auto {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-            <div class="navbar-nav">
-                <a class="navbar-brand" href="/">
-                    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-                </a>
-                <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-                <a class="nav-item nav-link" href="/attendance"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-            </div>
-            <div class="navbar-nav ml-auto">
-                <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-            </div>
-        </div>
-    </nav>
-    <br><br>
+    }
+     .page-header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
+</style>
+
+<div class="page-header">
     <div class="container">
-        <h1>Attendance</h1>
+        <h1><i class="fas fa-table"></i> Mark Attendance</h1>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/attendance-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Attendance
+    </a>
+
+    <div class="attendance-container">
+   
+        
         <form id="attendanceForm" method="post" action="/submit">
             <div class="form-group">
-                <label for="name">Name:</label>
+                <label for="name">Employee Name</label>
                 <input type="text" class="form-control" id="name" name="name" value="{{ name }}" readonly>
             </div>
+            
             <div class="form-group">
-                <label for="latitude">Latitude:</label>
-                <input type="text" class="form-control" id="latitude" name="latitude" readonly >
+                <label for="latitude">Latitude</label>
+                <input type="text" class="form-control" id="latitude" name="latitude" readonly>
             </div>
+            
             <div class="form-group">
-                <label for="longitude">Longitude:</label>
-                <input type="text" class="form-control" id="longitude" name="longitude" readonly >
+                <label for="longitude">Longitude</label>
+                <input type="text" class="form-control" id="longitude" name="longitude" readonly>
             </div>
+            
             <div class="form-group">
-                <label for="reason">Reason (Optional):</label>
-                <input type="text" id="reason" name="reason" >
+                <label for="reason">Reason (Optional)</label>
+                <input type="text" class="form-control" id="reason" name="reason" placeholder="Enter reason if any">
             </div>
-            <!-- Site Name field, hidden by default -->
+            
             <div class="form-group" id="site_name_group" style="display: none;">
-                <label for="site_name">Place Visited:</label>
-                <input type="text" id="site_name" name="site_name" >
+                <label for="site_name">Place Visited</label>
+                <input type="text" class="form-control" id="site_name" name="site_name" placeholder="Enter place visited">
             </div>
+            
             <div class="form-group">
-                <label for="entry_exit">Entry/Exit:</label>
+                <label for="entry_exit">Entry/Exit</label>
                 <select id="entry_exit" name="entry_exit" required class="form-control">
                     <option value="entry">Entry</option>
                     <option value="exit">Exit</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Submit Attendance</button>
+            
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-check-circle"></i> Submit Attendance
+            </button>
         </form>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Geolocation logic
-            if (navigator.geolocation) {
-                var options = {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                };
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var latitude = position.coords.latitude;
-                    var longitude = position.coords.longitude;
-                    document.getElementById("latitude").value = latitude;
-                    document.getElementById("longitude").value = longitude;
-                }, function(error) {
-                    fetch('https://ipapi.co/json/')
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById("latitude").value = data.latitude;
-                            document.getElementById("longitude").value = data.longitude;
-                        });
-                }, options);
-            }
-            // Show/hide Place Visited field based on Entry/Exit selection
-            function toggleSiteNameField() {
-                var entryExit = document.getElementById('entry_exit').value;
-                var siteNameGroup = document.getElementById('site_name_group');
-                if (entryExit === 'exit') {
-                    siteNameGroup.style.display = 'block';
-                } else {
-                    siteNameGroup.style.display = 'none';
-                    document.getElementById('site_name').value = '';
-                }
-            }
-            document.getElementById('entry_exit').addEventListener('change', toggleSiteNameField);
-            // Initialize on page load
-            toggleSiteNameField();
-        });
-    </script>
-    <!-- External CSS and JS Links -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</body>
-</html>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Geolocation logic
+    if (navigator.geolocation) {
+        var options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        };
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            document.getElementById("latitude").value = latitude;
+            document.getElementById("longitude").value = longitude;
+        }, function(error) {
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("latitude").value = data.latitude;
+                    document.getElementById("longitude").value = data.longitude;
+                });
+        }, options);
+    }
+    
+    // Show/hide Place Visited field based on Entry/Exit selection
+    function toggleSiteNameField() {
+        var entryExit = document.getElementById('entry_exit').value;
+        var siteNameGroup = document.getElementById('site_name_group');
+        if (entryExit === 'exit') {
+            siteNameGroup.style.display = 'block';
+        } else {
+            siteNameGroup.style.display = 'none';
+        }
+    }
+    
+    document.getElementById('entry_exit').addEventListener('change', toggleSiteNameField);
+    toggleSiteNameField();
+});
+</script>
+{% endblock %}
