@@ -23,10 +23,10 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
-    # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        'postgresql://postgres:nadiya1@db.ltvqpcocsivhtnvkaagl.supabase.co:5432/postgres'
-    )
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = (
+    #     'postgresql://postgres:nadiya1@db.ltvqpcocsivhtnvkaagl.supabase.co:5432/postgres'
+    # )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     app.config['UPLOADS_DEFAULT_DEST'] = os.path.join(app.static_folder, 'uploads')
@@ -36,7 +36,7 @@ def create_app():
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USERNAME'] = 'hampalisharu@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'mrkf gdwc dvgt uvtv'
+    app.config['MAIL_PASSWORD'] = 'iblr ljhn vsct brcj'
     app.config['MAIL_DEFAULT_SENDER'] = ('HR', 'sumana@nadiya.in')
     # app.config['SUPABASE_URL'] = 'https://oxugjpnnyuytmjtqrevr.supabase.co'
     # app.config['SUPABASE_KEY'] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94dWdqcG5ueXV5dG1qdHFyZXZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkyNzk2NzUsImV4cCI6MjA2NDg1NTY3NX0.miJKIWsR4YHoDY9cnazA8PfwnHq_e-3ngP36cJbJIlg' 

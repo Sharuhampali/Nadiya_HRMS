@@ -86,7 +86,10 @@
 }
 
 
-
+        .menu-toggle i.fa-bars {
+    font-size: 10rem !important;  /* Adjust to any huge value you want */
+    line-height: 1;
+}
         .menu-toggle {
             background: none;
             border: none;
@@ -132,6 +135,9 @@
             z-index: 999;
             overflow-y: auto;
         }
+        .sidebar.collapsed .sidebar-collapse-btn {
+  justify-content: center !important;/* Center when collapsed */
+}
         .sidebar.open { left: 0; }
         /* Collapsible sidebar styles */
         .sidebar.collapsed {
@@ -280,9 +286,10 @@
     </header>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
-    <span style="font-size: 1rem;">☰</span> <!-- Unicode hamburger icon -->
+  <nav class="sidebar" id="sidebar">
+  <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
+    <span class="hamburger-icon">☰</span>
+
     
 </button>
     <br>

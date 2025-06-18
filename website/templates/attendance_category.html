@@ -162,6 +162,7 @@
             </a>
         </div>
 
+            {% if current_user.email == 'sumana@nadiya.in' %}
         <div class="option-card">
             <a href="/attendance_table">
                 <i class="fas fa-table"></i>
@@ -169,7 +170,8 @@
                 <p>View comprehensive attendance data with detailed reports and analytics for all employees.</p>
             </a>
         </div>
-<!-- 
+            {% endif %}
+<!--    
         <div class="option-card">
             <a href="/who">
                 <i class="fas fa-user-clock"></i>

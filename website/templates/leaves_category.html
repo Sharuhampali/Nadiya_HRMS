@@ -170,6 +170,7 @@
             </a>
         </div>
 
+            {% if current_user.email == 'sumana@nadiya.in' %}
         <div class="option-card">
             <a href="/who1">
                 <i class="fas fa-chart-line"></i>
@@ -177,6 +178,7 @@
                 <p>Generate detailed leave reports and analytics for individual employees by financial year.</p>
             </a>
         </div>
+        {% endif %}
 
         <div class="option-card">
             <a href="/leave_requests">
@@ -186,6 +188,7 @@
             </a>
         </div>
 
+            {% if current_user.email == 'sumana@nadiya.in' %}
         <div class="option-card">
             <a href="/display_compoff">
                 <i class="fas fa-clock"></i>
@@ -193,6 +196,7 @@
                 <p>View compensatory off-day balances for all employees based on overtime work.</p>
             </a>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
