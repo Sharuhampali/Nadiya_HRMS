@@ -84,10 +84,19 @@
     border-bottom: 3px solid var(--header-border);
     transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
+@media (max-width: 768px) {
+    .top-header {
+        height: 60px;
+        padding: 0 0.75rem;
+        font-size: 0.9rem;
+        flex-wrap: wrap; /* If you have more than one child */
+        justify-content: space-between;
+    }
+}
 
 
         .menu-toggle i.fa-bars {
-    font-size: 10rem !important;  /* Adjust to any huge value you want */
+  
     line-height: 1;
 }
         .menu-toggle {
@@ -256,6 +265,19 @@
             .menu-toggle { display: none; }
         }
         * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;}
+
+        @media (max-width: 768px) {
+    .sidebar.collapsed{
+        transform: translateX(-100%); /* Hide sidebar off-screen */
+    }
+
+    .sidebar.open {
+        transform: translateX(0); /* Slide-in sidebar when active */
+    }
+     #sidebarCollapseBtn {
+        display: none !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -279,7 +301,7 @@
                 {% else %}
                     <img src="{{ url_for('static', filename='logo.png') }}" alt="Profile">
                 {% endif %}
-                <span>{{ current_user.first_name }}</span>
+           
             </div>
             {% endif %}
         </div>

@@ -184,7 +184,9 @@ def create_app():
     app.jinja_env.filters['count_late_entries'] = count_late_entries
 
     
-
+    @app.route('/healthz')
+    def health():
+        return "OK", 200
 
 
     return app

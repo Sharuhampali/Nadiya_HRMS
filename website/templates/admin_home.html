@@ -25,6 +25,29 @@
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
+    @media (max-width: 768px) {
+    .user-info-table {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        width: 100%;
+        backdrop-filter: blur(10px);
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal;
+    }
+     .user-info-table th,
+    .user-info-table td {
+        padding: 0.75rem 0rem;
+        border: none;
+        text-align: left;
+         word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal;
+    }
+    
+}
+
 
     .user-info-table table {
         width: 100%;
@@ -166,13 +189,10 @@
     }
 
     @media (max-width: 768px) {
-        .admin-grid {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
         
         .admin-stats {
-            grid-template-columns: repeat(2, 1fr);
+           display: grid;
+    grid-template-columns: repeat(2, 1fr); 
         }
         
         .dashboard-header {
@@ -182,10 +202,11 @@
 </style>
 
 <div class="container-fluid">
-    <div class="welcome-section">
-        <h1 class="welcome-title">Admin Dashboard</h1>
-        <p class="welcome-subtitle">Manage your organization efficiently with comprehensive tools.</p>
+ <div class="welcome-section">
+        <h1 class="welcome-title">Welcome back, {{ current_user.first_name }}!</h1>
+        <p class="welcome-subtitle">Here's what's happening with your work today.</p>
     </div>
+
 
     <div class="dashboard-header">
         <div class="date-info">
@@ -195,11 +216,11 @@
         <div class="user-info-table">
             <table>
                 <tr>
-                    <th><i class="fas fa-user"></i> Administrator</th>
+                    <th><i class="fas fa-user"></i> Name</th>
                     <td>{{ current_user.first_name }}</td>
                 </tr>
                 <tr>
-                    <th><i class="fas fa-briefcase"></i> Role</th>
+                    <th><i class="fas fa-briefcase"></i>Role</th>
                     <td style="text-transform: capitalize;">{{ user.role }}</td>
                 </tr>
             </table>
