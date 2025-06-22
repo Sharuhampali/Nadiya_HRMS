@@ -1,17 +1,30 @@
+# Bytecode and caches
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.log
+
+# Virtual environments
 venv/
-.env
-.git/
-.dockerignore
-Dockerfile
+env/
+.venv/
+
+# Node/npm
 node_modules/
+*.log
+
+# Git + OS clutter
+.git/
+.DS_Store
+
+# DBs or dumps
 *.sqlite3
 *.db
-*.mp4
-*.mov
+*.bak
+*.sql
 *.zip
-*.tar
+
+# Flask cache or uploads
+instance/
+uploads/
+media/
