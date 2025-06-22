@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+venv/
+.env
+.git/
+.dockerignore
+Dockerfile
+node_modules/
+*.sqlite3
+*.db
+*.mp4
+*.mov
+*.zip
+*.tar

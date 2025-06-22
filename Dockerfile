@@ -32,5 +32,7 @@ COPY . .
 EXPOSE 5001
 
 # Start using Gunicorn with 4 workers (tweak based on instance size)
-CMD ["gunicorn", "--workers=2", "--bind=0.0.0.0:5001", "main:app"]
+# CMD ["gunicorn", "--workers=2", "--bind=0.0.0.0:5001", "main:app"]
+CMD ["python", "main.py"]
+
 
