@@ -21,7 +21,7 @@ india_tz = pytz.timezone('Asia/Kolkata')
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    current_date = datetime.now(india_tz).date()
+    current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in' :
     
         return render_template(
@@ -134,7 +134,7 @@ def submit_attendance():
                 entry_location=entry_address,
                 user_id=user_id,
                 entry_time=now.replace(microsecond=0),  # Store only time
-                date=datetime.now(india_tz).date(),
+                date=datetime.now(india_tz).date().strftime("%d-%m-%y"),
                 day=datetime.now(india_tz).strftime('%A'),
                 reason=reason,
                 site_name=site_name
@@ -168,7 +168,7 @@ def submit_attendance():
 
             if request.form.get('holiday') and user_attendance.exit_location != user_attendance.entry_location:
                 user_attendance.hol = 10000
-            current_date = datetime.now(india_tz).date()
+            current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
             holiday = Holiday.query.filter_by(date=current_date).first()
             if holiday:
                 user_attendance.hol = 10000
@@ -953,7 +953,7 @@ def apply_leave():
 
         return redirect(url_for('views.apply_leave'))
 
-    return render_template('apply_leave.html', user=current_user, today=datetime.today().date())
+    return render_template('apply_leave.html', user=current_user, today=datetime.today().date().strftime("%d-%m-%y"))
 
 
 @views.route('/set_holidays', methods=['GET', 'POST'])
