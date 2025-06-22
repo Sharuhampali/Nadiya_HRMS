@@ -101,6 +101,7 @@ class Leave(db.Model):
     approved_by = db.Column(db.String(150))
     reason = db.Column(db.Text)
     ltype = db.Column(db.String(150))
+    leaves_data = db.Column(db.String(150))  # JSON string to store leave data
     
     user = db.relationship('User', backref='leaves', lazy=True)
 

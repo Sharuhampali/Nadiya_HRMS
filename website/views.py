@@ -270,6 +270,35 @@ def approve_leave(leave_id):
 
     return redirect(url_for('views.leave_requests'))
 
+# @views.route('/reject/<int:leave_id>', methods=['POST'])
+# @login_required
+# def reject(leave_id):
+#     leave = Leave.query.get(leave_id)
+#     if not leave:
+#         flash("Leave request not found.", category='error')
+#         return redirect(url_for('views.leave_requests'))
+
+#     leave.approved_by = current_user.email
+#     leave.rejected = True
+#     user = User.query.get(leave.user_id)
+#     days = float(leave.days)
+
+#     # Adjust counters based on leave type
+#     if leave.ltype == 'Compoff':
+#         user_attendances = Attendance.query.filter_by(user_id=leave.user_id).all()
+#         for attendance in user_attendances:
+#             attendance.compoff += days  # Example adjustment
+
+#     elif leave.ltype == 'Earned':
+#         user.earned -= days
+
+#     elif leave.ltype == 'Leave w/o Pay':
+#         user.pay -= days
+
+#     elif leave.ltype == 'Medical/Sick':
+#         user.medic -= days
+
+#     db.session.commit()
 @views.route('/reject/<int:leave_id>', methods=['POST'])
 @login_required
 def reject(leave_id):
@@ -280,25 +309,40 @@ def reject(leave_id):
 
     leave.approved_by = current_user.email
     leave.rejected = True
+
     user = User.query.get(leave.user_id)
-    days = float(leave.days)
 
-    # Adjust counters based on leave type
-    if leave.ltype == 'Compoff':
-        user_attendances = Attendance.query.filter_by(user_id=leave.user_id).all()
-        for attendance in user_attendances:
-            attendance.compoff += days  # Example adjustment
+    # Reverse leave balances using leaves_data breakdown
+    import json
+    entries = json.loads(leave.leaves_data)
 
-    elif leave.ltype == 'Earned':
-        user.earned -= days
+    for entry in entries:
+        date = entry['date']
+        duration = float(entry['duration'])
+        ltype = entry['type']
 
-    elif leave.ltype == 'Leave w/o Pay':
-        user.pay -= days
+        if ltype == 'Compoff':
+            # Restore to attendance record
+            for att in user.attendances:
+                if att.date.strftime('%Y-%m-%d') == date:  # Optional match
+                    att.compoff += duration
+                    break
+            else:
+                # Fallback: add to any attendance record if match not found
+                if user.attendances:
+                    user.attendances[0].compoff += duration
 
-    elif leave.ltype == 'Medical/Sick':
-        user.medic -= days
+        elif ltype == 'Earned':
+            user.earned -= duration
+
+        elif ltype == 'Leave w/o Pay':
+            user.pay -= duration
+
+        elif ltype == 'Medical/Sick':
+            user.medic -= duration
 
     db.session.commit()
+    flash("Leave request rejected and leave balances restored.", "info")
 
     # Send email
     send_email(
@@ -306,9 +350,8 @@ def reject(leave_id):
         user.email,
         'Your leave request has been rejected.'
     )
-
-    flash("Leave request rejected successfully.", category='success')
     return redirect(url_for('views.leave_requests'))
+
 
 @views.route('/approved_leaves')
 @login_required
@@ -659,112 +702,229 @@ ROLES_HIERARCHY = {
     'sales_manager': ['director', 'accounts_manager'],
 }
 
+# @views.route('/apply_leave', methods=['GET', 'POST'])
+# @login_required
+# def apply_leave():
+#     if request.method == 'POST':
+#         start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+#         end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
+#         ltype = request.form['ltype']
+#         reason = request.form.get('reason', None)
+#         days = float(request.form['days'])
+
+#         if ltype == 'Medical/Sick':
+#             if current_user.medic < 6:
+#                 current_user.medic += days
+#             else:
+#                 flash("Not enough Medical/Sick leaves left to apply", 'error')
+#                 return redirect(url_for('views.apply_leave'))
+
+#         elif ltype == 'Leave w/o Pay':
+#             if current_user.pay < 10:
+#                 current_user.pay += days
+#             else:
+#                 flash("Not enough Leave w/o Pay leaves left to apply", 'error')
+#                 return redirect(url_for('views.apply_leave'))
+
+#         elif ltype == 'Earned':
+#             if current_user.earned < 15:
+#                 current_user.earned += days
+#             else:
+#                 flash("Not enough Earned leaves left to apply", 'error')
+#                 return redirect(url_for('views.apply_leave'))
+
+#         elif ltype == 'Compoff':
+#             if current_user.total_compoff < days:
+#                 flash("Not enough compoff leaves left to apply", 'error')
+#                 return redirect(url_for('views.apply_leave'))
+
+#             # Deduct compoff from the first attendance record with compoff > 0
+#             for attendance in current_user.attendances:
+#                 if attendance.compoff >= days:
+#                     attendance.compoff -= days
+#                     db.session.commit()
+#                     break
+
+#         # Create a new leave instance and save it to the database
+#         new_leave = Leave(
+#             user_id=current_user.id,
+#             start_date=start_date,
+#             end_date=end_date,
+#             reason=reason,
+#             days=days,
+#             ltype=ltype
+#         )
+#         db.session.add(new_leave)
+#         db.session.commit()
+
+#         # Get manager roles based on user's role
+#         manager_roles = ROLES_HIERARCHY.get(current_user.role)
+
+#         if not manager_roles:
+#             flash("Your role does not have an assigned manager.", 'error')
+#             return redirect(url_for('views.apply_leave'))
+        
+#         if isinstance(manager_roles, str):
+#             manager_roles = [manager_roles]
+
+#         # Get users matching any of the manager roles
+#         managers = User.query.filter(User.role.in_(manager_roles)).all()
+
+#         if not managers:
+#             flash("No manager found for your role.", 'error')
+#             return redirect(url_for('views.apply_leave'))
+
+#         # Collect their email addresses
+#         recipient_emails = [manager.email for manager in managers if manager.email]
+
+#         # Always include this fixed oversight email
+#         STATIC_MANAGER_EMAIL = "sumana@nadiya.in"
+#         if STATIC_MANAGER_EMAIL not in recipient_emails:
+#             recipient_emails.append(STATIC_MANAGER_EMAIL)
+
+#         approval_url = url_for('views.approve_leave', leave_id=new_leave.id, _external=True)
+
+#         msg = Message(
+#             'New Leave Application',
+#             recipients=recipient_emails
+#         )
+#         msg.body = (
+#             f'{current_user.first_name} has applied for leave.\n\n'
+#             f'Type: {ltype}\n'
+#             f'Start Date: {start_date}\n'
+#             f'End Date: {end_date}\n'
+#             f'Days: {days}\n'
+#             f'Reason: {reason}\n\n'
+#             f'Click here to review/approve: {approval_url}'
+#         )
+
+#         try:
+#             mail.send(msg)
+#             flash('Leave application submitted successfully.', 'success')
+#         except Exception as e:
+#             print(f"Failed to send mail: {e}")
+#             flash('Failed to send leave application.', 'error')
+
+#         return redirect(url_for('views.apply_leave'))
+
+#     return render_template('apply_leave.html', user=current_user, today=datetime.today().date())
+
+import json
 @views.route('/apply_leave', methods=['GET', 'POST'])
 @login_required
 def apply_leave():
     if request.method == 'POST':
-        start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
-        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
-        ltype = request.form['ltype']
+        dates = request.form.getlist('leave_dates')
+        durations = request.form.getlist('leave_durations')
+        types = request.form.getlist('leave_types')
         reason = request.form.get('reason', None)
-        days = float(request.form['days'])
 
-        if ltype == 'Medical/Sick':
-            if current_user.medic < 6:
-                current_user.medic += days
-            else:
-                flash("Not enough Medical/Sick leaves left to apply", 'error')
-                return redirect(url_for('views.apply_leave'))
+        leave_entries = []
+        total_days = 0.0
+        summary = {'Earned': 0.0, 'Medical/Sick': 0.0, 'Compoff': 0.0, 'Leave w/o Pay': 0.0}
 
-        elif ltype == 'Leave w/o Pay':
-            if current_user.pay < 10:
-                current_user.pay += days
-            else:
-                flash("Not enough Leave w/o Pay leaves left to apply", 'error')
-                return redirect(url_for('views.apply_leave'))
+        # Build leave entry list
+        for date_str, dur_str, ltype in zip(dates, durations, types):
+            if not date_str or not ltype:
+                continue  # Skip incomplete rows
 
-        elif ltype == 'Earned':
-            if current_user.earned < 15:
-                current_user.earned += days
-            else:
-                flash("Not enough Earned leaves left to apply", 'error')
-                return redirect(url_for('views.apply_leave'))
+            duration = float(dur_str)
+            total_days += duration
+            summary[ltype] += duration
 
-        elif ltype == 'Compoff':
-            if current_user.total_compoff < days:
-                flash("Not enough compoff leaves left to apply", 'error')
-                return redirect(url_for('views.apply_leave'))
+            leave_entries.append({
+                'date': date_str,
+                'duration': duration,
+                'type': ltype
+            })
+        
 
-            # Deduct compoff from the first attendance record with compoff > 0
-            for attendance in current_user.attendances:
-                if attendance.compoff >= days:
-                    attendance.compoff -= days
+        # Validate leave quotas
+        if summary['Medical/Sick'] > (6 - current_user.medic):
+            flash("Not enough Medical/Sick leaves left.", 'error')
+            return redirect(url_for('views.apply_leave'))
+
+        if summary['Earned'] > (15 - current_user.earned):
+            flash("Not enough Earned leaves left.", 'error')
+            return redirect(url_for('views.apply_leave'))
+
+        if summary['Leave w/o Pay'] > (10 - current_user.pay):
+            flash("Leave w/o Pay quota exceeded.", 'error')
+            return redirect(url_for('views.apply_leave'))
+
+        if summary['Compoff'] > current_user.total_compoff:
+            flash("Not enough Compoff leaves left.", 'error')
+            return redirect(url_for('views.apply_leave'))
+
+        # Deduct compoff from attendance record
+        if summary['Compoff'] > 0:
+            remaining = summary['Compoff']
+            for att in current_user.attendances:
+                if att.compoff >= remaining:
+                    att.compoff -= remaining
                     db.session.commit()
                     break
 
-        # Create a new leave instance and save it to the database
+        # Apply leave balances
+        current_user.medic += summary['Medical/Sick']
+        current_user.earned += summary['Earned']
+        current_user.pay += summary['Leave w/o Pay']
+
+        start_date = min(datetime.strptime(entry['date'], '%Y-%m-%d').date() for entry in leave_entries)
+        end_date = max(datetime.strptime(entry['date'], '%Y-%m-%d').date() for entry in leave_entries)
+
         new_leave = Leave(
             user_id=current_user.id,
             start_date=start_date,
             end_date=end_date,
             reason=reason,
-            days=days,
-            ltype=ltype
+            days=total_days,
+            ltype="Mixed",
+            leaves_data=json.dumps(leave_entries)
         )
+
+
         db.session.add(new_leave)
         db.session.commit()
 
-        # Get manager roles based on user's role
+        # Manager logic unchanged
         manager_roles = ROLES_HIERARCHY.get(current_user.role)
-
         if not manager_roles:
-            flash("Your role does not have an assigned manager.", 'error')
+            flash("No manager assigned for your role.", 'error')
             return redirect(url_for('views.apply_leave'))
-        
         if isinstance(manager_roles, str):
             manager_roles = [manager_roles]
 
-        # Get users matching any of the manager roles
         managers = User.query.filter(User.role.in_(manager_roles)).all()
+        recipient_emails = [m.email for m in managers if m.email]
 
-        if not managers:
-            flash("No manager found for your role.", 'error')
-            return redirect(url_for('views.apply_leave'))
-
-        # Collect their email addresses
-        recipient_emails = [manager.email for manager in managers if manager.email]
-
-        # Always include this fixed oversight email
         STATIC_MANAGER_EMAIL = "sumana@nadiya.in"
         if STATIC_MANAGER_EMAIL not in recipient_emails:
             recipient_emails.append(STATIC_MANAGER_EMAIL)
 
         approval_url = url_for('views.approve_leave', leave_id=new_leave.id, _external=True)
 
-        msg = Message(
-            'New Leave Application',
-            recipients=recipient_emails
-        )
+        msg = Message('New Leave Application', recipients=recipient_emails)
         msg.body = (
             f'{current_user.first_name} has applied for leave.\n\n'
-            f'Type: {ltype}\n'
-            f'Start Date: {start_date}\n'
-            f'End Date: {end_date}\n'
-            f'Days: {days}\n'
-            f'Reason: {reason}\n\n'
-            f'Click here to review/approve: {approval_url}'
+            f'Total Days: {total_days}\n'
+            f'Breakdown:\n' +
+            '\n'.join([f"{k}: {v}" for k, v in summary.items() if v > 0]) +
+            f'\nReason: {reason}\n\n'
+            f'Approve here: {approval_url}'
         )
 
         try:
             mail.send(msg)
             flash('Leave application submitted successfully.', 'success')
         except Exception as e:
-            print(f"Failed to send mail: {e}")
-            flash('Failed to send leave application.', 'error')
+            print(f"Email error: {e}")
+            flash('Leave application sent, but failed to notify manager.', 'warning')
 
         return redirect(url_for('views.apply_leave'))
 
     return render_template('apply_leave.html', user=current_user, today=datetime.today().date())
+
 
 @views.route('/set_holidays', methods=['GET', 'POST'])
 @login_required

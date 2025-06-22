@@ -191,57 +191,45 @@
         <i class="fas fa-arrow-left"></i> Back to Leave Management
     </a>
 
-    <div class="form-container">
-        <h2 class="form-title">Leave Application Form</h2>
-        <form id="leaveForm" method="POST">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="start_date">Start Date:</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ today }}" min="{{ today }}" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="end_date">End Date:</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ today }}" min="{{ today }}" required>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="days">Number of Days:</label>
-                        <input type="number" class="form-control" id="days" name="days" step="0.5" value="0" readonly>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="ltype">Leave Type:</label>
-                        <select class="form-control" id="ltype" name="ltype" required>
-                            <option value="">Select Leave Type</option>
-                            <option value="Compoff">Compoff Leave</option>
-                            <option value="Earned">Earned Leave</option>
-                            <option value="Medical/Sick">Medical/Sick Leave</option>
-                            {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
-                                <option value="Leave w/o Pay">Leave w/o Pay</option>
-                            {% endif %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="reason">Reason (Optional):</label>
-                <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason for leave..."></textarea>
-            </div>
-            
-            <button type="submit" class="btn-submit">
-                <i class="fas fa-paper-plane"></i> Submit Leave Application
-            </button>
-        </form>
+   <form id="leaveForm" method="POST">
+    <h2 class="form-title">Leave Application Form</h2>
+
+    {% for i in range(7) %}
+    <div class="row mb-2">
+        <div class="col-md-4">
+            <input type="date" class="form-control" name="leave_dates" min="{{ today }}">
+        </div>
+        <div class="col-md-3">
+            <select class="form-control" name="leave_durations">
+                <option value="1">Full Day</option>
+                <option value="0.5">Half Day</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <select class="form-control" name="leave_types">
+                <option value="">Select Leave Type</option>
+                <option value="Compoff">Compoff Leave</option>
+                <option value="Earned">Earned Leave</option>
+                <option value="Medical/Sick">Medical/Sick Leave</option>
+                {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
+                    <option value="Leave w/o Pay">Leave w/o Pay</option>
+                {% endif %}
+            </select>
+        </div>
     </div>
+    {% endfor %}
+
+    <div class="form-group">
+        <label for="reason">Reason (Optional):</label>
+        <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason for leave..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-paper-plane"></i> Submit Leave Application
+    </button>
+</form>
+
+ <br>
 
     <div class="leave-balance-table">
         <h3 class="table-title"><i class="fas fa-chart-bar"></i> Your Leave Balance</h3>
