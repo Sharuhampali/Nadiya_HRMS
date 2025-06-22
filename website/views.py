@@ -256,19 +256,35 @@ def approve_leave(leave_id):
         flash("Leave request not found.", category='error')
         return redirect(url_for('views.home'))
 
+    if leave.approved or leave.rejected:
+        flash("This leave has already been processed.", category='warning')
+        return redirect(url_for('views.leave_requests'))
+
     leave.approved = True
     leave.approved_by = current_user.email
     db.session.commit()
 
-    # Get user who requested leave
     user = User.query.get(leave.user_id)
+
+    # Compose detailed approval message
+    leave_summary = json.loads(leave.leaves_data or "[]")
+    details = '\n'.join(
+        f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}" 
+        for entry in leave_summary
+    )
+
     send_email(
         'Leave Approved',
         user.email,
-        'Your leave request has been approved.'
+        f"Your leave request has been approved.\n\n"
+        f"Total Days: {leave.days}\n"
+        f"Types: {leave.ltype}\n"
+        f"Details:\n{details}\n\n"
+        f"Approved by: {current_user.email}"
     )
 
     return redirect(url_for('views.leave_requests'))
+
 
 # @views.route('/reject/<int:leave_id>', methods=['POST'])
 # @login_required
@@ -345,11 +361,25 @@ def reject(leave_id):
     flash("Leave request rejected and leave balances restored.", "info")
 
     # Send email
-    send_email(
-        'Leave Rejected',
-        user.email,
-        'Your leave request has been rejected.'
+    leave_summary = json.loads(leave.leaves_data or "[]")
+    details = '\n'.join(
+        f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}"
+        for entry in leave_summary
     )
+
+    send_email(
+        subject='Leave Rejected',
+        recipient=user.email,
+        body=(
+            f"Your leave request has been rejected.\n\n"
+            f"Dates: {leave.start_date} to {leave.end_date}\n"
+            f"Total Days: {leave.days}\n"
+            f"Types: {leave.ltype}\n"
+            f"Details:\n{details}\n\n"
+            f"Rejected by: {current_user.email}"
+        )
+    )
+
     return redirect(url_for('views.leave_requests'))
 
 
@@ -879,7 +909,7 @@ def apply_leave():
             end_date=end_date,
             reason=reason,
             days=total_days,
-            ltype="Mixed",
+            ltype=', '.join(sorted({entry['type'] for entry in leave_entries})),
             leaves_data=json.dumps(leave_entries)
         )
 
