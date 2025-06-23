@@ -54,7 +54,11 @@ class Attendance(db.Model):
     entry_location = db.Column(db.String(255))  # Store address for entry
     exit_location = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    compoff = db.Column(db.Float, default=0)
+    compoff = db.Column(db.Float, default=0)  # Always stores the final *approved* value: 0, 0.5, 1
+    compoff_requested = db.Column(db.Float, default=0)  # Temporary requested value, ignored unless approved
+    compoff_pending = db.Column(db.Boolean, default=False)
+    approved_by_id = db.Column(db.Integer, nullable=True)
+
     hol = db.Column(db.Float, default=0)
     date = db.Column(db.Date)
     day = db.Column(db.String(150))
@@ -82,13 +86,21 @@ class Attendance(db.Model):
 
     def calculate_comp_off(self):
         extra_time = self.extra_time_worked()
+        self.compoff_requested = 0
+        self.compoff_pending = False
+
         if extra_time and extra_time.total_seconds() > 0:
-            extra_hours = extra_time.total_seconds() / 3600
-            if extra_hours >= 8.5:
-                self.compoff = 1
-            elif extra_hours >= 4:
-                self.compoff = 0.5
-        return self.compoff
+            hours = extra_time.total_seconds() / 3600
+            if hours >= 8.5:
+                self.compoff_requested = 1
+                self.compoff_pending = True
+            elif hours >= 4:
+                self.compoff_requested = 0.5
+                self.compoff_pending = True
+        # self.compoff remains untouched until approved
+        return self.compoff_requested
+
+
 
 class Leave(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -134,7 +134,7 @@ def submit_attendance():
                 entry_location=entry_address,
                 user_id=user_id,
                 entry_time=now.replace(microsecond=0),  # Store only time
-                date=datetime.now(india_tz).date().strftime("%d-%m-%y"),
+                date=datetime.now(india_tz).date().strftime("%Y-%m-%d"),
                 day=datetime.now(india_tz).strftime('%A'),
                 reason=reason,
                 site_name=site_name
@@ -168,7 +168,7 @@ def submit_attendance():
 
             if request.form.get('holiday') and user_attendance.exit_location != user_attendance.entry_location:
                 user_attendance.hol = 10000
-            current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
+            current_date = datetime.now(india_tz).date()
             holiday = Holiday.query.filter_by(date=current_date).first()
             if holiday:
                 user_attendance.hol = 10000
@@ -176,10 +176,10 @@ def submit_attendance():
                 user_attendance.hol = 10000
             user_attendance.exit_time = now.replace(microsecond=0) # Store only time
             user_attendance.exit_location = exit_address
-            if user_attendance.exit_location != user_attendance.entry_location:
-                user_attendance.compoff = 0
-            else:
-                user_attendance.calculate_comp_off()  # Ensure this method exists and works as intended
+            # if user_attendance.exit_location != user_attendance.entry_location:
+            #     user_attendance.compoff = 0
+            # else:
+            user_attendance.calculate_comp_off()  # Ensure this method exists and works as intended
 
 
     try:
@@ -1348,3 +1348,63 @@ def calculate_leaves_for_user(user):
         user.pay = 10 - round((months_left * 10) / 12, 2)
 
     db.session.commit()
+
+@views.route('/approve_compoff/<int:attendance_id>', methods=['POST'])
+@login_required
+def approve_compoff(attendance_id):
+    attendance = Attendance.query.get(attendance_id)
+    submitter = User.query.get(attendance.user_id)
+
+    if not has_approval_authority(current_user.role, submitter.role):
+        flash("Not authorized.", "error")
+        return redirect(url_for('views.home'))
+
+    if attendance.compoff_pending:
+        attendance.compoff = attendance.compoff_requested
+        attendance.compoff_pending = False
+        attendance.compoff_requested = 0
+        attendance.approved_by_id = current_user.id
+        db.session.commit()
+        flash("Comp off approved.", "success")
+    return redirect(url_for('views.pending_compoffs'))
+
+@views.route('/reject_compoff/<int:attendance_id>', methods=['POST'])
+@login_required
+def reject_compoff(attendance_id):
+    attendance = Attendance.query.get(attendance_id)
+    submitter = User.query.get(attendance.user_id)
+
+    if not has_approval_authority(current_user.role, submitter.role):
+        flash("Not authorized.", "error")
+        return redirect(url_for('views.home'))
+
+    if attendance.compoff_pending:
+        attendance.compoff = 0
+        attendance.compoff_pending = False
+        attendance.compoff_requested = 0
+        attendance.approved_by_id = None
+        db.session.commit()
+        flash("Comp off rejected.", "info")
+    return redirect(url_for('views.pending_compoffs'))
+
+
+@views.route('/pending_compoffs')
+@login_required
+def pending_compoffs():
+    pending_records = Attendance.query.filter_by(compoff_pending=True).all()
+
+    approvable = [
+        record for record in pending_records
+        if (submitter := User.query.get(record.user_id)) 
+        and has_approval_authority(current_user.role, submitter.role)
+    ]
+
+    return render_template('pending_compoffs.html', records=approvable)
+
+
+
+def has_approval_authority(approver_role, submitter_role):
+    allowed_roles = ROLES_HIERARCHY.get(submitter_role, [])
+    if isinstance(allowed_roles, str):
+        allowed_roles = [allowed_roles]
+    return approver_role in allowed_roles

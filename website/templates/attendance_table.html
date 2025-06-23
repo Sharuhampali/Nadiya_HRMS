@@ -429,10 +429,11 @@
                 </tr>
             </thead>
             <tbody id="attendanceTableBody">
-                {% for attendance in attendances %}
+                {% for attendance in attendances|sort(attribute='date', reverse=True) %}
+
                 <tr>
                     <td><strong>{{ attendance.name }}</strong></td>
-                    <td>{{ attendance.date }}</td>
+                   <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
                     <td>{{ attendance.day }}</td>
                     <td>{{ attendance.entry_time }}</td>
                     <td>{{ attendance.entry_time | calculate_entry_early }}</td>

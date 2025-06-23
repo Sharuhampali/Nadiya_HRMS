@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Pending Comp Off Approvals</h2>
+
+    {% if records %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Employee Name</th>
+                    <th>Role</th>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Entry Time</th>
+                    <th>Exit Time</th>
+                    <th>Total Hours</th>
+                    <th>Requested Comp Off</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ record.name }}</td>
+                    <td>{{ record.user.role }}</td>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.day }}</td>
+                    <td>{{ record.entry_time.strftime('%H:%M') if record.entry_time else '—' }}</td>
+                    <td>{{ record.exit_time.strftime('%H:%M') if record.exit_time else '—' }}</td>
+                    <td>
+                        {% if record.total_time_worked() %}
+                            {{ record.total_time_worked() }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.compoff_pending %}
+                            {{ record.compoff_requested }} day{% if record.compoff_requested == 0.5 %} (half) {% endif %}
+                        {% else %}
+                            {{ record.compoff }} day
+                        {% endif %}
+                    </td>
+
+                    <td>
+                       <form method="POST" action="{{ url_for('views.approve_compoff', attendance_id=record.id) }}" style="display:inline;">
+    <button class="btn btn-success btn-sm">Approve</button>
+</form>
+
+<form method="POST" action="{{ url_for('views.reject_compoff', attendance_id=record.id) }}" style="display:inline;">
+    <button class="btn btn-danger btn-sm">Reject</button>
+</form>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">
+            No pending comp off approvals at this time.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
