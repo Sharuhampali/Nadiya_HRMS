@@ -62,9 +62,9 @@ Flask-Login==0.6.3
 Flask-Mail==0.10.0
 Flask-Migrate==4.0.7
 Flask-Reuploaded==1.4.0
-Flask-Uploads==0.2.1
+# Flask-Uploads==0.2.1
 Flask-WTF==1.2.1
-Flask-Cors==4.0.1
+Flask-Cors==3.0.10
 
 # SQLAlchemy and Database
 Flask-SQLAlchemy==3.1.1
@@ -74,7 +74,7 @@ alembic==1.13.1
 
 # Supabase & Redis
 supabase==2.15.3
-redis==6.2.0
+redis==5.0.4
 
 # Utilities
 python-dotenv==1.1.0
@@ -88,7 +88,7 @@ contextlib2==21.6.0
 cryptography==42.0.8
 authlib==1.6.0
 brotli==1.1.0
-brotlicffi==1.1.0.0
+# brotlicffi==1.1.0.0
 
 # Web and Parsing
 Jinja2==3.1.2
@@ -103,12 +103,12 @@ pytz==2023.3.post1
 gunicorn==21.2.0
 pytest==8.4.0
 pytest-mock==3.14.1
-ipython==8.12.3
-ipywidgets==8.1.1
+# ipython==8.12.3
+# ipywidgets==8.1.1
 
 # Misc
 h2==4.2.0
-railroad==0.5.0
-importlib_metadata==8.0.0
+# railroad==0.5.0
+# importlib_metadata==8.0.0
 pandas==2.2.2
 openpyxl==3.1.2
