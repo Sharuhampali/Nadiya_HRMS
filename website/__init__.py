@@ -25,7 +25,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
     # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     app.config['SQLALCHEMY_DATABASE_URI'] = (
-        'postgresql://postgres:nadiya1@db.ltvqpcocsivhtnvkaagl.supabase.in:5432/postgres'
+        'postgresql://postgres.ltvqpcocsivhtnvkaagl:nadiya1@aws-0-ap-south-1.pooler.supabase.com:5432/postgres'
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
