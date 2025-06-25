@@ -11,7 +11,7 @@ Flask-Cors==4.0.1
 # SQLAlchemy and Database
 flask_sqlalchemy==3.1.1
 SQLAlchemy==2.0.29
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.9 --only-binary :all:
 alembic==1.13.1
 
 # Supabase & Redis
