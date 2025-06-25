@@ -69,14 +69,18 @@ def logout():
 #             return redirect(url_for('views.home'))
 
 #     return render_template("sign_up.html", user=current_user)
+
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     user_count = User.query.count()
 
-    # Step 1: If users exist, only allow admin to proceed
+    # ✅ Step 1: Block non-admins from even seeing the form once the first user is created
     if user_count > 0:
-        if not current_user.is_authenticated or current_user.email != 'sumana@nadiya.in':
-            flash('Only the admin can create new accounts.', category='error')
+        if not current_user.is_authenticated:
+            flash('Sign-up is restricted. Please contact the administrator.', 'error')
+            return redirect(url_for('auth.login'))
+        elif current_user.email != 'sumana@nadiya.in':
+            flash('Only the admin can create new accounts.', 'error')
             return redirect(url_for('views.home'))
 
     if request.method == 'POST':
@@ -107,7 +111,7 @@ def sign_up():
 
             flash('Account created successfully.', category='success')
 
-            # Step 2: Log in ONLY if it's the first user (i.e., admin)
+            # Only log in the first ever user
             if user_count == 0:
                 login_user(new_user, remember=True)
 
@@ -124,6 +128,42 @@ def google_login():
     return oauth.google.authorize_redirect(redirect_uri)
 
 
+# @auth.route('/login/google/callback')
+# def google_callback():
+#     google = oauth.create_client('google')
+#     token = oauth.google.authorize_access_token()
+#     if google.token.is_expired():
+#         new_token = google.refresh_token(
+#             url='https://oauth2.googleapis.com/token',
+#             client_id=google.client_id,
+#             client_secret=google.client_secret
+#         )
+#         token = new_token
+    
+#     user_info = token.get('userinfo') or oauth.google.parse_id_token(token, nonce=None)
+#     print("User info received:", user_info)  # Debugging line to check user info
+    
+#     if user_info is None:
+#         flash("Failed to authenticate with Google.", "error")
+#         return redirect(url_for('auth.login'))
+    
+#     email = user_info.get('email')
+#     first_name = user_info.get('given_name', '')
+
+#     # Check if user exists, else create new
+#     user = User.query.filter_by(email=email).first()
+#     # if not user:
+#     #     user = User(email=email, first_name=first_name, password='')  # No password for OAuth users
+#     #     db.session.add(user)
+#     #     db.session.commit()
+#     if not user:
+#         flash("Access denied: Your account is not registered in the system.", "error")
+#         return redirect(url_for('auth.login'))
+
+#     login_user(user, remember=True)
+#     flash('Logged in successfully with Google!', 'success')
+#     return redirect(url_for('views.home'))
+
 @auth.route('/login/google/callback')
 def google_callback():
     google = oauth.create_client('google')
@@ -135,23 +175,25 @@ def google_callback():
             client_secret=google.client_secret
         )
         token = new_token
-    
+
     user_info = token.get('userinfo') or oauth.google.parse_id_token(token, nonce=None)
-    print("User info received:", user_info)  # Debugging line to check user info
-    
+    print("User info received:", user_info)
+
     if user_info is None:
         flash("Failed to authenticate with Google.", "error")
         return redirect(url_for('auth.login'))
-    
-    email = user_info.get('email')
-    first_name = user_info.get('given_name', '')
 
-    # Check if user exists, else create new
+    email = user_info.get('email')
+    
+    # Block if email is not from @nadiya.in
+    if not email.endswith("@nadiya.in"):
+        flash("Access denied: Only @nadiya.in email addresses are allowed.", "error")
+        return redirect(url_for('auth.login'))
+
     user = User.query.filter_by(email=email).first()
     if not user:
-        user = User(email=email, first_name=first_name, password='')  # No password for OAuth users
-        db.session.add(user)
-        db.session.commit()
+        flash("Access denied: Your account is not registered in the system.", "error")
+        return redirect(url_for('auth.login'))
 
     login_user(user, remember=True)
     flash('Logged in successfully with Google!', 'success')
