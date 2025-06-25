@@ -57,58 +57,57 @@
 # pandas==2.2.2
 # openpyxl==3.1.2
 # Flask and Extensions
-Flask==3.1.1
-Flask-Login==0.6.3
-Flask-Mail==0.10.0
-Flask-Migrate==4.0.7
-Flask-Reuploaded==1.4.0
-# Flask-Uploads==0.2.1
-Flask-WTF==1.2.1
-Flask-Cors==3.0.10
+# Flask and Extensions
+Flask~=3.1
+Flask-Login~=0.6
+Flask-Mail~=0.10
+Flask-Migrate~=4.0
+Flask-Reuploaded~=1.4
+# Flask-Uploads removed (abandoned on PyPI)
+Flask-WTF~=1.2
+Flask-Cors~=3.0
 
 # SQLAlchemy and Database
-Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.29
-psycopg2-binary==2.9.10 --only-binary=:all:
-alembic==1.13.1
+Flask-SQLAlchemy~=3.1
+SQLAlchemy~=2.0
+psycopg2-binary~=2.9 --only-binary=:all:
+alembic~=1.13
 
 # Supabase & Redis
-supabase==2.15.3
-redis==5.0.4
+supabase~=2.15
+redis~=5.0
 
 # Utilities
-python-dotenv==1.1.0
-filelock==3.18.0
-coverage==7.5.0
-simplejson==3.20.1
-requests==2.32.3
-contextlib2==21.6.0
+python-dotenv~=1.1
+filelock~=3.18
+coverage~=7.5
+simplejson~=3.20
+requests~=2.32
+contextlib2~=21.6
 
 # Security and Compression
-cryptography==42.0.8
-authlib==1.6.0
-brotli==1.1.0
-# brotlicffi==1.1.0.0
+cryptography~=42.0
+authlib~=1.6
+brotli~=1.1
+# brotlicffi commented out unless explicitly required
 
 # Web and Parsing
-Jinja2==3.1.2
-Werkzeug==3.1.3
-docutils==0.21.2
+Jinja2~=3.1
+Werkzeug~=3.1
+docutils~=0.21
 
 # Geo Support
-geopy==2.4.1
-pytz==2023.3.post1
+geopy~=2.4
+pytz~=2023.3
 
-# Dev Tools
-gunicorn==21.2.0
-pytest==8.4.0
-pytest-mock==3.14.1
-# ipython==8.12.3
-# ipywidgets==8.1.1
+# Dev Tools (commented out for production, optional for dev)
+gunicorn~=21.2
+pytest~=8.4
+pytest-mock~=3.14
+# ipython and ipywidgets are commented out
 
 # Misc
-h2==4.2.0
-# railroad==0.5.0
-# importlib_metadata==8.0.0
-pandas==2.2.2
-openpyxl==3.1.2
+h2~=4.2
+# railroad, importlib_metadata omitted
+pandas~=2.2
+openpyxl~=3.1
