@@ -35,8 +35,50 @@ def logout():
     return redirect(url_for('auth.login'))
 
 
+# @auth.route('/sign-up', methods=['GET', 'POST'])
+# def sign_up():
+    
+#     if request.method == 'POST':
+#         email = request.form.get('email')
+#         first_name = request.form.get('firstName')
+#         password1 = request.form.get('password1')
+#         password2 = request.form.get('password2')
+
+#         user = User.query.filter_by(email=email).first()
+#         if user:
+#             flash('Email already exists.', category='error')
+#         elif len(email) < 4:
+#             flash('Email must be greater than 3 characters.', category='error')
+#         elif len(first_name) < 2:
+#             flash('First name must be greater than 1 character.', category='error')
+#         elif password1 != password2:
+#             flash('Passwords don\'t match.', category='error')
+#         elif len(password1) < 1:
+#             flash('Password must be at least 7 characters.', category='error')
+#         else:
+#             new_user = User(email=email, first_name=first_name, password=generate_password_hash(
+#                 password1, method='scrypt'))
+#             db.session.add(new_user)
+#             db.session.commit()
+#             login_user(new_user, remember=True)
+#             for leave in current_user.leaves:
+#                 leave.medic = 0
+#                 leave.earned = 0
+#                 leave.pay = 0 
+#             flash('Account created!', category='success')
+#             return redirect(url_for('views.home'))
+
+#     return render_template("sign_up.html", user=current_user)
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
+    user_count = User.query.count()
+
+    # Step 1: If users exist, only allow admin to proceed
+    if user_count > 0:
+        if not current_user.is_authenticated or current_user.email != 'sumana@nadiya.in':
+            flash('Only the admin can create new accounts.', category='error')
+            return redirect(url_for('views.home'))
+
     if request.method == 'POST':
         email = request.form.get('email')
         first_name = request.form.get('firstName')
@@ -52,20 +94,24 @@ def sign_up():
             flash('First name must be greater than 1 character.', category='error')
         elif password1 != password2:
             flash('Passwords don\'t match.', category='error')
-        elif len(password1) < 1:
+        elif len(password1) < 7:
             flash('Password must be at least 7 characters.', category='error')
         else:
-            new_user = User(email=email, first_name=first_name, password=generate_password_hash(
-                password1, method='scrypt'))
+            new_user = User(
+                email=email,
+                first_name=first_name,
+                password=generate_password_hash(password1, method='scrypt')
+            )
             db.session.add(new_user)
             db.session.commit()
-            login_user(new_user, remember=True)
-            for leave in current_user.leaves:
-                leave.medic = 0
-                leave.earned = 0
-                leave.pay = 0 
-            flash('Account created!', category='success')
-            return redirect(url_for('views.home'))
+
+            flash('Account created successfully.', category='success')
+
+            # Step 2: Log in ONLY if it's the first user (i.e., admin)
+            if user_count == 0:
+                login_user(new_user, remember=True)
+
+            return redirect(url_for('auth.login'))
 
     return render_template("sign_up.html", user=current_user)
 

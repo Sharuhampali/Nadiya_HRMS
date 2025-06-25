@@ -205,11 +205,11 @@
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-number">{{ 15 - user.earned | round(2) }}</div>
+            <div class="stat-number">{{ 15 - current_user.earned | round(2) }}</div>
             <div class="stat-label">Earned Leaves</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ 6 - user.medic | round(2) }}</div>
+            <div class="stat-number">{{ 6 - current_user.medic | round(2) }}</div>
             <div class="stat-label">Medical Leaves</div>
         </div>
         <div class="stat-card">
@@ -217,7 +217,7 @@
             <div class="stat-label">Comp-off Days</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ 10 - user.pay | round(2) }}</div>
+            <div class="stat-number">{{ 10 - current_user.pay | round(2) }}</div>
             <div class="stat-label">Leave w/o Pay</div>
         </div>
     </div>

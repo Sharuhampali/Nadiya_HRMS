@@ -65,6 +65,7 @@ class Attendance(db.Model):
     totes = db.Column(db.Integer, default=0)
     reason = db.Column(db.Text)
     site_name = db.Column(db.String(150), nullable=True)  # New field for site/customer name
+    site_name_e = db.Column(db.String(150), nullable=True)
 
 
     def total_time_worked(self):
@@ -127,6 +128,8 @@ class Announcement(db.Model):
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    image_url = db.Column(db.String(300)) 
+    doc_url = db.Column(db.String(300)) 
 
 # class Upload(db.Model):
 #     __tablename__ = 'uploads'
@@ -136,3 +139,28 @@ class Announcement(db.Model):
 #     bucket_name = db.Column(db.String(50), nullable=False)  # 'photos' or 'docs'
 #     file_path = db.Column(db.String(512), nullable=False)
 #     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class IntermediateLog(db.Model):
+    __tablename__ = 'intermediate_log'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+    entry_type = db.Column(db.String(10))  # 'entry' or 'exit'
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    location = db.Column(db.String(255))
+    site = db.Column(db.String(150), nullable=True)  # New field for site/customer name
+    user = db.relationship('User', backref='intermediate_logs')
+
+# models.py
+
+class AnnouncementAcknowledgment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    announcement_id = db.Column(db.Integer, db.ForeignKey('announcement.id'))
+    acknowledged_on = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='acknowledgments')
+    announcement = db.relationship('Announcement', backref='acknowledgments')

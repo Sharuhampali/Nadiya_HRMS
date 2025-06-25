@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .status-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--bg-primary);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .status-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .status-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+    }
+
+    .status-table th,
+    .status-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+        font-size: 1rem;
+    }
+
+    .status-table th {
+        background-color: var(--bg-secondary);
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .status-table tr:hover {
+        background-color: var(--bg-tertiary);
+    }
+
+    .badge {
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-green {
+        background-color: #22c55e20;
+        color: #16a34a;
+        border: 1px solid #16a34a55;
+    }
+
+    .badge-red {
+        background-color: #ef444420;
+        color: #b91c1c;
+        border: 1px solid #b91c1c55;
+    }
+
+    @media (max-width: 768px) {
+        .status-table th, .status-table td {
+            font-size: 0.9rem;
+            padding: 0.75rem;
+        }
+    }
+</style>
+
+<div class="status-container">
+    <div class="status-title">
+        <i class="fas fa-check-circle"></i> Read Status for: {{ announcement.title }}
+    </div>
+
+    <table class="status-table">
+        <thead>
+            <tr>
+        
+                <th>User</th>
+                <th>Email</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for user in read_users %}
+            <tr>
+
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.email }}</td>
+                <td><span class="badge badge-green">Acknowledged</span></td>
+            </tr>
+        
+            {% endfor %}
+            {% for user in unread_users %}
+            <tr>
+              
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.email }}</td>
+                <td><span class="badge badge-red">Pending</span></td>
+            </tr>
+      
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

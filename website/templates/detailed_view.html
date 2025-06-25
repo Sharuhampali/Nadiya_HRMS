@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .card-body {
+        padding: 1.5rem;
+        color:var(--text-primary) !important;
+        background: var(--bg-primary) !important;
+    }
+
+</style>
+
+<div class="container mt-5">
+  <h2 class="mb-3">Detailed Attendance View</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-4">
+        Intermediate Entries for {{ user.first_name }} on {{ date.strftime('%d-%m-%Y') }}
+      </h5>
+
+      {% if logs %}
+      <div class="table-container">
+  <table class="table table-bordered table-sm align-middle">
+    <thead class="table-light">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Time</th>
+        <th scope="col">Type</th>
+        <th scope="col">Location</th>
+        <th scope="col">Place Visited</th> 
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ log.time.strftime('%H:%M') }}</td>
+        <td class="text-capitalize">{{ log.entry_type.replace('_', ' ') }}</td>
+        <td>{{ log.location }}</td>
+        <td>{{ log.site or '-' }}</td>  {# ✅ Display site_name #}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+      {% else %}
+      <p class="text-muted">No intermediate logs available for this day.</p>
+      {% endif %}
+
+      <a href="{{ url_for('views.attendance_table') }}" class="btn btn-secondary mt-3" style="background: green">Back to Attendance</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,6 +1,65 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
+    .location-success {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #22c55e;
+        font-weight: 600;
+        animation: fadeInSlide 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeInSlide {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .location-icon {
+        font-size: 1.2rem;
+    }
+
+    #location-status {
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        min-height: 2rem;
+    }
+
+    .spinner-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--accent-primary);
+        animation: bounce 1s infinite ease-in-out;
+    }
+
+    .spinner-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    .spinner-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+        0%, 80%, 100% {
+            transform: scale(0.8);
+            opacity: 0.6;
+        }
+        40% {
+            transform: scale(1.3);
+            opacity: 1;
+        }
+    }
+
     .navbar {
         background-color: var(--navbar-bg) !important;
         border-bottom: 1px solid var(--border-color);
@@ -122,7 +181,8 @@
             padding: 1.5rem;
         }
     }
-     .page-header {
+
+    .page-header {
         background: linear-gradient(135deg, #4f46e5, #7c3aed);
         color: white;
         padding: 2rem 0;
@@ -149,42 +209,46 @@
     </a>
 
     <div class="attendance-container">
-   
-        
         <form id="attendanceForm" method="post" action="/submit">
             <div class="form-group">
+                <div id="location-status" class="text-muted">
+                    <div id="location-loading" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="spinner-dot"></div>
+                        <div class="spinner-dot"></div>
+                        <div class="spinner-dot"></div>
+                        <span>Finding your location...</span>
+                    </div>
+                </div>
                 <label for="name">Employee Name</label>
                 <input type="text" class="form-control" id="name" name="name" value="{{ name }}" readonly>
             </div>
-            
-            <div class="form-group">
-                <label for="latitude">Latitude</label>
-                <input type="text" class="form-control" id="latitude" name="latitude" readonly>
+
+            <!-- Hidden Location Fields -->
+            <div style="display: none;">
+                <input type="text" id="latitude" name="latitude" readonly>
+                <input type="text" id="longitude" name="longitude" readonly>
             </div>
-            
+
             <div class="form-group">
-                <label for="longitude">Longitude</label>
-                <input type="text" class="form-control" id="longitude" name="longitude" readonly>
-            </div>
-            
-            <div class="form-group">
-                <label for="reason">Reason (Optional)</label>
+                <label for="reason">Remarks (If any)</label>
                 <input type="text" class="form-control" id="reason" name="reason" placeholder="Enter reason if any">
             </div>
-            
-            <div class="form-group" id="site_name_group" style="display: none;">
+
+            <div class="form-group" id="site_name_group">
                 <label for="site_name">Place Visited</label>
-                <input type="text" class="form-control" id="site_name" name="site_name" placeholder="Enter place visited">
+                <input type="text" class="form-control" id="site_name" name="site_name" placeholder="Enter place visited" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="entry_exit">Entry/Exit</label>
                 <select id="entry_exit" name="entry_exit" required class="form-control">
                     <option value="entry">Entry</option>
                     <option value="exit">Exit</option>
+                    <option value="intermediate_entry">Intermediate Entry</option>
+                    <option value="intermediate_exit">Intermediate Exit</option>
                 </select>
             </div>
-            
+
             <button type="submit" class="btn-submit">
                 <i class="fas fa-check-circle"></i> Submit Attendance
             </button>
@@ -193,42 +257,65 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Geolocation logic
+document.addEventListener("DOMContentLoaded", function () {
+    const status = document.getElementById("location-status");
+    const loadingText = document.getElementById("location-loading");
+    const latField = document.getElementById("latitude");
+    const lonField = document.getElementById("longitude");
+    const form = document.getElementById("attendanceForm");
+
+    let locationFetched = false;
+
+    function setLocation(lat, lon) {
+        latField.value = lat;
+        lonField.value = lon;
+        document.getElementById("location-loading").innerHTML = `
+        <div class="location-success">
+            <i class="fas fa-check-circle location-icon"></i>
+            <span>Location found successfully!</span>
+        </div>`;
+        status.classList.remove("text-muted");
+        status.classList.add("text-success");
+        locationFetched = true;
+    }
+
+    function handleError() {
+        loadingText.textContent = "❌ Unable to fetch location.";
+        status.classList.remove("text-muted");
+        status.classList.add("text-danger");
+    }
+
     if (navigator.geolocation) {
-        var options = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        };
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
-            document.getElementById("latitude").value = latitude;
-            document.getElementById("longitude").value = longitude;
-        }, function(error) {
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("latitude").value = data.latitude;
-                    document.getElementById("longitude").value = data.longitude;
-                });
-        }, options);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLocation(position.coords.latitude, position.coords.longitude);
+            },
+            (error) => {
+                fetch("https://ipapi.co/json/")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.latitude && data.longitude) {
+                            setLocation(data.latitude, data.longitude);
+                        } else {
+                            handleError();
+                        }
+                    })
+                    .catch(handleError);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    } else {
+        handleError();
     }
-    
-    // Show/hide Place Visited field based on Entry/Exit selection
-    function toggleSiteNameField() {
-        var entryExit = document.getElementById('entry_exit').value;
-        var siteNameGroup = document.getElementById('site_name_group');
-        if (entryExit === 'exit') {
-            siteNameGroup.style.display = 'block';
-        } else {
-            siteNameGroup.style.display = 'none';
+
+    form.addEventListener("submit", function (e) {
+        if (!locationFetched) {
+            e.preventDefault();
+            alert("Please wait — your location is still being fetched.");
+            status.scrollIntoView({ behavior: "smooth" });
         }
-    }
-    
-    document.getElementById('entry_exit').addEventListener('change', toggleSiteNameField);
-    toggleSiteNameField();
+    });
 });
 </script>
+
 {% endblock %}

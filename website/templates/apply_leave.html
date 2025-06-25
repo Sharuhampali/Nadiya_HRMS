@@ -192,6 +192,22 @@
     </a>
 
    <form id="leaveForm" method="POST">
+    {% if confirm_override %}
+    <div class="alert alert-warning" id="confirmBox">
+        <strong>Warning:</strong> You’re applying for more than your accrued leaves.<br>
+        Click confirm to proceed anyway.
+        <input type="hidden" name="confirm_override" value="true">
+        <!-- Keep previous form data alive -->
+        {% for key, value in form_data.items() %}
+            {% if key != 'confirm_override' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <button type="submit" class="btn btn-danger">Confirm and Apply</button>
+        <a href="{{ url_for('views.apply_leave') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+{% endif %}
+
     <h2 class="form-title">Leave Application Form</h2>
 
     {% for i in range(7) %}

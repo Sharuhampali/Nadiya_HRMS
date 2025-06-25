@@ -69,6 +69,59 @@
     --header-text: #f3f3f3;
     --header-border: #7c3aed; /* You can adjust if you want a different accent for dark */
 }
+.table-container {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        overflow-y: scroll;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        max-height: 500px;
+    }
+
+    .table {
+        background: var(--bg-primary);
+        margin: 0;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    .table thead {
+        background: var(--bg-primary);
+        color: rgb(16, 14, 14);
+    }
+
+    .table thead th {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 1rem 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+        border: 2px solid var(--border-color) !important;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--bg-secondary);
+        transform: scale(1.01);
+    }
+
+    .table tbody td {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        padding: 1rem 0.75rem;
+        text-align: center;
+        border: var(--border-color) solid 2px;
+        vertical-align: middle;
+    }
 
 .top-header {
     position: fixed;
@@ -114,6 +167,36 @@ select option {
   background-color: var(--bg-primary) !important;
   padding: 8px;
 }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 30px 20px;
+            font-size: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: var(--bg-primary);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
 
         .menu-toggle {
             background: none;
@@ -353,12 +436,7 @@ select option {
                     </a>
                 </div>
                 {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
-                <div class="nav-item">
-                    <a href="/attendance-category" class="nav-link">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>Attendance Center</span>
-                    </a>
-                </div>
+              
                 <div class="nav-item">
                     <a href="/attendance_table" class="nav-link">
                         <i class="fas fa-table"></i>
@@ -398,12 +476,7 @@ select option {
                     </a>
                 </div>
                 {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
-                <div class="nav-item">
-                    <a href="/leaves-category" class="nav-link">
-                        <i class="fas fa-calendar-times"></i>
-                        <span>Leave Center</span>
-                    </a>
-                </div>
+               
                 <div class="nav-item">
                     <a href="/display_compoff" class="nav-link">
                         <i class="fas fa-clock"></i>
@@ -433,20 +506,14 @@ select option {
                         <span>Announcements</span>
                     </a>
                 </div>
-                {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
+        
+                
                 <div class="nav-item">
-                    <a href="/holidays-category" class="nav-link">
-                        <i class="fas fa-gift"></i>
-                        <span>Holiday Management</span>
+                    <a href="/holiday_saturdays" class="nav-link">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>2nd & 4th Saturdays</span>
                     </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/announcements-category" class="nav-link">
-                        <i class="fas fa-megaphone"></i>
-                        <span>Communication Center</span>
-                    </a>
-                </div>
-                {% endif %}
+             
             </div>
             <!-- HR Management (Admin Only) -->
             {% if current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in" %}
@@ -476,12 +543,7 @@ select option {
                         <span>Data Export</span>
                     </a>
                 </div>
-                <div class="nav-item">
-                    <a href="/misc-category" class="nav-link">
-                        <i class="fas fa-cogs"></i>
-                        <span>HR Operations</span>
-                    </a>
-                </div>
+               
             </div>
             {% endif %}
             <!-- Account -->

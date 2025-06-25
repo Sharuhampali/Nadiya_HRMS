@@ -193,6 +193,14 @@
                 <p>View comprehensive employee list with contact information, roles, and organizational details.</p>
             </a>
         </div>
+          <div class="option-card">
+             <a href="{{ url_for('auth.sign_up') }}">
+                <i class="fas fa-user-plus"></i> 
+ 
+                <h3>Add new employee</h3>
+                <p>Add new employees set passwords and usernames with onboarding form.</p>
+            </a>
+        </div>
 
         <div class="option-card">
             <a href="/export">
@@ -203,16 +211,17 @@
         </div>
 
         <div class="option-card danger-card">
-            <a href="#" onclick="confirmReset()">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>System Reset</h3>
-                <p>Reset leave balances and holiday data. This action requires confirmation and cannot be undone.</p>
-            </a>
-        </div>
+    <a href="#" onclick="confirmReset(event)">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>System Reset</h3>
+        <p>Reset leave balances and holiday data. This action requires confirmation and cannot be undone.</p>
+    </a>
+</div>
+
     </div>
 </div>
 
-<script>
+<!-- <script>
     function confirmReset() {
         const confirmationId = prompt("Please enter the confirmation ID:");
         if (confirmationId === '24') {
@@ -221,5 +230,36 @@
             alert("Confirmation ID incorrect. Please try again.");
         }
     }
+</script> -->
+<script>
+    function confirmReset(event) {
+        event.preventDefault();
+
+        if (confirm("Are you sure you want to reset all leave balances and delete holiday data? This cannot be undone.")) {
+            // Trigger export download
+            const link = document.createElement('a');
+            link.href = '/export';
+            link.download = 'all_data_export.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Wait 1–2 seconds, then call reset endpoint
+            setTimeout(() => {
+                fetch('/reset_leaves', { method: 'POST' })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            alert("Reset request completed.");
+                        }
+                    })
+                    .catch(error => {
+                        alert("An error occurred while resetting: " + error);
+                    });
+            }, 2000); // Wait for download to begin before resetting
+        }
+    }
 </script>
+
 {% endblock %}

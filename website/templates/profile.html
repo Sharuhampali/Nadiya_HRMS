@@ -325,7 +325,6 @@
         }
     }
 </style>
-
 <div class="page-header">
     <div class="container">
         <h1><i class="fas fa-user-circle"></i> Employee Profile</h1>
@@ -345,7 +344,7 @@
                 {% else %}
                     <div class="profile-photo-placeholder">
                         {{ user.first_name[0].upper() if user.first_name else 'U' }}
-                    </div>
+                    </div> 
                 {% endif %}
             </div>
             <div class="profile-info">
@@ -357,6 +356,7 @@
             </div>
         </div>
 
+        {% if current_user.email == 'sumana@nadiya.in' %}
         <form method="POST" enctype="multipart/form-data" id="profileForm">
             <div class="form-section">
                 <h3 class="section-title">
@@ -418,47 +418,47 @@
                 </div>
             </div>
 
-            {% if user.documents %}
-            <div class="documents-section">
-                <h4 class="section-title">
-                    <i class="fas fa-folder-open"></i> Current Documents
-                </h4>
-                {% for document in user.documents %}
-                <div class="document-item">
-                    <div class="document-info">
-                        <div class="document-icon">
-                            {% if document.filename.endswith('.pdf') %}
-                                <i class="fas fa-file-pdf"></i>
-                            {% elif document.filename.endswith(('.doc', '.docx')) %}
-                                <i class="fas fa-file-word"></i>
-                            {% elif document.filename.endswith(('.jpg', '.jpeg', '.png')) %}
-                                <i class="fas fa-file-image"></i>
-                            {% else %}
-                                <i class="fas fa-file"></i>
-                            {% endif %}
-                        </div>
-                        <div class="document-details">
-                            <h4>{{ document.document_type.replace('_', ' ').title() }}</h4>
-                            <p>{{ document.filename }}</p>
-                        </div>
-                    </div>
-                    <a href="{{ url_for('static', filename='uploads/docs/' + document.filename) }}" class="btn-download" target="_blank">
-                        <i class="fas fa-download"></i> Download
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
             <button type="submit" class="submit-btn">
                 <i class="fas fa-save"></i> Save Profile Changes
             </button>
         </form>
+        {% endif %}
+
+        {% if user.documents %}
+        <div class="documents-section">
+            <h4 class="section-title">
+                <i class="fas fa-folder-open"></i> Current Documents
+            </h4>
+            {% for document in user.documents %}
+            <div class="document-item">
+                <div class="document-info">
+                    <div class="document-icon">
+                        {% if document.filename.endswith('.pdf') %}
+                            <i class="fas fa-file-pdf"></i>
+                        {% elif document.filename.endswith(('.doc', '.docx')) %}
+                            <i class="fas fa-file-word"></i>
+                        {% elif document.filename.endswith(('.jpg', '.jpeg', '.png')) %}
+                            <i class="fas fa-file-image"></i>
+                        {% else %}
+                            <i class="fas fa-file"></i>
+                        {% endif %}
+                    </div>
+                    <div class="document-details">
+                        <h4>{{ document.document_type.replace('_', ' ').title() }}</h4>
+                        <p>{{ document.filename }}</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('static', filename='uploads/docs/' + document.filename) }}" class="btn-download" target="_blank">
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 </div>
 
 <script>
-// File upload drag and drop functionality
 document.querySelectorAll('.file-upload-area').forEach(area => {
     area.addEventListener('dragover', function(e) {
         e.preventDefault();
@@ -473,13 +473,12 @@ document.querySelectorAll('.file-upload-area').forEach(area => {
     area.addEventListener('drop', function(e) {
         e.preventDefault();
         this.classList.remove('dragover');
-        
+
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             const input = this.parentElement.querySelector('input[type="file"]');
             input.files = files;
-            
-            // Show file name
+
             const fileName = files[0].name;
             const fileInfo = this.querySelector('p');
             fileInfo.textContent = `Selected: ${fileName}`;
@@ -487,8 +486,7 @@ document.querySelectorAll('.file-upload-area').forEach(area => {
     });
 });
 
-// File input change handlers
-document.getElementById('photo').addEventListener('change', function() {
+document.getElementById('photo')?.addEventListener('change', function() {
     if (this.files.length > 0) {
         const fileName = this.files[0].name;
         const uploadArea = this.parentElement.querySelector('.file-upload-area p');
@@ -496,7 +494,7 @@ document.getElementById('photo').addEventListener('change', function() {
     }
 });
 
-document.getElementById('document').addEventListener('change', function() {
+document.getElementById('document')?.addEventListener('change', function() {
     if (this.files.length > 0) {
         const fileName = this.files[0].name;
         const uploadArea = this.parentElement.querySelector('.file-upload-area p');
@@ -504,22 +502,19 @@ document.getElementById('document').addEventListener('change', function() {
     }
 });
 
-// Form validation
-document.getElementById('profileForm').addEventListener('submit', function(e) {
-    const documentFile = document.getElementById('document').files[0];
-    const documentType = document.getElementById('document_type').value;
-    
+document.getElementById('profileForm')?.addEventListener('submit', function(e) {
+    const documentFile = document.getElementById('document')?.files[0];
+    const documentType = document.getElementById('document_type')?.value;
+
     if (documentFile && !documentType) {
         e.preventDefault();
         alert('Please select a document type when uploading a document.');
         return false;
     }
-    
-    // Show upload progress for large files
-    if (documentFile && documentFile.size > 1024 * 1024) { // > 1MB
+
+    if (documentFile && documentFile.size > 1024 * 1024) {
         document.getElementById('uploadProgress').style.display = 'block';
-        
-        // Simulate progress (in real implementation, this would be handled by the server)
+
         let progress = 0;
         const progressFill = document.getElementById('progressFill');
         const interval = setInterval(() => {

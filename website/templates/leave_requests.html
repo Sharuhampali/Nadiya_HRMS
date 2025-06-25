@@ -341,6 +341,17 @@
             font-size: 1.5rem;
         }
     }
+    textarea.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 80px;
+}
+
 </style>
 
 <div class="page-header">
@@ -424,15 +435,22 @@
                     {% endif %}
                 </div>
 
-                {% if not leave.approved and not leave.rejected %}
+                  {% if not leave.approved and not leave.rejected %}
                     <div class="action-buttons">
                         <form class="approve-form" action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST" style="display: inline;">
                             <button type="submit" class="btn-approve">
                                 <i class="fas fa-check"></i> Approve
                             </button>
                         </form>
+
                         <form class="reject-form" action="{{ url_for('views.reject', leave_id=leave.id) }}" method="POST" style="display: inline;">
-                            <button type="submit" class="btn-reject">
+                            <div style="display: none;" class="remarks-wrapper mt-2">
+                                <textarea name="remarks" required placeholder="Why is this being rejected?" class="form-control mt-2 mb-2"></textarea>
+                                <button type="submit" class="btn-reject mt-1">
+                                    <i class="fas fa-times"></i> Confirm Reject
+                                </button>
+                            </div>
+                            <button type="button" class="btn-reject show-remarks-btn">
                                 <i class="fas fa-times"></i> Reject
                             </button>
                         </form>
@@ -480,6 +498,41 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!confirm(`Are you sure you want to ${action} this leave request?`)) {
                 e.preventDefault();
             }
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const leaveRequests = document.querySelectorAll('.leave-request');
+
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.dataset.filter;
+            leaveRequests.forEach(request => {
+                request.style.display = (filter === 'all' || request.dataset.status === filter) ? 'block' : 'none';
+            });
+        });
+    });
+
+    document.querySelectorAll('.btn-approve, .btn-reject').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const action = this.classList.contains('btn-approve') ? 'approve' : 'reject';
+            if (!this.classList.contains('show-remarks-btn')) {
+                if (!confirm(`Are you sure you want to ${action} this leave request?`)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.show-remarks-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const wrapper = this.closest('form').querySelector('.remarks-wrapper');
+            wrapper.style.display = 'block';
+            this.style.display = 'none';
         });
     });
 });

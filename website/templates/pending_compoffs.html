@@ -34,7 +34,7 @@
                         {% if record.total_time_worked() %}
                             {{ record.total_time_worked() }}
                         {% else %}
-                            —
+                            — 
                         {% endif %}
                     </td>
                     <td>
@@ -44,16 +44,19 @@
                             {{ record.compoff }} day
                         {% endif %}
                     </td>
-
                     <td>
-                       <form method="POST" action="{{ url_for('views.approve_compoff', attendance_id=record.id) }}" style="display:inline;">
-    <button class="btn btn-success btn-sm">Approve</button>
-</form>
+                        <form method="POST" action="{{ url_for('views.approve_compoff', attendance_id=record.id) }}" style="display:inline;">
+                            <button class="btn btn-success btn-sm">Approve</button>
+                        </form>
 
-<form method="POST" action="{{ url_for('views.reject_compoff', attendance_id=record.id) }}" style="display:inline;">
-    <button class="btn btn-danger btn-sm">Reject</button>
-</form>
-
+                        <!-- Trigger for rejection modal -->
+                        <button type="button"
+                                class="btn btn-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#rejectModal"
+                                data-url="{{ url_for('views.reject_compoff', attendance_id=record.id) }}">
+                            Reject
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -65,4 +68,43 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" id="rejectForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rejectModalLabel">Reject Comp Off Request</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="remarks" class="form-label">Rejection Remarks</label>
+            <textarea name="remarks" class="form-control" id="remarks" rows="4" required placeholder="Why is this being rejected?"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Confirm Reject</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript to set action dynamically -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const rejectModal = document.getElementById('rejectModal');
+    const rejectForm = document.getElementById('rejectForm');
+
+    rejectModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const actionUrl = button.getAttribute('data-url');
+        rejectForm.setAttribute('action', actionUrl);
+        rejectForm.reset();
+    });
+});
+</script>
 {% endblock %}

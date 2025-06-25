@@ -254,6 +254,7 @@
         overflow-y: scroll;
         box-shadow: 0 4px 20px var(--shadow);
         border: 1px solid var(--border-color);
+        max-height: 500px;
     }
 
     .table {
@@ -412,20 +413,22 @@
                     <th>Date</th>
                     <th>Day</th>
                     <th>Entry Time</th>
-                    <th>Entry Early By</th>
-                    <th>Entry Late By</th>
+                    <!-- <th>Entry Early By</th>
+                    <th>Entry Late By</th> -->
                     <th>Exit Time</th>
-                    <th>Exit Early By</th>
-                    <th>Exit Late By</th>
+                    <!-- <th>Exit Early By</th>
+                    <th>Exit Late By</th> -->
                     <th>Total Time</th>
                     <th>Extra Time</th>
                     <th>Comp Off</th>
                     <th>Entry Location</th>
                     <th>Exit Location</th>
-                    <th>Place Visited</th>
+                    <th>Place Visited (entry)</th>
+                    <th>Place Visited (exit)</th>
                     <th>Shift</th>
                     <th>Status</th>
                     <th>Reason</th>
+                    <th> View</th>
                 </tr>
             </thead>
             <tbody id="attendanceTableBody">
@@ -436,11 +439,11 @@
                    <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
                     <td>{{ attendance.day }}</td>
                     <td>{{ attendance.entry_time }}</td>
-                    <td>{{ attendance.entry_time | calculate_entry_early }}</td>
-                    <td>{{ attendance.entry_time | calculate_entry_late }}</td>
+                    <!-- <td>{{ attendance.entry_time | calculate_entry_early }}</td>
+                    <td>{{ attendance.entry_time | calculate_entry_late }}</td> -->
                     <td>{{ attendance.exit_time or '-' }}</td>
-                    <td>{{ attendance.exit_time | calculate_exit_early }}</td>
-                    <td>{{ attendance.exit_time | calculate_exit_late }}</td>
+                    <!-- <td>{{ attendance.exit_time | calculate_exit_early }}</td>
+                    <td>{{ attendance.exit_time | calculate_exit_late }}</td> -->
                     <td>{{ attendance.total_time_worked() }}</td>
                     <td>{{ attendance.extra_time_worked() }}</td>
                     <td><span class="status-badge status-ontime">{{ attendance.compoff }}</span></td>
@@ -462,6 +465,7 @@
                             -
                         {% endif %}
                     </td>
+                    <td>{{ attendance.site_name_e or '-' }}</td>
                     <td>{{ attendance.site_name or '-' }}</td>
                     <td>{{ attendance.entry_time | determine_shift }}</td>
                     <td>
@@ -472,6 +476,11 @@
                         {% endif %}
                     </td>
                     <td>{{ attendance.reason or '-' }}</td>
+                    <td>
+                    <a href="{{ url_for('views.detailed_view', user_id=attendance.user_id, date=attendance.date.strftime('%Y-%m-%d')) }}"
+   class="btn btn-outline-primary btn-sm">
+   View Details
+</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

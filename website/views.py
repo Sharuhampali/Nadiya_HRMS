@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,  send_from_directory
 from flask_login import login_required, current_user
-from .models import User, Attendance, Leave, Document, Holiday, Announcement
+from .models import User, Attendance, Leave, Document, Holiday, Announcement, IntermediateLog, AnnouncementAcknowledgment
 from . import db
 from flask import Flask, send_file
 from io import BytesIO
@@ -12,6 +12,7 @@ import os
 from . import mail
 from flask_mail import Message
 import pytz
+from werkzeug.utils import secure_filename
 
 
 views = Blueprint('views', __name__)
@@ -23,6 +24,7 @@ india_tz = pytz.timezone('Asia/Kolkata')
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in' :
+        
     
         return render_template(
             "home.html",
@@ -88,38 +90,62 @@ geoLoc = Nominatim(user_agent="my_app")
 def submit_attendance():
     latitude = request.form.get('latitude')
     longitude = request.form.get('longitude')
-    entry_exit = request.form.get('entry_exit')  # 'entry' or 'exit'
-    site_name = request.form.get('site_name')  # Get site/customer name if provided
+    entry_exit = request.form.get('entry_exit')  # 'entry', 'exit', etc.
+
+    site_name = request.form.get('site_name')      # For exit or intermediate
+
+
     user_id = current_user.id
     user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
 
-    if 'reason' in request.form:
-        reason = request.form['reason']
-    else:
-        reason = None
-    
-    
-    india_tz = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(india_tz).time()  # Get current time only
+    reason = request.form.get('reason', None)
 
+    india_tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(india_tz).time()
+
+    # Handle stale entries with no exit for > 20 hours
     if user_attendance and user_attendance.exit_time is None:
         if (datetime.combine(datetime.today(), now) - datetime.combine(datetime.today(), user_attendance.entry_time)) > timedelta(hours=20):
             user_attendance.exit_time = (datetime.combine(datetime.today(), user_attendance.entry_time) + timedelta(hours=5)).time()
-            user_attendance.calculate_comp_off()  # Ensure this method exists and works as intended
+            user_attendance.calculate_comp_off()
             try:
                 db.session.commit()
             except Exception as e:
                 print(e)
                 flash('There was an issue updating your attendance record.', 'error')
                 return redirect(url_for('views.home'))
-            # Refresh user_attendance after commit
             user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
 
-    if entry_exit == 'entry':
+    # Handle intermediate entries
+    if entry_exit in ['intermediate_entry', 'intermediate_exit']:
+        try:
+            location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
+            location = location_obj.address if location_obj else "Unknown"
+        except Exception as e:
+            print(f"Intermediate geo error: {e}")
+            location = "Unknown"
+
+        new_log = IntermediateLog(
+            user_id=current_user.id,
+            date=datetime.now(india_tz).date(),
+            time=now.replace(microsecond=0),
+            entry_type=entry_exit,
+            latitude=latitude,
+            longitude=longitude,
+            location=location,
+            site=site_name
+        )
+        db.session.add(new_log)
+        db.session.commit()
+        flash(f"{entry_exit.replace('_', ' ').capitalize()} recorded.", "success")
+        return redirect(url_for('views.home'))
+
+    # Entry logic
+    elif entry_exit == 'entry':
+        user_attendance.site_name_e = request.form.get('site_name')
         if user_attendance and user_attendance.exit_time is None:
             flash('Please exit the current attendance record before submitting another entry.', 'warning')
         else:
-            # Get entry location
             try:
                 entry_location = geoLoc.reverse(f"{latitude}, {longitude}")
                 entry_address = entry_location.address if entry_location else "Unknown"
@@ -133,20 +159,19 @@ def submit_attendance():
                 longitude=longitude,
                 entry_location=entry_address,
                 user_id=user_id,
-                entry_time=now.replace(microsecond=0),  # Store only time
+                entry_time=now.replace(microsecond=0),
                 date=datetime.now(india_tz).date().strftime("%Y-%m-%d"),
                 day=datetime.now(india_tz).strftime('%A'),
                 reason=reason,
-                site_name=site_name
+                site_name=site_name  # ✅ Entry uses site_name_e
             )
             db.session.add(new_attendance)
 
+    # Exit logic
     elif entry_exit == 'exit' and user_attendance:
-        user_attendance.site_name = site_name
         if user_attendance.exit_time is not None:
             flash('Please close the current attendance record before submitting another exit.', 'warning')
         else:
-            # Get exit location
             try:
                 exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
                 exit_address = exit_location.address if exit_location else "Unknown"
@@ -160,28 +185,24 @@ def submit_attendance():
                 first_saturday = first_day_of_month + timedelta(days=(5 - first_day_weekday) % 7)
                 second_saturday = first_saturday + timedelta(days=7)
                 fourth_saturday = first_saturday + timedelta(days=21)
-
                 return date == second_saturday or date == fourth_saturday
 
             def is_holiday(date):
                 return date.weekday() == 6 or is_second_or_fourth_saturday(date)
 
-            if request.form.get('holiday') and user_attendance.exit_location != user_attendance.entry_location:
+            if request.form.get('holiday'):
                 user_attendance.hol = 10000
+
             current_date = datetime.now(india_tz).date()
-            holiday = Holiday.query.filter_by(date=current_date).first()
-            if holiday:
+            if Holiday.query.filter_by(date=current_date).first() or is_holiday(current_date):
                 user_attendance.hol = 10000
-            if is_holiday(current_date):
-                user_attendance.hol = 10000
-            user_attendance.exit_time = now.replace(microsecond=0) # Store only time
+
+            user_attendance.exit_time = now.replace(microsecond=0)
             user_attendance.exit_location = exit_address
-            # if user_attendance.exit_location != user_attendance.entry_location:
-            #     user_attendance.compoff = 0
-            # else:
-            user_attendance.calculate_comp_off()  # Ensure this method exists and works as intended
+            user_attendance.site_name = site_name  # ✅ Exit uses site_name
+            user_attendance.calculate_comp_off()
 
-
+    # Commit changes to DB
     try:
         db.session.commit()
         return redirect(url_for('views.home'))
@@ -189,6 +210,7 @@ def submit_attendance():
         print(e)
         flash('There was an issue submitting your attendance.', 'error')
         return redirect(url_for('views.home'))
+
 
 @views.route('/all', methods=['GET'])
 def all():
@@ -323,10 +345,15 @@ def reject(leave_id):
         flash("Leave request not found.", category='error')
         return redirect(url_for('views.leave_requests'))
 
+    user = User.query.get(leave.user_id)
+    if not user:
+        flash("User not found.", category='error')
+        return redirect(url_for('views.leave_requests'))
+
+    remarks = request.form.get('remarks') or "No remarks provided."
     leave.approved_by = current_user.email
     leave.rejected = True
-
-    user = User.query.get(leave.user_id)
+    leave.remarks = remarks  # Optional: only if you have a 'remarks' field in Leave model
 
     # Reverse leave balances using leaves_data breakdown
     import json
@@ -338,13 +365,11 @@ def reject(leave_id):
         ltype = entry['type']
 
         if ltype == 'Compoff':
-            # Restore to attendance record
             for att in user.attendances:
-                if att.date.strftime('%Y-%m-%d') == date:  # Optional match
+                if att.date.strftime('%Y-%m-%d') == date:
                     att.compoff += duration
                     break
             else:
-                # Fallback: add to any attendance record if match not found
                 if user.attendances:
                     user.attendances[0].compoff += duration
 
@@ -360,7 +385,7 @@ def reject(leave_id):
     db.session.commit()
     flash("Leave request rejected and leave balances restored.", "info")
 
-    # Send email
+    # Construct email summary
     leave_summary = json.loads(leave.leaves_data or "[]")
     details = '\n'.join(
         f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}"
@@ -376,11 +401,13 @@ def reject(leave_id):
             f"Total Days: {leave.days}\n"
             f"Types: {leave.ltype}\n"
             f"Details:\n{details}\n\n"
-            f"Rejected by: {current_user.email}"
+            f"Rejected by: {current_user.email}\n"
+            f"Remarks: {remarks}"
         )
     )
 
     return redirect(url_for('views.leave_requests'))
+
 
 
 @views.route('/approved_leaves')
@@ -458,19 +485,22 @@ def who1_output():
         Leave.end_date <= end_of_fy
     ).all()
 
-    # Initialize sums
     earned_sum = 0
     medic_sum = 0
     pay_sum = 0
 
-    # Calculate sums for different leave types
     for leave in approved_leaves:
-        if leave.ltype == 'Earned':
-            earned_sum += leave.days
-        elif leave.ltype == 'Medical/Sick':
-            medic_sum += leave.days
-        elif leave.ltype == 'Leave w/o pay':
-            pay_sum += leave.days
+        leave_data = json.loads(leave.leaves_data)
+        for entry in leave_data:
+            ltype = entry.get('type')
+            duration = float(entry.get('duration', 0))
+            if ltype == 'Earned':
+                earned_sum += duration
+            elif ltype == 'Medical/Sick':
+                medic_sum += duration
+            elif ltype == 'Leave w/o Pay':
+                pay_sum += duration
+
 
     return render_template('who1_output.html', user=user, approved_leaves=approved_leaves, earned_sum=earned_sum, medic_sum=medic_sum, pay_sum=pay_sum)
 
@@ -639,7 +669,7 @@ def assign_roles():
 
                 months_left = (end_of_year.year - today.year) * 12 + (end_of_year.month - today.month) - today.day // 30
                 p_leaves = round((months_left * 10) / 12, 2)
-                user.pay = p_leaves
+                user.pay = 10 - p_leaves
 
             user.probation = is_probation
 
@@ -932,7 +962,7 @@ def apply_leave():
         if STATIC_MANAGER_EMAIL not in recipient_emails:
             recipient_emails.append(STATIC_MANAGER_EMAIL)
 
-        approval_url = url_for('views.approve_leave', leave_id=new_leave.id, _external=True)
+        approval_url = url_for('views.leave_requests',  _external=True)
 
         msg = Message('New Leave Application', recipients=recipient_emails)
         msg.body = (
@@ -1053,34 +1083,78 @@ def announcements():
     announcements = Announcement.query.all()
     return render_template('announcements.html', announcements=announcements)
 
+# @views.route('/post_announcement', methods=['GET', 'POST'])
+# def post_announcement():
+#     if request.method == 'POST':
+#         title = request.form.get('title')
+#         content = request.form.get('content')
+
+#         # Create a new announcement
+#         announcement = Announcement(title=title, content=content)
+#         db.session.add(announcement)
+#         db.session.commit()
+
+#         # Fetch all registered user emails
+#         users = User.query.all()
+#         user_emails = [user.email for user in users]
+
+#         # Send email notifications
+#         with current_app.app_context():
+#             for email in user_emails:
+#                 msg = Message(subject='New Announcement Posted',
+#                               sender=current_app.config['MAIL_DEFAULT_SENDER'],
+#                               recipients=[email])
+#                 msg.body = f'A new announcement has been posted:\n\nTitle: {title}\nContent: {content}'
+#                 mail.send(msg)
+
+#         flash('Announcement posted successfully and notifications sent!', 'success')
+#         return redirect(url_for('views.announcements'))
+
+#     return render_template('post_announcement.html')
 @views.route('/post_announcement', methods=['GET', 'POST'])
 def post_announcement():
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
+        file = request.files.get('attachments')  # Fix name match
+        file1 = request.files.get('attachments1')
 
-        # Create a new announcement
-        announcement = Announcement(title=title, content=content)
+        image_url = None
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            file_path = os.path.join('static', 'uploads', 'docs', filename)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            file.save(file_path)
+            image_url = f'uploads/docs/{filename}'
+
+        doc_url = None
+        if file1 and file1.filename != '':
+            filename = secure_filename(file1.filename)
+            file_path = os.path.join('static', 'uploads', 'docs', filename)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            file1.save(file_path)
+            doc_url = f'uploads/docs/{filename}'
+
+        announcement = Announcement(title=title, content=content, image_url=image_url, doc_url=doc_url)
         db.session.add(announcement)
         db.session.commit()
 
-        # Fetch all registered user emails
         users = User.query.all()
         user_emails = [user.email for user in users]
 
-        # Send email notifications
-        with current_app.app_context():
-            for email in user_emails:
-                msg = Message(subject='New Announcement Posted',
-                              sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                              recipients=[email])
-                msg.body = f'A new announcement has been posted:\n\nTitle: {title}\nContent: {content}'
-                mail.send(msg)
+        # with current_app.app_context():
+        #     for email in user_emails:
+        #         msg = Message(subject='New Announcement Posted',
+        #                       sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        #                       recipients=[email])
+        #         msg.body = f'A new announcement has been posted:\n\nTitle: {title}\nContent: {content}'
+        #         mail.send(msg)
 
         flash('Announcement posted successfully and notifications sent!', 'success')
         return redirect(url_for('views.announcements'))
 
     return render_template('post_announcement.html')
+
 
 @views.route('/delete_announcement/<int:announcement_id>', methods=['POST'])
 @login_required
@@ -1283,14 +1357,14 @@ def subtract_holidays():
     flash('Leave days edited successfully.', category='success')
     return redirect(url_for('views.show_subtract_holidays_form'))
 
-@views.route('/export', methods=['POST' , 'GET'])
+from flask_mail import Message
+
+@views.route('/export', methods=['POST', 'GET'])
 @login_required
 def export_all_data():
     output = BytesIO()
 
-    # Create an ExcelWriter to write multiple DataFrames to separate sheets
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        # Map of table names to SQLAlchemy models
         tables = {
             'Users': User,
             'Documents': Document,
@@ -1301,28 +1375,39 @@ def export_all_data():
         }
 
         for sheet_name, model in tables.items():
-            # Query all records from the table
             query = model.query.all()
-
-            # Convert SQLAlchemy objects to dicts
             data = [item.__dict__.copy() for item in query]
-
-            # Remove private fields (like _sa_instance_state)
             for row in data:
                 row.pop('_sa_instance_state', None)
-
-            # Convert to DataFrame and write to sheet
             df = pd.DataFrame(data)
-            df.to_excel(writer, sheet_name=sheet_name[:31], index=False)  # Excel sheet names must be <=31 chars
+            df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
 
     output.seek(0)
 
+    # Send the email
+    msg = Message(subject="HRMS System Backup",
+                  recipients=["hampalisharu@gmail.com"])  # Replace with actual recipient
+    msg.body = "Attached is the latest system backup of all tables before reset."
+    msg.attach("all_data_export.xlsx", 
+               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+               output.read())
+
+    try:
+        mail.send(msg)
+        flash("Exported data and emailed backup successfully.", "success")
+    except Exception as e:
+        flash(f"Exported data, but failed to send email: {str(e)}", "warning")
+
+    # Reset pointer to allow browser download too (optional)
+    output.seek(0)
     return send_file(
         output,
         as_attachment=True,
         download_name="all_data_export.xlsx",
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+
 
 #############################################################################################
 
@@ -1341,7 +1426,7 @@ def calculate_leaves_for_user(user):
     if user.probation:
         user.earned = 0
         user.medic = 0
-        user.pay = round((months_left * 10) / 12, 2)
+        user.pay = 10 - round((months_left * 10) / 12, 2)
     else:
         user.earned = 15 - round((months_left * 15) / 12, 2)
         user.medic = 6 - round((months_left * 6) / 12, 2)
@@ -1349,11 +1434,80 @@ def calculate_leaves_for_user(user):
 
     db.session.commit()
 
+@views.route('/hol')
+@login_required
+def holiday_saturdays():
+
+    india_tz = pytz.timezone('Asia/Kolkata')
+    today = datetime.now(india_tz).date()
+    
+    # Determine financial year range
+    if today.month >= 4:
+        start_year = today.year
+        end_year = today.year + 1
+    else:
+        start_year = today.year - 1
+        end_year = today.year
+
+    start_date = date(start_year, 4, 1)
+    end_date = date(end_year, 3, 31)
+
+    # Helper to find 2nd and 4th Saturdays in a given month
+    def second_and_fourth_saturdays(year, month):
+        saturdays = []
+        for day in range(1, 32):
+            try:
+                dt = date(year, month, day)
+            except ValueError:
+                break
+            if dt.weekday() == 5:  # Saturday
+                saturdays.append(dt)
+        return [saturdays[1], saturdays[3]] if len(saturdays) >= 4 else []
+
+    # Loop through each month and collect dates
+    holiday_saturdays = []
+    for year in [start_year, end_year] if start_date.year != end_date.year else [start_year]:
+        for month in range(1, 13):
+            current = date(year, month, 1)
+            if start_date <= current <= end_date:
+                holiday_saturdays.extend(second_and_fourth_saturdays(year, month))
+
+    holiday_saturdays = [d for d in holiday_saturdays if start_date <= d <= end_date]
+    holiday_saturdays.sort()
+
+    return render_template('holiday_saturdays.html', saturdays=holiday_saturdays, start=start_date, end=end_date)
+
+
+# @views.route('/approve_compoff/<int:attendance_id>', methods=['POST'])
+# @login_required
+# def approve_compoff(attendance_id):
+#     attendance = Attendance.query.get(attendance_id)
+#     submitter = User.query.get(attendance.user_id)
+
+#     if not has_approval_authority(current_user.role, submitter.role):
+#         flash("Not authorized.", "error")
+#         return redirect(url_for('views.home'))
+
+#     if attendance.compoff_pending:
+#         attendance.compoff = attendance.compoff_requested
+#         attendance.compoff_pending = False
+#         attendance.compoff_requested = 0
+#         attendance.approved_by_id = current_user.id
+#         db.session.commit()
+#         flash("Comp off approved.", "success")
+#     return redirect(url_for('views.pending_compoffs'))
 @views.route('/approve_compoff/<int:attendance_id>', methods=['POST'])
 @login_required
 def approve_compoff(attendance_id):
     attendance = Attendance.query.get(attendance_id)
+    if not attendance:
+        flash("Attendance record not found.", "error")
+        return redirect(url_for('views.pending_compoffs'))
+
     submitter = User.query.get(attendance.user_id)
+    if not submitter:
+        flash("User not found for this record.", "error")
+        return redirect(url_for('views.pending_compoffs'))
 
     if not has_approval_authority(current_user.role, submitter.role):
         flash("Not authorized.", "error")
@@ -1361,13 +1515,46 @@ def approve_compoff(attendance_id):
 
     if attendance.compoff_pending:
         attendance.compoff = attendance.compoff_requested
-        attendance.compoff_pending = False
         attendance.compoff_requested = 0
+        attendance.compoff_pending = False
         attendance.approved_by_id = current_user.id
         db.session.commit()
-        flash("Comp off approved.", "success")
+
+        # Optional: Notify user
+        send_email(
+            subject="Comp Off Approved",
+            recipient=submitter.email,
+            body=(
+                f"Dear {submitter.first_name},\n\n"
+                f"Your Comp Off request for {attendance.date.strftime('%d-%m-%Y')} has been approved.\n"
+                f"Approved by: {current_user.first_name} ({current_user.email})\n\n"
+                f"Regards,\nHR Team"
+            )
+        )
+
+        flash("Comp off approved and user notified.", "success")
+
     return redirect(url_for('views.pending_compoffs'))
 
+
+# @views.route('/reject_compoff/<int:attendance_id>', methods=['POST'])
+# @login_required
+# def reject_compoff(attendance_id):
+#     attendance = Attendance.query.get(attendance_id)
+#     submitter = User.query.get(attendance.user_id)
+
+#     if not has_approval_authority(current_user.role, submitter.role):
+#         flash("Not authorized.", "error")
+#         return redirect(url_for('views.home'))
+
+#     if attendance.compoff_pending:
+#         attendance.compoff = 0
+#         attendance.compoff_pending = False
+#         attendance.compoff_requested = 0
+#         attendance.approved_by_id = None
+#         db.session.commit()
+#         flash("Comp off rejected.", "info")
+#     return redirect(url_for('views.pending_compoffs'))
 @views.route('/reject_compoff/<int:attendance_id>', methods=['POST'])
 @login_required
 def reject_compoff(attendance_id):
@@ -1378,14 +1565,39 @@ def reject_compoff(attendance_id):
         flash("Not authorized.", "error")
         return redirect(url_for('views.home'))
 
+    remarks = request.form.get("remarks", "").strip()
+
     if attendance.compoff_pending:
         attendance.compoff = 0
         attendance.compoff_pending = False
         attendance.compoff_requested = 0
         attendance.approved_by_id = None
         db.session.commit()
-        flash("Comp off rejected.", "info")
+
+        # Format the email
+        subject = 'Comp Off Request Rejected'
+        body = (
+            f"Dear {submitter.first_name},\n\n"
+            f"Your Comp Off request for the date: {attendance.date.strftime('%d-%m-%Y')} has been rejected.\n\n"
+            f"Reason:\n{remarks}\n\n"
+            f"Rejected by: {current_user.first_name} ({current_user.email})\n"
+            f"If you have any questions, please reach out to your reporting manager or HR.\n\n"
+            f"Regards,\nHR Team"
+        )
+
+        # Send email
+        send_email(
+            subject=subject,
+            recipient=submitter.email,
+            body=body
+        )
+
+        flash("Comp Off rejected. Notification sent to the user.", "info")
+    else:
+        flash("No pending Comp Off request found for this record.", "warning")
+
     return redirect(url_for('views.pending_compoffs'))
+
 
 
 @views.route('/pending_compoffs')
@@ -1408,3 +1620,54 @@ def has_approval_authority(approver_role, submitter_role):
     if isinstance(allowed_roles, str):
         allowed_roles = [allowed_roles]
     return approver_role in allowed_roles
+
+
+@views.route('/detailed_view/<int:user_id>/<date>')
+@login_required
+def detailed_view(user_id, date):
+    from datetime import datetime
+    user = User.query.get_or_404(user_id)
+    parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
+    logs = IntermediateLog.query.filter_by(
+        user_id=user_id,
+        date=parsed_date
+    ).order_by(IntermediateLog.time).all()
+
+    return render_template('detailed_view.html', logs=logs, user=user, date=parsed_date)
+
+
+@views.route('/acknowledge/<int:announcement_id>', methods=['POST'])
+@login_required
+def acknowledge_announcement(announcement_id):
+    existing = AnnouncementAcknowledgment.query.filter_by(
+        user_id=current_user.id,
+        announcement_id=announcement_id
+    ).first()
+    if not existing:
+        ack = AnnouncementAcknowledgment(
+            user_id=current_user.id,
+            announcement_id=announcement_id
+        )
+        db.session.add(ack)
+        db.session.commit()
+        flash('Acknowledged successfully.', 'success')
+    else:
+        flash('You have already acknowledged this announcement.', 'info')
+    return redirect(url_for('views.announcements'))
+
+@views.route('/announcement-read-status/<int:announcement_id>')
+@login_required
+def read_status(announcement_id):
+    if current_user.email not in ["sumana@nadiya.in", "accounts@nadiya.in"]:
+        flash("Access denied.", "danger")
+        return redirect(url_for('views.announcements'))
+
+    announcement = Announcement.query.get_or_404(announcement_id)
+    all_users = User.query.all()
+    acknowledgments = {ack.user_id for ack in announcement.acknowledgments}
+    
+    read_users = [user for user in all_users if user.id in acknowledgments]
+    unread_users = [user for user in all_users if user.id not in acknowledgments]
+
+    return render_template("acknowledgment_status.html", announcement=announcement,
+                           read_users=read_users, unread_users=unread_users)
