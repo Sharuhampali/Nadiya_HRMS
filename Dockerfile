@@ -29,10 +29,7 @@ RUN pip install --upgrade pip \
 # Copy project files
 COPY . .
 
-EXPOSE 5001
+EXPOSE 8080
 
-# Start using Gunicorn with 4 workers (tweak based on instance size)
-# CMD ["gunicorn", "--workers=2", "--bind=0.0.0.0:5001", "main:app"]
-CMD ["python", "main.py"]
-
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "main:app"]
 
