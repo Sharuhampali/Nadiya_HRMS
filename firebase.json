@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": "public",
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "nadiya-hr", 
+          "region": "asia-south1"
+        }
+      }
+    ]
+  }
+}
