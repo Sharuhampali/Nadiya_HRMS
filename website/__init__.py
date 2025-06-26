@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 from .oauth import oauth, configure_oauth
+from flask_cors import CORS
 
 
 
@@ -24,6 +25,10 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
+    CORS(app, supports_credentials=True, origins=[
+        "https://high-essence-464010-f6.web.app"
+    ])
+
 
     # General config
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
