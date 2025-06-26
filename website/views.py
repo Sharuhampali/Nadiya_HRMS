@@ -132,10 +132,10 @@ def submit_attendance():
                 flash('You must mark an intermediate exit before logging a new intermediate entry.', 'warning')
                 return redirect(url_for('views.home'))
 
-        if entry_exit == 'intermediate_exit':
-            if not last_log or last_log.entry_type != 'intermediate_entry':
-                flash('You must mark an intermediate entry before logging an intermediate exit.', 'warning')
-                return redirect(url_for('views.home'))
+        # if entry_exit == 'intermediate_exit':
+            # if not last_log or last_log.entry_type != 'intermediate_entry':
+            #     flash('You must mark an intermediate entry before logging an intermediate exit.', 'warning')
+            #     return redirect(url_for('views.home'))
 
         try:
             location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
