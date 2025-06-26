@@ -21,25 +21,29 @@ mail = Mail()
 
 
 def create_app():
+    load_dotenv()
+
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
-    # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        'postgresql://postgres.ltvqpcocsivhtnvkaagl:nadiya1@aws-0-ap-south-1.pooler.supabase.com:5432/postgres'
-    )
+
+    # General config
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    app.config['UPLOADS_DEFAULT_DEST'] = os.path.join(app.static_folder, 'uploads')
-    app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(app.static_folder, 'uploads/photos')
-    app.config['UPLOADED_DOCS_DEST'] = os.path.join(app.static_folder, 'uploads/docs')
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = 'hampalisharu@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'iblr ljhn vsct brcj'
-    app.config['MAIL_DEFAULT_SENDER'] = ('HR', 'sumana@nadiya.in')
-    # app.config['SUPABASE_URL'] = 'https://oxugjpnnyuytmjtqrevr.supabase.co'
-    # app.config['SUPABASE_KEY'] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94dWdqcG5ueXV5dG1qdHFyZXZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkyNzk2NzUsImV4cCI6MjA2NDg1NTY3NX0.miJKIWsR4YHoDY9cnazA8PfwnHq_e-3ngP36cJbJIlg' 
+    # Uploads
+    app.config['UPLOADS_DEFAULT_DEST'] = os.getenv('UPLOADS_DEFAULT_DEST')
+    app.config['UPLOADED_PHOTOS_DEST'] = os.getenv('UPLOADED_PHOTOS_DEST')
+    app.config['UPLOADED_DOCS_DEST'] = os.getenv('UPLOADED_DOCS_DEST')
+
+    # Mail config
+    app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+    app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = (os.getenv('MAIL_DEFAULT_SENDER_NAME'), os.getenv('MAIL_DEFAULT_SENDER_EMAIL'))
+
+   
     from .auth import oauth
     oauth.init_app(app)
 

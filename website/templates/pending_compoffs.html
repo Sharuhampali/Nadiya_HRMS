@@ -1,31 +1,96 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Pending Comp Off Approvals</h2>
+<style>
+    .comp-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 24px 12px 40px 12px;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        background: var(--bg-primary);
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 10px var(--shadow);
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filter-tab {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .filter-tab.active {
+        background: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+    }
+
+    .status-approved { color: #059669; font-weight: 600; }
+    .status-rejected { color: #dc2626; font-weight: 600; }
+    .status-pending { color: #f59e0b; font-weight: 600; }
+
+    .table td, .table th {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-calendar-check"></i> Comp Off Approvals</h1>
+</div>
+
+<div class="comp-container">
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all"><i class="fas fa-list"></i> All</div>
+        <div class="filter-tab" data-filter="pending"><i class="fas fa-clock"></i> Pending</div>
+        <div class="filter-tab" data-filter="approved"><i class="fas fa-check-circle"></i> Approved</div>
+        <div class="filter-tab" data-filter="rejected"><i class="fas fa-times-circle"></i> Rejected</div>
+    </div>
 
     {% if records %}
         <table class="table table-bordered table-hover">
             <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Employee Name</th>
+                    <th>Name</th>
                     <th>Role</th>
                     <th>Date</th>
                     <th>Day</th>
-                    <th>Entry Time</th>
-                    <th>Exit Time</th>
-                    <th>Total Hours</th>
-                    <th>Requested Comp Off</th>
+                    <th>Entry</th>
+                    <th>Exit</th>
+                    <th>Hours</th>
+                    <th>Comp Off</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for record in records %}
-                <tr>
+                {% set status = 'approved' if record.compoff_approved else 'rejected' if record.compoff_rejected else 'pending' %}
+                <tr class="record-row" data-status="{{ status }}">
                     <td>{{ loop.index }}</td>
                     <td>{{ record.name }}</td>
-                    <td>{{ record.user.role }}</td>
+                    <td>{{ record.user.role.replace('_', ' ') if record.user.role else '—' }}</td>
                     <td>{{ record.date }}</td>
                     <td>{{ record.day }}</td>
                     <td>{{ record.entry_time.strftime('%H:%M') if record.entry_time else '—' }}</td>
@@ -39,32 +104,40 @@
                     </td>
                     <td>
                         {% if record.compoff_pending %}
-                            {{ record.compoff_requested }} day{% if record.compoff_requested == 0.5 %} (half) {% endif %}
+                            {{ record.compoff_requested }} day{% if record.compoff_requested == 0.5 %} (half){% endif %}
                         {% else %}
                             {{ record.compoff }} day
                         {% endif %}
                     </td>
                     <td>
-                        <form method="POST" action="{{ url_for('views.approve_compoff', attendance_id=record.id) }}" style="display:inline;">
-                            <button class="btn btn-success btn-sm">Approve</button>
-                        </form>
-
-                        <!-- Trigger for rejection modal -->
-                        <button type="button"
-                                class="btn btn-danger btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#rejectModal"
-                                data-url="{{ url_for('views.reject_compoff', attendance_id=record.id) }}">
-                            Reject
-                        </button>
+                        <span class="status-{{ status }}">
+                            {{ status.capitalize() }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if status == 'pending' %}
+                            <form method="POST" action="{{ url_for('views.approve_compoff', attendance_id=record.id) }}" style="display:inline;">
+                                <button class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal"
+                                    data-url="{{ url_for('views.reject_compoff', attendance_id=record.id) }}">
+                                Reject
+                            </button>
+                        {% else %}
+                            <em>N/A</em>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <div class="alert alert-info">
-            No pending comp off approvals at this time.
+        <div class="alert-info text-center py-5">
+            <i class="fas fa-inbox fa-2x mb-2"></i><br>
+            No comp off records found.
         </div>
     {% endif %}
 </div>
@@ -93,16 +166,32 @@
   </div>
 </div>
 
-<!-- JavaScript to set action dynamically -->
+<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.filter-tab');
+    const rows = document.querySelectorAll('.record-row');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const filter = tab.dataset.filter;
+
+            rows.forEach(row => {
+                const status = row.dataset.status;
+                row.style.display = (filter === 'all' || filter === status) ? '' : 'none';
+            });
+        });
+    });
+
     const rejectModal = document.getElementById('rejectModal');
     const rejectForm = document.getElementById('rejectForm');
 
     rejectModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        const actionUrl = button.getAttribute('data-url');
-        rejectForm.setAttribute('action', actionUrl);
+        const url = button.getAttribute('data-url');
+        rejectForm.setAttribute('action', url);
         rejectForm.reset();
     });
 });

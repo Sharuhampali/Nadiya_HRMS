@@ -263,7 +263,7 @@
                             {{ user.first_name[0].upper() }}
                         </div>
                         <div class="employee-name">{{ user.first_name }}</div>
-                        <div class="employee-role">{{ user.role.replace('_', ' ') }}</div>
+<div class="employee-role">{{ user.role.replace('_', ' ') if user.role else 'No role assigned' }}</div>
                     </div>
                     {% endfor %}
                 {% else %}

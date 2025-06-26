@@ -25,6 +25,8 @@ class User(db.Model, UserMixin):
     reset_token = db.Column(db.String(36), nullable=True)
 
     attendances = db.relationship('Attendance', backref='user', lazy=True)
+    joining_date = db.Column(db.DateTime, default=datetime.utcnow)
+
 
     def set_probation_status(self, is_probation):
         """Update probation status and reset leave balances if on probation."""

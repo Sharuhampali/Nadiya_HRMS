@@ -13,6 +13,8 @@ from . import mail
 from flask_mail import Message
 import pytz
 from werkzeug.utils import secure_filename
+from leave_calculator import calculate_initial_leaves
+from dateutil.relativedelta import relativedelta
 
 
 views = Blueprint('views', __name__)
@@ -23,7 +25,7 @@ india_tz = pytz.timezone('Asia/Kolkata')
 @login_required
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in' :
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' :
         
     
         return render_template(
@@ -71,7 +73,7 @@ def announcements_category():
 @views.route('/misc-category')
 @login_required
 def misc_category():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
     return render_template('misc_category.html', user=current_user)
@@ -142,10 +144,11 @@ def submit_attendance():
 
     # Entry logic
     elif entry_exit == 'entry':
-        user_attendance.site_name_e = request.form.get('site_name')
         if user_attendance and user_attendance.exit_time is None:
             flash('Please exit the current attendance record before submitting another entry.', 'warning')
         else:
+            site_name = request.form.get('site_name')
+
             try:
                 entry_location = geoLoc.reverse(f"{latitude}, {longitude}")
                 entry_address = entry_location.address if entry_location else "Unknown"
@@ -225,7 +228,7 @@ def all():
 @views.route('/attendance_table')
 @login_required
 def attendance_table():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
@@ -419,7 +422,7 @@ def approved_leaves():
 @views.route('/reset_leaves', methods=['GET', 'POST'])
 @login_required
 def reset_leaves():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
         flash("You do not have permission to reset leaves.", category='error')
         return redirect(url_for('views.home'))
 
@@ -507,7 +510,7 @@ def who1_output():
 @views.route('/display_compoff', methods=['GET'])
 @login_required
 def display_compoff():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
@@ -616,10 +619,76 @@ def uploaded_file(setname, filename):
     else:
         return "File type not supported", 400
 
+# @views.route('/assign_roles', methods=['GET', 'POST'])
+# @login_required
+# def assign_roles():
+#     if current_user.email != 'sumana@nadiya.in'and current_user.email!= 'maneesh@nadiya.in':
+#         flash('You do not have permission to access this page.', 'error')
+#         return redirect(url_for('views.home'))
+
+#     if request.method == 'POST':
+#         user_id = request.form['user_id']
+#         role = request.form['role']
+#         is_probation = request.form.get('probation') == 'on'
+#         user = User.query.get(user_id)
+#      #### this logic is not for 1.5 leaves every month, this is only for calculating leaves if app use started in the middle of the year
+#         if user:
+#             user.role = role
+#             user.set_probation_status(is_probation)
+
+#             if not is_probation:
+#                 today = datetime.today()
+
+
+#                 if today.month >= 4:  # Financial year starts on April 1st
+#                     start_of_year = datetime(today.year, 4, 1)
+#                     end_of_year = datetime(today.year + 1, 3, 31)
+#                 else:  # Financial year starts on April 1st of the previous year
+#                     start_of_year = datetime(today.year - 1, 4, 1)
+#                     end_of_year = datetime(today.year, 3, 31)
+
+#                 months_left = (end_of_year.year - today.year) * 12 + (end_of_year.month - today.month) - today.day // 30
+
+#                 # Calculate leave entitlements and round to 2 decimal places
+#                 earned_leaves = round((months_left * 15) / 12, 2)
+#                 user.earned = 15 - earned_leaves
+
+#                 m_leaves = round((months_left * 6) / 12, 2)
+#                 user.medic = 6 - m_leaves
+
+#                 p_leaves = round((months_left * 10) / 12, 2)
+#                 user.pay = 10 - p_leaves
+
+#             if is_probation:
+#                 today = datetime.today()
+
+#                 # Determine the start and end of the financial year
+#                 if today.month >= 4:  # Financial year starts on April 1st
+#                     start_of_year = datetime(today.year, 4, 1)
+#                     end_of_year = datetime(today.year + 1, 3, 31)
+#                 else:  # Financial year starts on April 1st of the previous year
+#                     start_of_year = datetime(today.year - 1, 4, 1)
+#                     end_of_year = datetime(today.year, 3, 31)
+
+#                 months_left = (end_of_year.year - today.year) * 12 + (end_of_year.month - today.month) - today.day // 30
+#                 p_leaves = round((months_left * 10) / 12, 2)
+#                 user.pay = 10 - p_leaves
+
+#             user.probation = is_probation
+
+#             db.session.commit()
+#             flash(f'Role {role} assigned to {user.first_name}.', 'success')
+#         else:
+#             flash('User not found.', 'error')
+#         return redirect(url_for('views.assign_roles'))
+
+#     users = User.query.all()
+
+#     return render_template('assign_roles.html', users=users)
 @views.route('/assign_roles', methods=['GET', 'POST'])
 @login_required
 def assign_roles():
-    if current_user.email != 'sumana@nadiya.in'and current_user.email!= 'accounts@nadiya.in':
+    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in']:
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('views.home'))
 
@@ -627,51 +696,20 @@ def assign_roles():
         user_id = request.form['user_id']
         role = request.form['role']
         is_probation = request.form.get('probation') == 'on'
+
         user = User.query.get(user_id)
-     #### this logic is not for 1.5 leaves every month, this is only for calculating leaves if app use started in the middle of the year
         if user:
+            previously_probation = user.probation
             user.role = role
             user.set_probation_status(is_probation)
 
-            if not is_probation:
-                today = datetime.today()
-
-
-                if today.month >= 4:  # Financial year starts on April 1st
-                    start_of_year = datetime(today.year, 4, 1)
-                    end_of_year = datetime(today.year + 1, 3, 31)
-                else:  # Financial year starts on April 1st of the previous year
-                    start_of_year = datetime(today.year - 1, 4, 1)
-                    end_of_year = datetime(today.year, 3, 31)
-
-                months_left = (end_of_year.year - today.year) * 12 + (end_of_year.month - today.month) - today.day // 30
-
-                # Calculate leave entitlements and round to 2 decimal places
-                earned_leaves = round((months_left * 15) / 12, 2)
-                user.earned = 15 - earned_leaves
-
-                m_leaves = round((months_left * 6) / 12, 2)
-                user.medic = 6 - m_leaves
-
-                p_leaves = round((months_left * 10) / 12, 2)
-                user.pay = 10 - p_leaves
-
-            if is_probation:
-                today = datetime.today()
-
-                # Determine the start and end of the financial year
-                if today.month >= 4:  # Financial year starts on April 1st
-                    start_of_year = datetime(today.year, 4, 1)
-                    end_of_year = datetime(today.year + 1, 3, 31)
-                else:  # Financial year starts on April 1st of the previous year
-                    start_of_year = datetime(today.year - 1, 4, 1)
-                    end_of_year = datetime(today.year, 3, 31)
-
-                months_left = (end_of_year.year - today.year) * 12 + (end_of_year.month - today.month) - today.day // 30
-                p_leaves = round((months_left * 10) / 12, 2)
-                user.pay = 10 - p_leaves
-
-            user.probation = is_probation
+            if previously_probation and not is_probation:
+                # Probation just ended, check if 6 months have passed
+                if user.joining_date and datetime.today() >= user.joining_date + relativedelta(months=6):
+                    leave_balances = calculate_initial_leaves(datetime.today(), is_probation=False)
+                    user.earned = leave_balances["earned"]
+                    user.medic = leave_balances["medic"]
+                    user.pay = leave_balances["pay"]
 
             db.session.commit()
             flash(f'Role {role} assigned to {user.first_name}.', 'success')
@@ -680,87 +718,55 @@ def assign_roles():
         return redirect(url_for('views.assign_roles'))
 
     users = User.query.all()
-
     return render_template('assign_roles.html', users=users)
-# @views.route('/assign_roles', methods=['GET', 'POST'])
-# @login_required
-# def assign_roles():
-#     if current_user.email not in ['sumana@nadiya.in', 'accounts@nadiya.in']:
-#         flash('You do not have permission to access this page.', 'error')
-#         return redirect(url_for('views.home'))
 
-#     if request.method == 'POST':
-#         user_id = request.form['user_id']
-#         role = request.form['role']
-#         is_probation = request.form.get('probation') == 'on'
-
-#         user = User.query.get(user_id)
-
-#         if user:
-#             user.role = role
-#             user.set_probation_status(is_probation)  # You can remove this if you're setting it directly below
-#             user.probation = is_probation  # Ensures direct assignment if above method doesn't exist
-#             db.session.commit()
-#             flash(f'Role "{role}" assigned to {user.first_name}. Probation status: {"Yes" if is_probation else "No"}.', 'success')
-#         else:
-#             flash('User not found.', 'error')
-
-#         return redirect(url_for('views.assign_roles'))
-
-#     users = User.query.all()
-#     return render_template('assign_roles.html', users=users)
 
 
 @views.route('/leave_requests')
 @login_required
 def leave_requests():
-    # Check current user's role
-    print(f"Current user's role: {current_user.role}")
+    user_role = current_user.role
+    print(f"Current user's role: {user_role}")
 
-    # Ensure only authorized users can view leave requests
-    if current_user.role == 'director':
-        leave_requests = Leave.query.all()
-    elif current_user.email == 'sumana@nadiya.in':
-        leave_requests = Leave.query.all()
-    elif current_user.role == 'accounts_manager':
-        # Fetch leave requests for accounts members
-        leave_requests = Leave.query.join(User).filter(User.role == 'accounts_member').all()
-    elif current_user.role == 'business_manager':
-        # Fetch leave requests for business members
-        leave_requests = Leave.query.join(User).filter(User.role == 'business_member').all()
-    elif current_user.role == 'service_manager':
-        # Fetch leave requests for service members
-        leave_requests = Leave.query.join(User).filter(User.role == 'service_member').all()
-    elif current_user.role == 'service_support_manager':
-        # Fetch leave requests for service support members
-        leave_requests = Leave.query.join(User).filter(User.role == 'service_support_member').all()
-    elif current_user.role == 'sales_manager':
-        # Fetch leave requests for sales members
-        leave_requests = Leave.query.join(User).filter(User.role == 'sales_member').all()
-    elif current_user.role == 'service_member':
-        leave_requests = Leave.query.join(User).filter(User.role == 'service_emp').all()
-    else:
+    # # Special case override for specific admin emails
+    # if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in']:
+    #     leave_requests = Leave.query.all()
+    #     return render_template('leave_requests.html', leave_requests=leave_requests)
+
+    # # director can see everything
+    # if user_role == 'director':
+    #     leave_requests = Leave.query.all()
+    #     return render_template('leave_requests.html', leave_requests=leave_requests)
+
+    # Get all roles where current user is a manager (i.e., in the value list of ROLES_HIERARCHY)
+    subordinate_roles = [role for role, managers in ROLES_HIERARCHY.items() if user_role in managers]
+
+    if not subordinate_roles:
         flash("You do not have permission to view leave requests.", category='error')
         return redirect(url_for('views.home'))
 
+    # Fetch leave requests for users with subordinate roles
+    leave_requests = Leave.query.join(User).filter(User.role.in_(subordinate_roles)).all()
     return render_template('leave_requests.html', leave_requests=leave_requests)
 
-ROLES_HIERARCHY = {
-    'accounts_member': ['accounts_manager', 'director'],
-    'business_member': ['business_manager', 'director', 'accounts_manager'],
-    'service_member': ['service_manager', 'director', 'accounts_manager'],
-    'service_support_member': ['service_support_manager', 'director', 'accounts_manager'],
-    'sales_member': ['sales_manager', 'director', 'accounts_manager'],
-    'service_emp': ['service_manager', 'director', 'accounts_manager'],
-  
 
-    # Optional: escalate further
-    'accounts_manager': 'director',
-    'business_manager': ['director', 'accounts_manager'],
-    'service_manager': ['director', 'accounts_manager'],
-    'service_support_manager': ['director', 'accounts_manager'],
-    'sales_manager': ['director', 'accounts_manager'],
+ROLES_HIERARCHY = {
+    # Lowest tier → respective manager(s)
+    'design_member': ['design_head','operational_head', 'director'],
+    'service_member': ['service_manager', 'operational_head', 'director'],
+    'accounts_member': ['accounts_manager','operational_head','director'],
+    
+    # Mid-tier managers → higher-level director(s)
+    'design_head': ['director','operational_head'],
+    'service_manager': ['director','operational_head'],
+    'business_development_manager': ['director','operational_head'],
+    'accounts_manager': ['director','operational_head'],
+
+    # Director reports to operational head and vice versa 
+    'director': ['operational_head'],
+    'operational_head': ['director']
 }
+
 
 # @views.route('/apply_leave', methods=['GET', 'POST'])
 # @login_required
@@ -1160,7 +1166,7 @@ def post_announcement():
 @login_required
 def delete_announcement(announcement_id):
     confirmation_id = request.form.get('confirmation_id')
-    if (current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in") and confirmation_id == '24':
+    if (current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in") and confirmation_id == '24':
 
 
         announcement = Announcement.query.get(announcement_id)
@@ -1386,7 +1392,7 @@ def export_all_data():
 
     # Send the email
     msg = Message(subject="HRMS System Backup",
-                  recipients=["hampalisharu@gmail.com"])  # Replace with actual recipient
+                  recipients=["sumana@nadiya.in.com", "maneesh@nadiya.in"])  # Replace with actual recipient
     msg.body = "Attached is the latest system backup of all tables before reset."
     msg.attach("all_data_export.xlsx", 
                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1600,18 +1606,50 @@ def reject_compoff(attendance_id):
 
 
 
+# @views.route('/pending_compoffs')
+# @login_required
+# def pending_compoffs():
+#     pending_records = Attendance.query.filter_by(compoff_pending=True).all()
+
+#     approvable = [
+#         record for record in pending_records
+#         if (submitter := User.query.get(record.user_id)) 
+#         and has_approval_authority(current_user.role, submitter.role)
+#     ]
+
+#     return render_template('pending_compoffs.html', records=approvable)
 @views.route('/pending_compoffs')
 @login_required
 def pending_compoffs():
-    pending_records = Attendance.query.filter_by(compoff_pending=True).all()
+    all_records = Attendance.query.filter(
+        (Attendance.compoff_pending == True) |
+        (Attendance.compoff > 0) |
+        ((Attendance.compoff == 0) & (Attendance.compoff_requested > 0))
+    ).all()
 
-    approvable = [
-        record for record in pending_records
-        if (submitter := User.query.get(record.user_id)) 
-        and has_approval_authority(current_user.role, submitter.role)
-    ]
+    approvable = []
+
+    for record in all_records:
+        submitter = User.query.get(record.user_id)
+
+        if submitter and has_approval_authority(current_user.role, submitter.role):
+            # Attach user object for use in template
+            record.user = submitter
+
+            # Determine compoff status inline
+            if record.compoff_pending:
+                record.compoff_status = 'pending'
+            elif record.compoff and record.compoff > 0:
+                record.compoff_status = 'approved'
+            elif not record.compoff_pending and record.compoff_requested > 0 and (record.compoff == 0 or record.compoff is None):
+                record.compoff_status = 'rejected'
+            else:
+                record.compoff_status = 'unknown'  # fallback for edge cases
+
+            approvable.append(record)
 
     return render_template('pending_compoffs.html', records=approvable)
+
 
 
 
@@ -1658,7 +1696,7 @@ def acknowledge_announcement(announcement_id):
 @views.route('/announcement-read-status/<int:announcement_id>')
 @login_required
 def read_status(announcement_id):
-    if current_user.email not in ["sumana@nadiya.in", "accounts@nadiya.in"]:
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
         flash("Access denied.", "danger")
         return redirect(url_for('views.announcements'))
 
