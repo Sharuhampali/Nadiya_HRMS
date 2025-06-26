@@ -2,54 +2,90 @@
 
 {% block content %}
 <style>
-    .card-body {
-        padding: 1.5rem;
-        color:var(--text-primary) !important;
-        background: var(--bg-primary) !important;
-    }
+  .card-body {
+    padding: 1.5rem;
+    color: var(--text-primary) !important;
+    background: var(--bg-primary) !important;
+  }
 
+  .x {
+    background-color: green !important;
+    color: white !important;
+  }
 </style>
-
 <div class="container mt-5">
   <h2 class="mb-3">Detailed Attendance View</h2>
 
   <div class="card shadow-sm">
     <div class="card-body">
       <h5 class="card-title mb-4">
-        Intermediate Entries for {{ user.first_name }} on {{ date.strftime('%d-%m-%Y') }}
+        Attendance Details for {{ user.first_name }} on {{ date.strftime('%d-%m-%Y') }}
       </h5>
 
-      {% if logs %}
       <div class="table-container">
-  <table class="table table-bordered table-sm align-middle">
-    <thead class="table-light">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Time</th>
-        <th scope="col">Type</th>
-        <th scope="col">Location</th>
-        <th scope="col">Place Visited</th> 
-      </tr>
-    </thead>
-    <tbody>
-      {% for log in logs %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ log.time.strftime('%H:%M') }}</td>
-        <td class="text-capitalize">{{ log.entry_type.replace('_', ' ') }}</td>
-        <td>{{ log.location }}</td>
-        <td>{{ log.site or '-' }}</td>  {# ✅ Display site_name #}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+        <table class="table table-bordered table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+        
+              <th>Type</th>
+              <th>Time</th>
+              <th>Location</th>
+              <th>Place Visited</th>
+            </tr>
+          </thead>
+          <tbody>
+          
 
-      {% else %}
-      <p class="text-muted">No intermediate logs available for this day.</p>
-      {% endif %}
+            {% if attendance %}
+              <tr >
+               
+                <td class="x"><strong>Main Entry</strong></td>
+                <td class="x">{{ attendance.entry_time.strftime('%H:%M') if attendance.entry_time else '-' }}</td>
+                <td class="x">{{ attendance.entry_location or '-' }}</td>
+                <td class="x">{{ attendance.site_name_e or '-' }}</td>
+              </tr>
+        
+            {% endif %}
 
-      <a href="{{ url_for('views.attendance_table') }}" class="btn btn-secondary mt-3" style="background: green">Back to Attendance</a>
+            {% for log in logs %}
+              <tr>
+         
+                <td class="text-capitalize">{{ log.entry_type.replace('_', ' ') }}</td>
+                <td>{{ log.time.strftime('%H:%M') }}</td>
+                <td>{{ log.location }}</td>
+                <td>{{ log.site or '-' }}</td>
+              </tr>
+              
+            {% endfor %}
+
+            {% if attendance %}
+              <tr >
+           
+                <td class="x"><strong>Main Exit</strong></td>
+                <td class="x">
+                  {% if attendance.exit_time %}
+                    {{ attendance.exit_time.strftime('%H:%M') }}
+                  {% else %}
+                    <span class="text-muted">Not recorded</span>
+                  {% endif %}
+                </td>
+                <td class="x">{{ attendance.exit_location or '-' }}</td>
+                <td class="x">{{ attendance.site_name or '-' }}</td>
+              </tr>
+            {% endif %}
+
+            {% if not attendance and not logs %}
+              <tr>
+                <td colspan="5" class="text-muted">No attendance data available for this day.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <a href="{{ url_for('views.attendance_table') }}" class="btn btn-secondary mt-3" style="background: green">
+        Back to Attendance
+      </a>
     </div>
   </div>
 </div>

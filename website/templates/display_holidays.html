@@ -270,7 +270,7 @@
                         </span>
                     </div>
 
-                    {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'accounts@nadiya.in' %}
+                    {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'maneesh@nadiya.in' %}
                         <div class="holiday-actions">
                             <form action="{{ url_for('views.delete_holiday', holiday_id=holiday.id) }}" method="POST" class="delete-form">
                                 <input type="text" name="confirmation_id" placeholder="Confirmation ID" required class="delete-input">
@@ -287,7 +287,7 @@
         <div class="no-holidays">
             <i class="fas fa-calendar-times"></i>
             <p>No holidays have been set yet.</p>
-            {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'accounts@nadiya.in' %}
+            {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'maneesh@nadiya.in' %}
                 <a href="/set_holidays" style="color: var(--warning); text-decoration: none; font-weight: 600; margin-top: 1rem; display: inline-block;">
                     <i class="fas fa-plus"></i> Add Holidays
                 </a>

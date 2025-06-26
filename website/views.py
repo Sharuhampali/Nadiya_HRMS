@@ -119,7 +119,24 @@ def submit_attendance():
             user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
 
     # Handle intermediate entries
+    # Handle intermediate entries
     if entry_exit in ['intermediate_entry', 'intermediate_exit']:
+        # Check last intermediate entry for the day
+        last_log = IntermediateLog.query.filter_by(
+            user_id=current_user.id,
+            date=datetime.now(india_tz).date()
+        ).order_by(IntermediateLog.id.desc()).first()
+
+        if entry_exit == 'intermediate_entry':
+            if last_log and last_log.entry_type == 'intermediate_entry':
+                flash('You must mark an intermediate exit before logging a new intermediate entry.', 'warning')
+                return redirect(url_for('views.home'))
+
+        if entry_exit == 'intermediate_exit':
+            if not last_log or last_log.entry_type != 'intermediate_entry':
+                flash('You must mark an intermediate entry before logging an intermediate exit.', 'warning')
+                return redirect(url_for('views.home'))
+
         try:
             location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
             location = location_obj.address if location_obj else "Unknown"
@@ -141,6 +158,7 @@ def submit_attendance():
         db.session.commit()
         flash(f"{entry_exit.replace('_', ' ').capitalize()} recorded.", "success")
         return redirect(url_for('views.home'))
+
 
     # Entry logic
     elif entry_exit == 'entry':
@@ -753,19 +771,19 @@ def leave_requests():
 
 ROLES_HIERARCHY = {
     # Lowest tier → respective manager(s)
-    'design_member': ['design_head','operational_head', 'director'],
-    'service_member': ['service_manager', 'operational_head', 'director'],
-    'accounts_member': ['accounts_manager','operational_head','director'],
+    'design_member': ['design_head','operations_head', 'director'],
+    'service_member': ['service_manager', 'operations_head', 'director'],
+    'accounts_member': ['accounts_manager','operations_head','director'],
     
     # Mid-tier managers → higher-level director(s)
-    'design_head': ['director','operational_head'],
-    'service_manager': ['director','operational_head'],
-    'business_development_manager': ['director','operational_head'],
-    'accounts_manager': ['director','operational_head'],
+    'design_head': ['director','operations_head'],
+    'service_manager': ['director','operations_head'],
+    'business_development_manager': ['director','operations_head'],
+    'accounts_manager': ['director','operations_head'],
 
     # Director reports to operational head and vice versa 
-    'director': ['operational_head'],
-    'operational_head': ['director']
+    'director': ['operations_head'],
+    'operations_head': ['director']
 }
 
 
@@ -1419,25 +1437,15 @@ def export_all_data():
 #############################################################################################
 
 def calculate_leaves_for_user(user):
-    today = datetime.today()
-
-    if today.month >= 4:
-        start_of_year = datetime(today.year, 4, 1)
-        end_of_year = datetime(today.year + 1, 3, 31)
-    else:
-        start_of_year = datetime(today.year - 1, 4, 1)
-        end_of_year = datetime(today.year, 3, 31)
-
-    months_left = (end_of_year.year - today.year) * 12 + (end_of_year.month - today.month) - today.day // 30
-
+   
     if user.probation:
         user.earned = 0
         user.medic = 0
-        user.pay = 10 - round((months_left * 10) / 12, 2)
+        user.pay = 10 - round((1 * 10) / 12, 2)
     else:
-        user.earned = 15 - round((months_left * 15) / 12, 2)
-        user.medic = 6 - round((months_left * 6) / 12, 2)
-        user.pay = 10 - round((months_left * 10) / 12, 2)
+        user.earned = 15 - round((1 * 15) / 12, 2)
+        user.medic = 6 - round((1 * 6) / 12, 2)
+        user.pay = 10 - round((1 * 10) / 12, 2)
 
     db.session.commit()
 
@@ -1607,49 +1615,49 @@ def reject_compoff(attendance_id):
 
 
 
-# @views.route('/pending_compoffs')
-# @login_required
-# def pending_compoffs():
-#     pending_records = Attendance.query.filter_by(compoff_pending=True).all()
-
-#     approvable = [
-#         record for record in pending_records
-#         if (submitter := User.query.get(record.user_id)) 
-#         and has_approval_authority(current_user.role, submitter.role)
-#     ]
-
-#     return render_template('pending_compoffs.html', records=approvable)
 @views.route('/pending_compoffs')
 @login_required
 def pending_compoffs():
-    all_records = Attendance.query.filter(
-        (Attendance.compoff_pending == True) |
-        (Attendance.compoff > 0) |
-        ((Attendance.compoff == 0) & (Attendance.compoff_requested > 0))
-    ).all()
+    pending_records = Attendance.query.filter_by(compoff_pending=True).all()
 
-    approvable = []
-
-    for record in all_records:
-        submitter = User.query.get(record.user_id)
-
-        if submitter and has_approval_authority(current_user.role, submitter.role):
-            # Attach user object for use in template
-            record.user = submitter
-
-            # Determine compoff status inline
-            if record.compoff_pending:
-                record.compoff_status = 'pending'
-            elif record.compoff and record.compoff > 0:
-                record.compoff_status = 'approved'
-            elif not record.compoff_pending and record.compoff_requested > 0 and (record.compoff == 0 or record.compoff is None):
-                record.compoff_status = 'rejected'
-            else:
-                record.compoff_status = 'unknown'  # fallback for edge cases
-
-            approvable.append(record)
+    approvable = [
+        record for record in pending_records
+        if (submitter := User.query.get(record.user_id)) 
+        and has_approval_authority(current_user.role, submitter.role)
+    ]
 
     return render_template('pending_compoffs.html', records=approvable)
+# @views.route('/pending_compoffs')
+# @login_required
+# def pending_compoffs():
+#     all_records = Attendance.query.filter(
+#         (Attendance.compoff_pending == True) |
+#         (Attendance.compoff > 0) |
+#         ((Attendance.compoff == 0) & (Attendance.compoff_requested > 0))
+#     ).all()
+
+#     approvable = []
+
+#     for record in all_records:
+#         submitter = User.query.get(record.user_id)
+
+#         if submitter and has_approval_authority(current_user.role, submitter.role):
+#             # Attach user object for use in template
+#             record.user = submitter
+
+#             # Determine compoff status inline
+#             if record.compoff_pending:
+#                 record.compoff_status = 'pending'
+#             elif record.compoff and record.compoff > 0:
+#                 record.compoff_status = 'approved'
+#             elif not record.compoff_pending and record.compoff_requested > 0 and (record.compoff == 0 or record.compoff is None):
+#                 record.compoff_status = 'rejected'
+#             else:
+#                 record.compoff_status = 'unknown'  # fallback for edge cases
+
+#             approvable.append(record)
+
+#     return render_template('pending_compoffs.html', records=approvable)
 
 
 
@@ -1671,8 +1679,10 @@ def detailed_view(user_id, date):
         user_id=user_id,
         date=parsed_date
     ).order_by(IntermediateLog.time).all()
+    attendance = Attendance.query.filter_by(user_id=user_id, date=date).first()
 
-    return render_template('detailed_view.html', logs=logs, user=user, date=parsed_date)
+
+    return render_template('detailed_view.html', logs=logs, user=user, date=parsed_date, attendance=attendance)
 
 
 @views.route('/acknowledge/<int:announcement_id>', methods=['POST'])

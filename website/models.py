@@ -69,15 +69,20 @@ class Attendance(db.Model):
     site_name = db.Column(db.String(150), nullable=True)  # New field for site/customer name
     site_name_e = db.Column(db.String(150), nullable=True)
 
-
     def total_time_worked(self):
-        if self.entry_time and self.exit_time:
-            entry_time_dt = datetime.combine(date.today(), self.entry_time)
-            exit_time_dt = datetime.combine(date.today(), self.exit_time)
-            if exit_time_dt < entry_time_dt:
-                exit_time_dt += timedelta(days=1)
-            return exit_time_dt - entry_time_dt
+        if self.entry_time and self.exit_time and self.date:
+            entry_dt = datetime.combine(self.date, self.entry_time)
+
+            # If exit is same day
+            if self.exit_time >= self.entry_time:
+                exit_dt = datetime.combine(self.date, self.exit_time)
+            else:
+                # Crossed midnight — exit is on the next day
+                exit_dt = datetime.combine(self.date + timedelta(days=1), self.exit_time)
+
+            return exit_dt - entry_dt
         return None
+
 
     def extra_time_worked(self):
         total_time = self.total_time_worked()

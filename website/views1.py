@@ -22,7 +22,7 @@
 # @login_required
 # def home():
 #     current_date = datetime.now(india_tz).date()
-#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in' :
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' :
 #         return render_template("home.html", user=current_user, current_date= current_date)
 
 #     return render_template("admin_home.html", user=current_user, current_date= current_date)
@@ -157,7 +157,7 @@
 # @views.route('/attendance_table')
 # @login_required
 # def attendance_table():
-#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
 #         flash("You do not have permission to view this page.", category='error')
 #         return redirect(url_for('views.home'))
 
@@ -276,7 +276,7 @@
 # @views.route('/reset_leaves', methods=['GET', 'POST'])
 # @login_required
 # def reset_leaves():
-#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
 #         flash("You do not have permission to reset leaves.", category='error')
 #         return redirect(url_for('views.home'))
 
@@ -363,7 +363,7 @@
 # @views.route('/display_compoff', methods=['GET'])
 # @login_required
 # def display_compoff():
-#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'accounts@nadiya.in':
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
 #         flash("You do not have permission to view this page.", category='error')
 #         return redirect(url_for('views.home'))
 
@@ -480,7 +480,7 @@
 # @views.route('/assign_roles', methods=['GET', 'POST'])
 # @login_required
 # def assign_roles():
-#     if current_user.email != 'sumana@nadiya.in'and current_user.email!= 'accounts@nadiya.in':
+#     if current_user.email != 'sumana@nadiya.in'and current_user.email!= 'maneesh@nadiya.in':
 #         flash('You do not have permission to access this page.', 'error')
 #         return redirect(url_for('views.home'))
 
@@ -584,20 +584,20 @@
 
 
 # # ROLES = {
-# #    'director': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in', 'accounts@nadiya.in' ],
-# #     'accounts_manager': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in'  ],
-# #     'business_manager': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in', 'accounts@nadiya.in' ],
-# #     'service_manager':['maneesh@nadiya.in', 'support@nadiya.in' , 'sumana@nadiya.in', 'accounts@nadiya.in'],
-# #     'service_support_manager': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in' ],
-# #     'sales_manager': ['maneesh@nadiya.in', 'support@nadiya.in' , 'sumana@nadiya.in','accounts@nadiya.in' ],
-# #     'others': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in'  ],
+# #    'director': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in', 'maneesh@nadiya.in' ],
+# #     'accounts_manager': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in'  ],
+# #     'business_manager': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in', 'maneesh@nadiya.in' ],
+# #     'service_manager':['maneesh@nadiya.in', 'support@nadiya.in' , 'sumana@nadiya.in', 'maneesh@nadiya.in'],
+# #     'service_support_manager': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in' ],
+# #     'sales_manager': ['maneesh@nadiya.in', 'support@nadiya.in' , 'sumana@nadiya.in','maneesh@nadiya.in' ],
+# #     'others': ['maneesh@nadiya.in', 'support@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in'  ],
 # #     #
-# #     'accounts_member': ['sumana@nadiya.in','maneesh@nadiya.in', 'support@nadiya.in','accounts@nadiya.in' ],
-# #     'business_member': ['maneesh@nadiya.in', 'support@nadiya.in','bhanuprakash@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in' ],
-# #     'service_member': ['maneesh@nadiya.in', 'support@nadiya.in','service_manager@gmail.com', 'sumana@nadiya.in','accounts@nadiya.in' ],
-# #     'service_support_member': ['maneesh@nadiya.in', 'support@nadiya.in','gibin@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in' ],
-# #     'sales_member': ['maneesh@nadiya.in', 'support@nadiya.in','nivedita@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in' ],
-# #     'service_emp' : ['maneesh@nadiya.in', 'support@nadiya.in','salessupport@nadiya.in', 'sumana@nadiya.in','accounts@nadiya.in' ]
+# #     'accounts_member': ['sumana@nadiya.in','maneesh@nadiya.in', 'support@nadiya.in','maneesh@nadiya.in' ],
+# #     'business_member': ['maneesh@nadiya.in', 'support@nadiya.in','bhanuprakash@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in' ],
+# #     'service_member': ['maneesh@nadiya.in', 'support@nadiya.in','service_manager@gmail.com', 'sumana@nadiya.in','maneesh@nadiya.in' ],
+# #     'service_support_member': ['maneesh@nadiya.in', 'support@nadiya.in','gibin@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in' ],
+# #     'sales_member': ['maneesh@nadiya.in', 'support@nadiya.in','nivedita@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in' ],
+# #     'service_emp' : ['maneesh@nadiya.in', 'support@nadiya.in','salessupport@nadiya.in', 'sumana@nadiya.in','maneesh@nadiya.in' ]
 # # }
 # ROLES_HEIRARCHY = {
 #     'accounts_member': ['accounts_manager', 'director'],
@@ -857,7 +857,7 @@
 # @login_required
 # def delete_announcement(announcement_id):
 #     confirmation_id = request.form.get('confirmation_id')
-#     if (current_user.email == "sumana@nadiya.in" or current_user.email == "accounts@nadiya.in") and confirmation_id == '24':
+#     if (current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in") and confirmation_id == '24':
 
 
 #         announcement = Announcement.query.get(announcement_id)
