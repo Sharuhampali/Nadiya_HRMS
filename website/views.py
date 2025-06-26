@@ -166,7 +166,7 @@ def submit_attendance():
                 date=datetime.now(india_tz).date().strftime("%Y-%m-%d"),
                 day=datetime.now(india_tz).strftime('%A'),
                 reason=reason,
-                site_name=site_name  # ✅ Entry uses site_name_e
+                site_name_e=site_name 
             )
             db.session.add(new_attendance)
 
@@ -175,6 +175,7 @@ def submit_attendance():
         if user_attendance.exit_time is not None:
             flash('Please close the current attendance record before submitting another exit.', 'warning')
         else:
+            site_name = request.form.get('site_name')
             try:
                 exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
                 exit_address = exit_location.address if exit_location else "Unknown"

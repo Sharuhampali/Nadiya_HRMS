@@ -201,31 +201,35 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="role">Assign Role:</label>
-                <select class="form-control" name="role" id="role" required>
-                    <option value="">Select a role...</option>
-                    <optgroup label="Management">
-                        <option value="director">Director</option>
-                        <option value="accounts_manager">Accounts Manager</option>
-                        <option value="business_manager">Business Development Manager</option>
-                        <option value="service_manager">Service Manager</option>
-                        <option value="service_support_manager">Service Support Manager</option>
-                        <option value="sales_manager">Sales Manager</option>
-                    </optgroup>
-                    <optgroup label="Team Members">
-                        <option value="accounts_member">Accounts Member</option>
-                        <option value="business_member">Business Development Member</option>
-                        <option value="service_member">Service Member</option>
-                        <option value="service_support_member">Service Support Member</option>
-                        <option value="sales_member">Sales Member</option>
-                        <option value="service_emp">Service Employee</option>
-                    </optgroup>
-                    <optgroup label="Other">
-                        <option value="others">Others</option>
-                    </optgroup>
-                </select>
-            </div>
+           <div class="form-group">
+    <label for="role">Assign Role:</label>
+    <select class="form-control" name="role" id="role" required>
+        <option value="">Select a role...</option>
+
+        <optgroup label="Executive Leadership">
+            <option value="director">Director</option>
+            <option value="operational_head">Operational Head</option>
+        </optgroup>
+
+        <optgroup label="Department Heads / Managers">
+            <option value="design_head">Design Head</option>
+            <option value="service_manager">Service Manager</option>
+            <option value="accounts_manager">Accounts Manager</option>
+            <option value="business_development_manager">Business Development Manager</option>
+        </optgroup>
+
+        <optgroup label="Team Members">
+            <option value="design_member">Design Member</option>
+            <option value="service_member">Service Member</option>
+            <option value="accounts_member">Accounts Member</option>
+        </optgroup>
+
+        <optgroup label="Other">
+            <option value="others">Others</option>
+        </optgroup>
+    </select>
+</div>
+
 
             <div class="form-group">
                 <div class="checkbox-container">

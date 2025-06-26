@@ -193,7 +193,10 @@
         border-radius: 8px;
         margin-bottom: 0.5rem;
         transition: all 0.3s ease;
-    }
+        flex-wrap: wrap;              /* allow items to wrap on smaller screens */
+        word-break: break-word;       /* break long words if needed */
+        overflow-wrap: break-word;    /* ensure overflow text wraps */
+}
 
     .document-item:hover {
         transform: translateY(-2px);
