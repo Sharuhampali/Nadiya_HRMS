@@ -270,10 +270,10 @@ def is_late(entry_time, ideal_entry="09:30"):
         ideal = datetime.strptime(ideal_entry, "%H:%M")
         return entry > ideal
 
-@views.route('/who_output', methods=['POST'])
+@views.route('/who_output', methods=['GET','POST'])
 @login_required
 def who_output():
-    name = request.form.get('name')
+    name = current_user.first_name
 
     user_attendances = Attendance.query.filter_by(name=name).all()
     totes = sum(attendance.totes for attendance in user_attendances)
@@ -725,11 +725,10 @@ def assign_roles():
             if previously_probation and not is_probation:
                 # Probation just ended, check if 6 months have passed
                 if user.joining_date and datetime.today() >= user.joining_date + relativedelta(months=6):
-                    leave_balances = calculate_initial_leaves(datetime.today(), is_probation=False)
-                    user.earned = leave_balances["earned"]
-                    user.medic = leave_balances["medic"]
-                    user.pay = leave_balances["pay"]
-
+                    
+                    user.earned = 0
+                    user.medic = 0
+                    user.pay = 0
             db.session.commit()
             flash(f'Role {role} assigned to {user.first_name}.', 'success')
         else:
@@ -1441,11 +1440,11 @@ def calculate_leaves_for_user(user):
     if user.probation:
         user.earned = 0
         user.medic = 0
-        user.pay = 10 - round((1 * 10) / 12, 2)
+        user.pay = 10 
     else:
-        user.earned = 15 - round((1 * 15) / 12, 2)
-        user.medic = 6 - round((1 * 6) / 12, 2)
-        user.pay = 10 - round((1 * 10) / 12, 2)
+        user.earned = 15 
+        user.medic = 6 
+        user.pay = 10 
 
     db.session.commit()
 
@@ -1615,49 +1614,49 @@ def reject_compoff(attendance_id):
 
 
 
-@views.route('/pending_compoffs')
-@login_required
-def pending_compoffs():
-    pending_records = Attendance.query.filter_by(compoff_pending=True).all()
-
-    approvable = [
-        record for record in pending_records
-        if (submitter := User.query.get(record.user_id)) 
-        and has_approval_authority(current_user.role, submitter.role)
-    ]
-
-    return render_template('pending_compoffs.html', records=approvable)
 # @views.route('/pending_compoffs')
 # @login_required
 # def pending_compoffs():
-#     all_records = Attendance.query.filter(
-#         (Attendance.compoff_pending == True) |
-#         (Attendance.compoff > 0) |
-#         ((Attendance.compoff == 0) & (Attendance.compoff_requested > 0))
-#     ).all()
+#     pending_records = Attendance.query.filter_by(compoff_pending=True).all()
 
-#     approvable = []
-
-#     for record in all_records:
-#         submitter = User.query.get(record.user_id)
-
-#         if submitter and has_approval_authority(current_user.role, submitter.role):
-#             # Attach user object for use in template
-#             record.user = submitter
-
-#             # Determine compoff status inline
-#             if record.compoff_pending:
-#                 record.compoff_status = 'pending'
-#             elif record.compoff and record.compoff > 0:
-#                 record.compoff_status = 'approved'
-#             elif not record.compoff_pending and record.compoff_requested > 0 and (record.compoff == 0 or record.compoff is None):
-#                 record.compoff_status = 'rejected'
-#             else:
-#                 record.compoff_status = 'unknown'  # fallback for edge cases
-
-#             approvable.append(record)
+#     approvable = [
+#         record for record in pending_records
+#         if (submitter := User.query.get(record.user_id)) 
+#         and has_approval_authority(current_user.role, submitter.role)
+#     ]
 
 #     return render_template('pending_compoffs.html', records=approvable)
+@views.route('/pending_compoffs')
+@login_required
+def pending_compoffs():
+    all_records = Attendance.query.filter(
+        (Attendance.compoff_pending == True) |
+        (Attendance.compoff > 0) |
+        ((Attendance.compoff == 0) & (Attendance.compoff_requested > 0))
+    ).all()
+
+    approvable = []
+
+    for record in all_records:
+        submitter = User.query.get(record.user_id)
+
+        if submitter and has_approval_authority(current_user.role, submitter.role):
+            # Attach user object for use in template
+            record.user = submitter
+
+            # Determine compoff status inline
+            if record.compoff_pending:
+                record.compoff_status = 'pending'
+            elif record.compoff and record.compoff > 0:
+                record.compoff_status = 'approved'
+            elif not record.compoff_pending and record.compoff_requested > 0 and (record.compoff == 0 or record.compoff is None):
+                record.compoff_status = 'rejected'
+            else:
+                record.compoff_status = 'unknown'  # fallback for edge cases
+
+            approvable.append(record)
+
+    return render_template('pending_compoffs.html', records=approvable)
 
 
 

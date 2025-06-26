@@ -1,24 +1,24 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Records</title>
+    <title>Attendance Table</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f0f2f5;
-            padding: 0;
             margin: 0;
+            padding: 0;
         }
         h1 {
             font-weight: 700;
             text-align: center;
-            margin: 30px 0 20px;
+            margin-bottom: 20px;
             color: #343a40;
+            margin-top: 30px;
         }
         .container.custom-container {
             padding: 0 15px;
@@ -33,42 +33,35 @@
             background-color: #fff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
-            border: 2px solid black;
+            border: 2px solid #343a40;
             min-width: 800px;
             width: 100%;
-            margin: 0 auto;
         }
         .table thead {
             background-color: #93C4C6;
             color: #fff;
-            border: 2px solid black;
+            border: 2px solid #343a40;
         }
         .table thead th {
             text-align: center;
-            border: 2px solid black;
+            border: 2px solid #343a40;
         }
         .table tbody tr {
             transition: background-color 0.3s;
-            border: 2px solid black;
+            border: 2px solid #343a40;
         }
         .table tbody tr:hover {
             background-color: #f1f1f1;
         }
         .table tbody td {
             text-align: center;
-            border: 2px solid black;
+            border: 2px solid #343a40;
         }
         .table tbody td:nth-child(odd) {
             background-color: #f9f9f9;
         }
         .table tbody td:nth-child(even) {
             background-color: #e9ecef;
-        }
-        .a{
-            width: 40% !important;
-        }
-        .a th{
-            width: 50% !important;
         }
          .navbar{
           background-color: #E2E2E2 !important;
@@ -100,7 +93,6 @@
 }
 
 
-
     </style>
 </head>
 <body>
@@ -110,6 +102,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbar">
           <div class="navbar-nav">
+
              <a class="navbar-brand" href="/">
     <img src="static/logo.png" alt="Logo" style="height: 80px;">
   </a>
@@ -124,31 +117,9 @@
     </nav>
 
     <div class="container custom-container">
-
-        <h1>Attendance Records for {{ name }}</h1>
+        <h1>Attendance Data</h1>
         <br>
-        <table  class="table a">
-            <tr>
-                <th>
-                    <h5>Total Late Entries:</h5>
-                </th>
-                <td>
-                    <h5>{{ (late_entries - 4, 0) | max }}</h5>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    {% if attendances %}
-                        <h5>Total Compoff:</h5>
-                </th>
-                <td>
-                        <h5>{{ attendances[-1].user.total_compoff }}</h5>
-                </td>
-                    {% endif %}
-            </tr>
-        </table>
 
-        <br>
         <div class="table-container">
             <table class="table">
                 <thead>
@@ -168,8 +139,11 @@
                         <th>Comp Off</th>
                         <th>Entry Location</th>
                         <th>Exit Location</th>
+                        <th>Site/Customer Name</th>
                         <th>Shift</th>
                         <th>Late Entry</th>
+                        <th>Reason</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -198,19 +172,363 @@
                                 {{ attendance.exit_location | extract_area }}
                             </a>
                         </td>
+                        <td>{{ attendance.site_name }}</td>
                         <td>{{ attendance.entry_time | determine_shift }}</td>
                         <td>{{ attendance.entry_time | is_late }}</td>
+                        <td>{{ attendance.reason }}</td>
+
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <br><br>
         </div>
     </div>
 
-    <!-- External JS Links -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-</html>
+</html> -->
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
+
+    .search-container {
+        background: var(--bg-primary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px var(--shadow);
+        border: 1px solid var(--border-color);
+        justify-content: right;
+        
+    }
+
+    .search-box {
+        position: relative;
+        
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .table-container {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        overflow-y: scroll;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        max-height: 500px;
+    }
+
+    .table {
+        background: var(--bg-primary);
+        margin: 0;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    .table thead {
+        background: var(--bg-primary);
+        color: rgb(16, 14, 14);
+    }
+
+    .table thead th {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 1rem 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+        border: 2px solid var(--border-color) !important;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--bg-secondary);
+        transform: scale(1.01);
+    }
+
+    .table tbody td {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        padding: 1rem 0.75rem;
+        text-align: center;
+        border: var(--border-color) solid 2px;
+        vertical-align: middle;
+    }
+
+
+    .location-link {
+        color: var(--accent-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .location-link:hover {
+        color: var(--accent-secondary);
+        text-decoration: underline;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-late {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .status-ontime {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .table {
+            min-width: 1200px;
+        }
+        
+        .search-box {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-table"></i> My Attendance Records</h1>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/attendance-category" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Attendance
+    </a>
+
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, date, location, or any field...">
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="table" id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Entry Time</th>
+                    <!-- <th>Entry Early By</th>
+                    <th>Entry Late By</th> -->
+                    <th>Exit Time</th>
+                    <!-- <th>Exit Early By</th>
+                    <th>Exit Late By</th> -->
+                    <th>Total Time</th>
+                    <th>Extra Time</th>
+                    <th>Comp Off</th>
+                    <th>Entry Location</th>
+                    <th>Exit Location</th>
+                    <th>Place Visited (entry)</th>
+                    <th>Place Visited (exit)</th>
+                    <th>Shift</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th> View</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceTableBody">
+                {% for attendance in attendances|sort(attribute='date', reverse=True) %}
+
+                <tr>
+                    <td><strong>{{ attendance.name }}</strong></td>
+                   <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ attendance.day }}</td>
+                    <td>{{ attendance.entry_time }}</td>
+                    <!-- <td>{{ attendance.entry_time | calculate_entry_early }}</td>
+                    <td>{{ attendance.entry_time | calculate_entry_late }}</td> -->
+                    <td>{{ attendance.exit_time or '-' }}</td>
+                    <!-- <td>{{ attendance.exit_time | calculate_exit_early }}</td>
+                    <td>{{ attendance.exit_time | calculate_exit_late }}</td> -->
+                    <td>{{ attendance.total_time_worked() }}</td>
+                    <td>{{ attendance.extra_time_worked() }}</td>
+                    <td><span class="status-badge status-ontime">{{ attendance.compoff }}</span></td>
+                    <td>
+                        {% if attendance.entry_location %}
+                            <a href="{{ attendance.entry_location | maps_url }}" target="_blank" class="location-link">
+                                {{ attendance.entry_location | extract_area }}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if attendance.exit_location %}
+                            <a href="{{ attendance.exit_location | maps_url }}" target="_blank" class="location-link">
+                                {{ attendance.exit_location | extract_area }}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ attendance.site_name_e or '-' }}</td>
+                    <td>{{ attendance.site_name or '-' }}</td>
+                    <td>{{ attendance.entry_time | determine_shift }}</td>
+                    <td>
+                        {% if attendance.entry_time | is_late %}
+                            <span class="status-badge status-late">Late</span>
+                        {% else %}
+                            <span class="status-badge status-ontime">On Time</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ attendance.reason or '-' }}</td>
+                    <td>
+                    <a href="{{ url_for('views.detailed_view', user_id=attendance.user_id, date=attendance.date.strftime('%Y-%m-%d')) }}"
+   class="btn btn-outline-primary btn-sm">
+   View Details
+</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fas fa-search"></i>
+            <p>No records found matching your search criteria.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('attendanceTableBody');
+    const noResults = document.getElementById('noResults');
+    const rows = Array.from(tableBody.getElementsByTagName('tr'));
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        let visibleRows = 0;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (visibleRows === 0 && searchTerm !== '') {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+    });
+
+    // Add keyboard shortcut for search
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
+});
+</script>
+{% endblock %}
+
