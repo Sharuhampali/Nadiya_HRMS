@@ -127,11 +127,11 @@ def logout():
 def sign_up():
     user_count = User.query.count()
 
-    # Only allow admin to create new users after the first one
-    if user_count > 0:
-        if not current_user.is_authenticated or current_user.email != 'sumana@nadiya.in':
-            flash('Only the admin can create new accounts.', category='error')
-            return redirect(url_for('views.home'))
+    # # Only allow admin to create new users after the first one
+    # if user_count > 0:
+    #     if not current_user.is_authenticated or current_user.email != 'sumana@nadiya.in':
+    #         flash('Only the admin can create new accounts.', category='error')
+    #         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         email = request.form.get('email')
