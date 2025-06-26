@@ -172,7 +172,7 @@ def sign_up():
             if user_count == 0:
                 login_user(new_user, remember=True)
 
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('views.home'))
 
     return render_template("sign_up.html", user=current_user)
 
