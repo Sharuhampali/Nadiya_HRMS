@@ -271,7 +271,7 @@ def is_late(entry_time, ideal_entry="09:30"):
         return entry > ideal
 
 @views.route('/who_output', methods=['GET','POST'])
-@login_required
+
 def who_output():
     name = current_user.first_name
 
