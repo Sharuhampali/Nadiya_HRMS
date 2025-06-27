@@ -12,7 +12,7 @@ def calculate_initial_leaves(joining_date, is_probation):
         }
     else:
         return {
-            "earned": 15,
-            "medic":6,
-            "pay":10
+            "earned": 0,
+            "medic":0,
+            "pay":0
         }
