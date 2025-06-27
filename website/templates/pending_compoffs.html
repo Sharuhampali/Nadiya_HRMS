@@ -79,6 +79,8 @@
                     <th>Entry</th>
                     <th>Exit</th>
                     <th>Hours</th>
+                    <th>Place Visited (Entry)</th>
+                    <th>Place Visited (Exit)</th>
                     <th>Comp Off</th>
                     <th>Status</th>
                     <th colspan="2">Actions</th>
@@ -106,6 +108,8 @@
                             — 
                         {% endif %}
                     </td>
+                    <td>record.site_name</td>
+                    <td>record.site_name_e</td>
                     <td>
                         {% if record.compoff_pending %}
                             {{ record.compoff_requested }} day{% if record.compoff_requested == 0.5 %} (half){% endif %}

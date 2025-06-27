@@ -87,28 +87,173 @@ def attendance_form():
 from datetime import  timedelta
 geoLoc = Nominatim(user_agent="my_app")
 
+# @views.route('/submit', methods=['POST'])
+# @login_required
+# def submit_attendance():
+#     latitude = request.form.get('latitude')
+#     longitude = request.form.get('longitude')
+#     entry_exit = request.form.get('entry_exit')  # 'entry', 'exit', etc.
+
+#     site_name = request.form.get('site_name')      # For exit or intermediate
+
+
+#     user_id = current_user.id
+#     user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
+
+#     reason = request.form.get('reason', None)
+
+#     india_tz = pytz.timezone('Asia/Kolkata')
+#     now = datetime.now(india_tz).time()
+
+#     # Handle stale entries with no exit for > 20 hours
+#     if user_attendance and user_attendance.exit_time is None:
+#         if (datetime.combine(datetime.today(), now) - datetime.combine(datetime.today(), user_attendance.entry_time)) > timedelta(hours=20):
+#             user_attendance.exit_time = (datetime.combine(datetime.today(), user_attendance.entry_time) + timedelta(hours=5)).time()
+#             user_attendance.calculate_comp_off()
+#             try:
+#                 db.session.commit()
+#             except Exception as e:
+#                 print(e)
+#                 flash('There was an issue updating your attendance record.', 'error')
+#                 return redirect(url_for('views.home'))
+#             user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
+
+#     # Handle intermediate entries
+#     # Handle intermediate entries
+#     if entry_exit in ['intermediate_entry', 'intermediate_exit']:
+#         # Check last intermediate entry for the day
+#         last_log = IntermediateLog.query.filter_by(
+#             user_id=current_user.id,
+#             date=datetime.now(india_tz).date()
+#         ).order_by(IntermediateLog.id.desc()).first()
+
+#         if entry_exit == 'intermediate_entry':
+#             if last_log and last_log.entry_type == 'intermediate_entry':
+#                 flash('You must mark an intermediate exit before logging a new intermediate entry.', 'warning')
+#                 return redirect(url_for('views.home'))
+
+#         # if entry_exit == 'intermediate_exit':
+#             # if not last_log or last_log.entry_type != 'intermediate_entry':
+#             #     flash('You must mark an intermediate entry before logging an intermediate exit.', 'warning')
+#             #     return redirect(url_for('views.home'))
+
+#         try:
+#             location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
+#             location = location_obj.address if location_obj else "Unknown"
+#         except Exception as e:
+#             print(f"Intermediate geo error: {e}")
+#             location = "Unknown"
+
+#         new_log = IntermediateLog(
+#             user_id=current_user.id,
+#             date=datetime.now(india_tz).date(),
+#             time=now.replace(microsecond=0),
+#             entry_type=entry_exit,
+#             latitude=latitude,
+#             longitude=longitude,
+#             location=location,
+#             site=site_name
+#         )
+#         db.session.add(new_log)
+#         db.session.commit()
+#         flash(f"{entry_exit.replace('_', ' ').capitalize()} recorded.", "success")
+#         return redirect(url_for('views.home'))
+
+
+#     # Entry logic
+#     elif entry_exit == 'entry':
+#         if user_attendance and user_attendance.exit_time is None:
+#             flash('Please exit the current attendance record before submitting another entry.', 'warning')
+#         else:
+#             site_name = request.form.get('site_name')
+
+#             try:
+#                 entry_location = geoLoc.reverse(f"{latitude}, {longitude}")
+#                 entry_address = entry_location.address if entry_location else "Unknown"
+#             except Exception as e:
+#                 print(f"Error fetching entry location: {str(e)}")
+#                 entry_address = "Unknown"
+
+#             new_attendance = Attendance(
+#                 name=current_user.first_name,
+#                 latitude=latitude,
+#                 longitude=longitude,
+#                 entry_location=entry_address,
+#                 user_id=user_id,
+#                 entry_time=now.replace(microsecond=0),
+#                 date=datetime.now(india_tz).date().strftime("%Y-%m-%d"),
+#                 day=datetime.now(india_tz).strftime('%A'),
+#                 reason=reason,
+#                 site_name_e=site_name 
+#             )
+#             db.session.add(new_attendance)
+
+#     # Exit logic
+#     elif entry_exit == 'exit' and user_attendance:
+#         if user_attendance.exit_time is not None:
+#             flash('Please close the current attendance record before submitting another exit.', 'warning')
+#         else:
+#             site_name = request.form.get('site_name')
+#             try:
+#                 exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
+#                 exit_address = exit_location.address if exit_location else "Unknown"
+#             except Exception as e:
+#                 print(f"Error fetching exit location: {str(e)}")
+#                 exit_address = "Unknown"
+
+#             def is_second_or_fourth_saturday(date):
+#                 first_day_of_month = date.replace(day=1)
+#                 first_day_weekday = first_day_of_month.weekday()
+#                 first_saturday = first_day_of_month + timedelta(days=(5 - first_day_weekday) % 7)
+#                 second_saturday = first_saturday + timedelta(days=7)
+#                 fourth_saturday = first_saturday + timedelta(days=21)
+#                 return date == second_saturday or date == fourth_saturday
+
+#             def is_holiday(date):
+#                 return date.weekday() == 6 or is_second_or_fourth_saturday(date)
+
+#             if request.form.get('holiday'):
+#                 user_attendance.hol = 10000
+
+#             current_date = datetime.now(india_tz).date()
+#             if Holiday.query.filter_by(date=current_date).first() or is_holiday(current_date):
+#                 user_attendance.hol = 10000
+
+#             user_attendance.exit_time = now.replace(microsecond=0)
+#             user_attendance.exit_location = exit_address
+#             user_attendance.site_name = site_name  # ✅ Exit uses site_name
+#             user_attendance.calculate_comp_off()
+
+#     # Commit changes to DB
+#     try:
+#         db.session.commit()
+#         return redirect(url_for('views.home'))
+#     except Exception as e:
+#         print(e)
+#         flash('There was an issue submitting your attendance.', 'error')
+#         return redirect(url_for('views.home'))
+
 @views.route('/submit', methods=['POST'])
 @login_required
 def submit_attendance():
     latitude = request.form.get('latitude')
     longitude = request.form.get('longitude')
     entry_exit = request.form.get('entry_exit')  # 'entry', 'exit', etc.
-
-    site_name = request.form.get('site_name')      # For exit or intermediate
-
-
-    user_id = current_user.id
-    user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
-
+    site_name = request.form.get('site_name')    # For exit or intermediate
     reason = request.form.get('reason', None)
 
+    user_id = current_user.id
     india_tz = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(india_tz).time()
+    now = datetime.now(india_tz)
+    now_time = now.time()
+
+    user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
 
     # Handle stale entries with no exit for > 20 hours
     if user_attendance and user_attendance.exit_time is None:
-        if (datetime.combine(datetime.today(), now) - datetime.combine(datetime.today(), user_attendance.entry_time)) > timedelta(hours=20):
-            user_attendance.exit_time = (datetime.combine(datetime.today(), user_attendance.entry_time) + timedelta(hours=5)).time()
+        time_diff = datetime.combine(now.date(), now_time) - datetime.combine(now.date(), user_attendance.entry_time)
+        if time_diff > timedelta(hours=20):
+            user_attendance.exit_time = (datetime.combine(now.date(), user_attendance.entry_time) + timedelta(hours=5)).time()
             user_attendance.calculate_comp_off()
             try:
                 db.session.commit()
@@ -118,25 +263,39 @@ def submit_attendance():
                 return redirect(url_for('views.home'))
             user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
 
-    # Handle intermediate entries
+    # Determine last known state
+    today = now.date()
+    last_main = None
+    if user_attendance and user_attendance.exit_time is None:
+        last_main = 'entry'
+    elif user_attendance and user_attendance.exit_time:
+        last_main = 'exit'
+
+    last_log = IntermediateLog.query.filter_by(
+        user_id=user_id,
+        date=today
+    ).order_by(IntermediateLog.id.desc()).first()
+
+    last_inter = last_log.entry_type if last_log else None
+
+    last_state = last_inter if last_inter else last_main
+
+    # Allowed transitions
+    valid_next = {
+        None: ['entry'],
+        'entry': ['intermediate_exit', 'exit'],
+        'intermediate_exit': ['intermediate_entry', 'exit'],
+        'intermediate_entry': ['intermediate_exit', 'exit'],
+        'exit': ['entry'],
+    }
+
+    if entry_exit not in valid_next.get(last_state, []):
+        readable = last_state.replace('_', ' ') if last_state else 'None'
+        flash(f"Invalid attendance sequence. After '{readable}', you may only do: {', '.join(valid_next.get(last_state, []))}.", 'warning')
+        return redirect(url_for('views.home'))
+
     # Handle intermediate entries
     if entry_exit in ['intermediate_entry', 'intermediate_exit']:
-        # Check last intermediate entry for the day
-        last_log = IntermediateLog.query.filter_by(
-            user_id=current_user.id,
-            date=datetime.now(india_tz).date()
-        ).order_by(IntermediateLog.id.desc()).first()
-
-        if entry_exit == 'intermediate_entry':
-            if last_log and last_log.entry_type == 'intermediate_entry':
-                flash('You must mark an intermediate exit before logging a new intermediate entry.', 'warning')
-                return redirect(url_for('views.home'))
-
-        # if entry_exit == 'intermediate_exit':
-            # if not last_log or last_log.entry_type != 'intermediate_entry':
-            #     flash('You must mark an intermediate entry before logging an intermediate exit.', 'warning')
-            #     return redirect(url_for('views.home'))
-
         try:
             location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
             location = location_obj.address if location_obj else "Unknown"
@@ -146,8 +305,8 @@ def submit_attendance():
 
         new_log = IntermediateLog(
             user_id=current_user.id,
-            date=datetime.now(india_tz).date(),
-            time=now.replace(microsecond=0),
+            date=today,
+            time=now_time.replace(microsecond=0),
             entry_type=entry_exit,
             latitude=latitude,
             longitude=longitude,
@@ -159,72 +318,63 @@ def submit_attendance():
         flash(f"{entry_exit.replace('_', ' ').capitalize()} recorded.", "success")
         return redirect(url_for('views.home'))
 
-
     # Entry logic
     elif entry_exit == 'entry':
-        if user_attendance and user_attendance.exit_time is None:
-            flash('Please exit the current attendance record before submitting another entry.', 'warning')
-        else:
-            site_name = request.form.get('site_name')
+        site_name = request.form.get('site_name')
+        try:
+            entry_location = geoLoc.reverse(f"{latitude}, {longitude}")
+            entry_address = entry_location.address if entry_location else "Unknown"
+        except Exception as e:
+            print(f"Error fetching entry location: {str(e)}")
+            entry_address = "Unknown"
 
-            try:
-                entry_location = geoLoc.reverse(f"{latitude}, {longitude}")
-                entry_address = entry_location.address if entry_location else "Unknown"
-            except Exception as e:
-                print(f"Error fetching entry location: {str(e)}")
-                entry_address = "Unknown"
-
-            new_attendance = Attendance(
-                name=current_user.first_name,
-                latitude=latitude,
-                longitude=longitude,
-                entry_location=entry_address,
-                user_id=user_id,
-                entry_time=now.replace(microsecond=0),
-                date=datetime.now(india_tz).date().strftime("%Y-%m-%d"),
-                day=datetime.now(india_tz).strftime('%A'),
-                reason=reason,
-                site_name_e=site_name 
-            )
-            db.session.add(new_attendance)
+        new_attendance = Attendance(
+            name=current_user.first_name,
+            latitude=latitude,
+            longitude=longitude,
+            entry_location=entry_address,
+            user_id=user_id,
+            entry_time=now_time.replace(microsecond=0),
+            date=today.strftime("%Y-%m-%d"),
+            day=now.strftime('%A'),
+            reason=reason,
+            site_name_e=site_name
+        )
+        db.session.add(new_attendance)
 
     # Exit logic
     elif entry_exit == 'exit' and user_attendance:
-        if user_attendance.exit_time is not None:
-            flash('Please close the current attendance record before submitting another exit.', 'warning')
-        else:
-            site_name = request.form.get('site_name')
-            try:
-                exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
-                exit_address = exit_location.address if exit_location else "Unknown"
-            except Exception as e:
-                print(f"Error fetching exit location: {str(e)}")
-                exit_address = "Unknown"
+        site_name = request.form.get('site_name')
+        try:
+            exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
+            exit_address = exit_location.address if exit_location else "Unknown"
+        except Exception as e:
+            print(f"Error fetching exit location: {str(e)}")
+            exit_address = "Unknown"
 
-            def is_second_or_fourth_saturday(date):
-                first_day_of_month = date.replace(day=1)
-                first_day_weekday = first_day_of_month.weekday()
-                first_saturday = first_day_of_month + timedelta(days=(5 - first_day_weekday) % 7)
-                second_saturday = first_saturday + timedelta(days=7)
-                fourth_saturday = first_saturday + timedelta(days=21)
-                return date == second_saturday or date == fourth_saturday
+        def is_second_or_fourth_saturday(date):
+            first = date.replace(day=1)
+            first_weekday = first.weekday()
+            first_sat = first + timedelta(days=(5 - first_weekday) % 7)
+            second_sat = first_sat + timedelta(days=7)
+            fourth_sat = first_sat + timedelta(days=21)
+            return date == second_sat or date == fourth_sat
 
-            def is_holiday(date):
-                return date.weekday() == 6 or is_second_or_fourth_saturday(date)
+        def is_holiday(date):
+            return date.weekday() == 6 or is_second_or_fourth_saturday(date)
 
-            if request.form.get('holiday'):
-                user_attendance.hol = 10000
+        if request.form.get('holiday'):
+            user_attendance.hol = 10000
 
-            current_date = datetime.now(india_tz).date()
-            if Holiday.query.filter_by(date=current_date).first() or is_holiday(current_date):
-                user_attendance.hol = 10000
+        if Holiday.query.filter_by(date=today).first() or is_holiday(today):
+            user_attendance.hol = 10000
 
-            user_attendance.exit_time = now.replace(microsecond=0)
-            user_attendance.exit_location = exit_address
-            user_attendance.site_name = site_name  # ✅ Exit uses site_name
-            user_attendance.calculate_comp_off()
+        user_attendance.exit_time = now_time.replace(microsecond=0)
+        user_attendance.exit_location = exit_address
+        user_attendance.site_name = site_name
+        user_attendance.calculate_comp_off()
 
-    # Commit changes to DB
+    # Final DB commit
     try:
         db.session.commit()
         return redirect(url_for('views.home'))
@@ -232,6 +382,7 @@ def submit_attendance():
         print(e)
         flash('There was an issue submitting your attendance.', 'error')
         return redirect(url_for('views.home'))
+
 
 
 @views.route('/all', methods=['GET'])
@@ -1523,9 +1674,9 @@ def approve_compoff(attendance_id):
         flash("User not found for this record.", "error")
         return redirect(url_for('views.pending_compoffs'))
 
-    # if not has_approval_authority(current_user.role, submitter.role):
-    #     flash("Not authorized.", "error")
-    #     return redirect(url_for('views.home'))
+    if not has_approval_authority(current_user.role, submitter.role):
+        flash("Not authorized.", "error")
+        return redirect(url_for('views.home'))
 
     if attendance.compoff_pending:
         attendance.compoff = attendance.compoff_requested
@@ -1640,7 +1791,7 @@ def pending_compoffs():
     for record in all_records:
         submitter = User.query.get(record.user_id)
 
-        if submitter :
+        if submitter and has_approval_authority(current_user.role, submitter.role):
             # Attach user object for use in template
             record.user = submitter
 
