@@ -395,22 +395,41 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="document_type">Document Type</label>
-                    <select name="document_type" id="document_type" class="form-control">
-                        <option value="">Select document type...</option>
-                        <option value="resume">Resume/CV</option>
-                        <option value="education_certificate">Education Certificates</option>
-                        <option value="signed_agreements">Signed Agreements</option>
-                        <option value="job_application_form">Job Application Form</option>
-                        <option value="annual_letter_1">Annual Letter 1</option>
-                        <option value="annual_letter_2">Annual Letter 2</option>
-                        <option value="annual_letter_3">Annual Letter 3</option>
-                        <option value="annual_letter_4">Annual Letter 4</option>
-                        <option value="annual_letter_5">Annual Letter 5</option>
-                        <option value="promotion_letter">Promotion Letter</option>
-                        <option value="exit_letter">Exit Letter</option>
-                        <option value="other">Other</option>
-                    </select>
+                 <label for="document_type">Document Type</label>
+<select name="document_type" id="document_type" class="form-control" aria-label="Select Document Type">
+    <option value="">Select document type...</option>
+
+    <optgroup label="Identity Documents">
+        <option value="aadhar">Aadhaar Card</option>
+        <option value="pan">PAN Card</option>
+        <option value="passbook">Bank Passbook</option>
+    </optgroup>
+
+    <optgroup label="Employment Documents">
+        <option value="resume">Resume / CV</option>
+        <option value="job_application_form">Job Application Form</option>
+        <option value="signed_agreements">Signed Agreements</option>
+    </optgroup>
+
+    <optgroup label="Educational Documents">
+        <option value="education_certificate">Education Certificates</option>
+    </optgroup>
+
+    <optgroup label="Company Letters">
+        <option value="annual_letter_1">Annual Letter 1</option>
+        <option value="annual_letter_2">Annual Letter 2</option>
+        <option value="annual_letter_3">Annual Letter 3</option>
+        <option value="annual_letter_4">Annual Letter 4</option>
+        <option value="annual_letter_5">Annual Letter 5</option>
+        <option value="promotion_letter">Promotion Letter</option>
+        <option value="exit_letter">Exit Letter</option>
+    </optgroup>
+
+    <optgroup label="Other">
+        <option value="other">Other</option>
+    </optgroup>
+</select>
+
                 </div>
 
                 <div class="upload-progress" id="uploadProgress">

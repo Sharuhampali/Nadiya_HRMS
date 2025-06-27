@@ -6,6 +6,7 @@
         max-width: 1000px;
         margin: 0 auto;
         padding: 24px 12px 40px 12px;
+        overflow: scroll
     }
 
     .page-header {
@@ -108,8 +109,8 @@
                             — 
                         {% endif %}
                     </td>
-                    <td>record.site_name</td>
-                    <td>record.site_name_e</td>
+                    <td>{{record.site_name}}</td>
+                    <td>{{record.site_name_e}}</td>
                     <td>
                         {% if record.compoff_pending %}
                             {{ record.compoff_requested }} day{% if record.compoff_requested == 0.5 %} (half){% endif %}
