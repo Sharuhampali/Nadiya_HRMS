@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Attendance Requests</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Request ID</th>
+            <th>User ID</th>
+            <th>Requested By</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>Reason</th>
+            <th>Requested At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for req in requests %}
+        <tr>
+            <td>{{ req.id }}</td>
+            <td>{{ req.user_id }}</td>
+            <td>{{ req.requested_by }}</td>
+            <td>{{ req.entry_time or "—" }}</td>
+            <td>{{ req.exit_time or "—" }}</td>
+            <td>{{ req.reason }}</td>
+            <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                <form action="{{ url_for('views.approve_edit_request', request_id=req.id) }}" method="post" style="display:inline-block;">
+                    <button class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <button class="btn btn-danger btn-sm" onclick="openModal('{{ req.id }}')">Reject</button>
+            </td>
+        </tr>
+
+        <!-- Modal -->
+        <div id="modal-{{ req.id }}" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('{{ req.id }}')">&times;</span>
+                <form method="POST" action="{{ url_for('views.reject_edit_request', request_id=req.id) }}">
+                    <h3>Reject Request #{{ req.id }}</h3>
+                    <label for="remarks" class="mb-2">Remarks</label>
+                    <textarea name="remarks" rows="3" required style="width:100%;"></textarea>
+                    <br>
+                    <button type="submit" class="btn btn-danger mb-2">Confirm Reject</button> 
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('{{ req.id }}')">Cancel</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <tr><td colspan="8" class="text-center">No pending requests.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 400px;
+    position: relative;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 24px;
+    cursor: pointer;
+}
+</style>
+
+<script>
+function openModal(id) {
+    document.getElementById('modal-' + id).style.display = 'block';
+}
+
+function closeModal(id) {
+    document.getElementById('modal-' + id).style.display = 'none';
+}
+
+window.onclick = function(event) {
+    document.querySelectorAll('.modal').forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

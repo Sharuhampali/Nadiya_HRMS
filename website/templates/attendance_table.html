@@ -1,194 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Table</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-        }
-        h1 {
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #343a40;
-            margin-top: 30px;
-        }
-        .container.custom-container {
-            padding: 0 15px;
-            max-width: 100%;
-            width: 100%;
-        }
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-        }
-        .table {
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            border: 2px solid #343a40;
-            min-width: 800px;
-            width: 100%;
-        }
-        .table thead {
-            background-color: #93C4C6;
-            color: #fff;
-            border: 2px solid #343a40;
-        }
-        .table thead th {
-            text-align: center;
-            border: 2px solid #343a40;
-        }
-        .table tbody tr {
-            transition: background-color 0.3s;
-            border: 2px solid #343a40;
-        }
-        .table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-        .table tbody td {
-            text-align: center;
-            border: 2px solid #343a40;
-        }
-        .table tbody td:nth-child(odd) {
-            background-color: #f9f9f9;
-        }
-        .table tbody td:nth-child(even) {
-            background-color: #e9ecef;
-        }
-         .navbar{
-          background-color: #E2E2E2 !important;
-
-      }
-      .navbar-nav .nav-link {
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    color: #000 !important;
-}
-
-#logout {
-    color: #000;
-    text-align: center;
-}
-
-.profile-photo img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-left: 10px;
-}
-
-.navbar-nav.ml-auto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-          <div class="navbar-nav">
-
-             <a class="navbar-brand" href="/">
-    <img src="static/logo.png" alt="Logo" style="height: 80px;">
-  </a>
-
-            <a class="nav-item nav-link" href="/"><i class="fa fa-home"></i> Home</a>
-            <a class="nav-item nav-link" href="/attendance_table"><i class="fa fa-calendar-check-o"></i> Attendance</a>
-          </div>
-          <div class="navbar-nav ml-auto">
-            <a class="nav-item nav-link" id="logout" href="/logout"><i class="fa fa-sign-out"></i> Logout</a>
-          </div>
-        </div>
-    </nav>
-
-    <div class="container custom-container">
-        <h1>Attendance Data</h1>
-        <br>
-
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Date</th>
-                        <th>Day</th>
-                        <th>Entry Time</th>
-
-                        <th>Entry Early By</th>
-                        <th>Entry Late By</th>
-                        <th>Exit Time</th>
-                        <th>Exit Early By</th>
-                        <th>Exit Late By</th>
-                        <th>Total Time Worked</th>
-                        <th>Extra Time Worked</th>
-                        <th>Comp Off</th>
-                        <th>Entry Location</th>
-                        <th>Exit Location</th>
-                        <th>Site/Customer Name</th>
-                        <th>Shift</th>
-                        <th>Late Entry</th>
-                        <th>Reason</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for attendance in attendances | reverse %}
-                    <tr>
-                        <td>{{ attendance.name }}</td>
-                        <td>{{ attendance.date }}</td>
-                        <td>{{ attendance.day }}</td>
-                        <td>{{ attendance.entry_time }}</td>
-
-                        <td>{{ attendance.entry_time | calculate_entry_early }}</td>
-                        <td>{{ attendance.entry_time | calculate_entry_late }}</td>
-                        <td>{{ attendance.exit_time }}</td>
-                        <td>{{ attendance.exit_time | calculate_exit_early }}</td>
-                        <td>{{ attendance.exit_time | calculate_exit_late }}</td>
-                        <td>{{ attendance.total_time_worked() }}</td>
-                        <td>{{ attendance.extra_time_worked() }}</td>
-                        <td>{{ attendance.compoff }}</td>
-                        <td>
-                            <a href="{{ attendance.entry_location | maps_url }}" target="_blank">
-                                {{ attendance.entry_location | extract_area }}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{{ attendance.exit_location | maps_url }}" target="_blank">
-                                {{ attendance.exit_location | extract_area }}
-                            </a>
-                        </td>
-                        <td>{{ attendance.site_name }}</td>
-                        <td>{{ attendance.entry_time | determine_shift }}</td>
-                        <td>{{ attendance.entry_time | is_late }}</td>
-                        <td>{{ attendance.reason }}</td>
-
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html> -->
 {% extends "base.html" %}
 {% block content %}
 <style>
@@ -386,7 +195,6 @@
         }
     }
 </style>
-
 <div class="page-header">
     <div class="container">
         <h1><i class="fas fa-table"></i> Attendance Records</h1>
@@ -413,11 +221,7 @@
                     <th>Date</th>
                     <th>Day</th>
                     <th>Entry Time</th>
-                    <!-- <th>Entry Early By</th>
-                    <th>Entry Late By</th> -->
                     <th>Exit Time</th>
-                    <!-- <th>Exit Early By</th>
-                    <th>Exit Late By</th> -->
                     <th>Total Time</th>
                     <th>Extra Time</th>
                     <th>Comp Off</th>
@@ -428,22 +232,18 @@
                     <th>Shift</th>
                     <th>Status</th>
                     <th>Reason</th>
-                    <th> View</th>
+                    <th>View</th>
+                    <th>Edit</th>
                 </tr>
             </thead>
             <tbody id="attendanceTableBody">
                 {% for attendance in attendances|sort(attribute='date', reverse=True) %}
-
                 <tr>
                     <td><strong>{{ attendance.name }}</strong></td>
-                   <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
                     <td>{{ attendance.day }}</td>
                     <td>{{ attendance.entry_time }}</td>
-                    <!-- <td>{{ attendance.entry_time | calculate_entry_early }}</td>
-                    <td>{{ attendance.entry_time | calculate_entry_late }}</td> -->
                     <td>{{ attendance.exit_time or '-' }}</td>
-                    <!-- <td>{{ attendance.exit_time | calculate_exit_early }}</td>
-                    <td>{{ attendance.exit_time | calculate_exit_late }}</td> -->
                     <td>{{ attendance.total_time_worked() }}</td>
                     <td>{{ attendance.extra_time_worked() }}</td>
                     <td><span class="status-badge status-ontime">{{ attendance.compoff }}</span></td>
@@ -452,18 +252,14 @@
                             <a href="{{ attendance.entry_location | maps_url }}" target="_blank" class="location-link">
                                 {{ attendance.entry_location | extract_area }}
                             </a>
-                        {% else %}
-                            -
-                        {% endif %}
+                        {% else %}-{% endif %}
                     </td>
                     <td>
                         {% if attendance.exit_location %}
                             <a href="{{ attendance.exit_location | maps_url }}" target="_blank" class="location-link">
                                 {{ attendance.exit_location | extract_area }}
                             </a>
-                        {% else %}
-                            -
-                        {% endif %}
+                        {% else %}-{% endif %}
                     </td>
                     <td>{{ attendance.site_name_e or '-' }}</td>
                     <td>{{ attendance.site_name or '-' }}</td>
@@ -477,15 +273,27 @@
                     </td>
                     <td>{{ attendance.reason or '-' }}</td>
                     <td>
-                    <a href="{{ url_for('views.detailed_view', user_id=attendance.user_id, date=attendance.date.strftime('%Y-%m-%d')) }}"
-   class="btn btn-outline-primary btn-sm">
-   View Details
-</a></td>
+                        <a href="{{ url_for('views.detailed_view', user_id=attendance.user_id, date=attendance.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </td>
+                    <td>
+                        {% if current_user.email == 'sumana@nadiya.in' or current_user.email== 'maneesh@nadiya.in' %}
+                            <button class="request-edit-btn btn btn-outline-warning btn-sm"
+                                    data-attendance-id="{{ attendance.id }}"
+                                    data-user-id="{{ attendance.user_id }}"
+                                    data-date="{{ attendance.date.strftime('%Y-%m-%d') }}"
+                                    data-entry="{{ attendance.entry_time }}"
+                                    data-exit="{{ attendance.exit_time }}"
+                                    data-toggle="modal"
+                                    data-target="#editRequestModal">
+                                Request Edit
+                            </button>
+                        {% else %}-{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        
+
         <div id="noResults" class="no-results" style="display: none;">
             <i class="fas fa-search"></i>
             <p>No records found matching your search criteria.</p>
@@ -493,42 +301,110 @@
     </div>
 </div>
 
+<!-- Modal for Edit Request -->
+<div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background: var(--bg-primary); color: var(--text-primary); border: 2px solid var(--border-color);">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editRequestModalLabel">Request Attendance Edit</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: var(--text-primary);">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" action="{{ url_for('views.request_edit') }}">
+        <div class="modal-body">
+          <input type="hidden" name="attendance_id" id="edit-attendance-id" value="">
+          <input type="hidden" name="data_user_id" id="edit-user-id" value="">
+          <input type="hidden" name="date" id="edit-date" value="">
+
+          <div class="form-group">
+            <label for="edit-entry-time">New Entry Time</label>
+            <input type="time" class="form-control" id="edit-entry-time" name="entry_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-exit-time">New Exit Time</label>
+            <input type="time" class="form-control" id="edit-exit-time" name="exit_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-reason">Reason</label>
+            <textarea class="form-control" id="edit-reason" name="reason" rows="3" required
+                      style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const tableBody = document.getElementById('attendanceTableBody');
-    const noResults = document.getElementById('noResults');
-    const rows = Array.from(tableBody.getElementsByTagName('tr'));
+document.addEventListener('DOMContentLoaded', function () {
+  const searchInput = document.getElementById('searchInput');
+  const tableBody = document.getElementById('attendanceTableBody');
+  const noResults = document.getElementById('noResults');
+  const rows = Array.from(tableBody?.getElementsByTagName('tr') || []);
 
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
-        let visibleRows = 0;
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const searchTerm = this.value.toLowerCase().trim();
+      let visibleRows = 0;
 
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                row.style.display = '';
-                visibleRows++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        if (visibleRows === 0 && searchTerm !== '') {
-            noResults.style.display = 'block';
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          row.style.display = '';
+          visibleRows++;
         } else {
-            noResults.style.display = 'none';
+          row.style.display = 'none';
         }
-    });
+      });
 
-    // Add keyboard shortcut for search
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'f') {
-            e.preventDefault();
-            searchInput.focus();
-        }
+      if (noResults)
+        noResults.style.display = visibleRows === 0 && searchTerm !== '' ? 'block' : 'none';
     });
+  }
+
+  // Handle "Request Edit" modal population
+  const buttons = document.querySelectorAll('.request-edit-btn');
+  buttons.forEach(button => {
+    button.addEventListener('click', function () {
+      const attendanceId = this.getAttribute('data-attendance-id');
+      const userId = this.getAttribute('data-user-id');
+      const date = this.getAttribute('data-date');
+      const entry = this.getAttribute('data-entry');
+      const exit = this.getAttribute('data-exit');
+
+      function toHHMM(timeStr) {
+        if (!timeStr || !timeStr.includes(':')) return '';
+        const parts = timeStr.split(':');
+        return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+      }
+
+      document.getElementById('edit-attendance-id').value = attendanceId || '';
+      document.getElementById('edit-user-id').value = userId || '';
+      document.getElementById('edit-date').value = date || '';
+      document.getElementById('edit-entry-time').value = toHHMM(entry);
+      document.getElementById('edit-exit-time').value = toHHMM(exit);
+    });
+  });
+
+  // Optional: Focus search on Ctrl+F
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'f') {
+      e.preventDefault();
+      searchInput?.focus();
+    }
+  });
 });
 </script>
-{% endblock %}
 
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

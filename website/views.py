@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,  send_from_directory
 from flask_login import login_required, current_user
-from .models import User, Attendance, Leave, Document, Holiday, Announcement, IntermediateLog, AnnouncementAcknowledgment
+from .models import User, Attendance, Leave, Document, Holiday, Announcement, IntermediateLog, AnnouncementAcknowledgment, EditRequest
 from . import db
 from flask import Flask, send_file
 from io import BytesIO
@@ -438,9 +438,12 @@ def who_output():
 def who():
     return render_template('who.html')
 
-def send_email(subject, recipient, body):
+def send_email(recipient, subject, body, html=False):
     msg = Message(subject, recipients=[recipient])
-    msg.body = body
+    if html:
+        msg.html = body
+    else:
+        msg.body = body
     mail.send(msg)
 
 @views.route('/approve_leave/<int:leave_id>', methods=['POST'])
@@ -926,7 +929,7 @@ ROLES_HIERARCHY = {
     'accounts_member': ['accounts_manager','operations_head','director'],
     
     # Mid-tier managers → higher-level director(s)
-    'design_head': ['director','operations_head'],
+    'design_head': ['service-manager','director','operations_head'],
     'service_manager': ['director','operations_head'],
     'business_development_manager': ['director','operations_head'],
     'accounts_manager': ['director','operations_head'],
@@ -1437,6 +1440,7 @@ def add_compoff():
 #     return render_template('reset_password.html', token=token)
 
 import uuid
+import secrets
 from werkzeug.security import generate_password_hash
 @views.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -1561,7 +1565,7 @@ def export_all_data():
 
     # Send the email
     msg = Message(subject="HRMS System Backup",
-                  recipients=["sumana@nadiya.in.com", "maneesh@nadiya.in"])  # Replace with actual recipient
+                  recipients=["sumana@nadiya.in", "maneesh@nadiya.in"])  # Replace with actual recipient
     msg.body = "Attached is the latest system backup of all tables before reset."
     msg.attach("all_data_export.xlsx", 
                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1870,3 +1874,163 @@ def read_status(announcement_id):
 
     return render_template("acknowledgment_status.html", announcement=announcement,
                            read_users=read_users, unread_users=unread_users)
+
+@views.route('/request_edit', methods=['POST'])
+@login_required
+def request_edit():
+    if current_user.email != 'sumana@nadiya.in':
+        flash("You do not have permission to request edits.", 'error')
+        return redirect(url_for('views.home'))
+
+    attendance_id = request.form.get('attendance_id')
+    new_entry = request.form.get('entry_time')  # format: HH:MM
+    new_exit = request.form.get('exit_time')
+    reason = request.form.get('reason')
+
+    # Fetch the attendance record to get user_id
+    attendance = Attendance.query.get(attendance_id)
+    if not attendance:
+        flash("Invalid attendance record.", 'error')
+        return redirect(url_for('views.home'))
+
+    token = secrets.token_hex(32)
+    req = EditRequest(
+        attendance_id=attendance_id,
+        user_id=attendance.user_id,  # <-- Add this line to fix NotNullViolation
+        requested_by=current_user.email,
+        entry_time=datetime.strptime(new_entry, "%H:%M").time() if new_entry else None,
+        exit_time=datetime.strptime(new_exit, "%H:%M").time() if new_exit else None,
+        reason=reason,
+        token=token,
+        status='pending'
+    )
+    db.session.add(req)
+    db.session.commit()
+
+    # Send approval email 
+    approval_link = url_for('views.edit_requests', _external=True)
+    send_email(
+        recipient="hampalisharu@gmail.com",
+        subject="Attendance Edit Request Approval",
+        body=(
+            f"{current_user.email} has requested to edit attendance record ID {attendance_id}.\n\n"
+            f"Reason: {reason}\n\n"
+            f"Review & Approve Here: {approval_link}"
+        )
+    )
+    flash("Edit request sent for approval.", "info")
+    return redirect(url_for('views.home'))
+
+
+@views.route('/approve_edit/<token>')
+def approve_edit(token):
+    req = EditRequest.query.filter_by(token=token, status='pending').first()
+    if not req:
+        return "Invalid or expired token.", 400
+
+    attendance = Attendance.query.get(req.attendance_id)
+
+    if not attendance:
+        return f"""
+        Attendance record not found for ID {req.attendance_id}.<br><br>
+        Requested Edit:<br>
+        Entry: {req.entry_time}<br>
+        Exit: {req.exit_time}<br>
+        Reason: {req.reason}<br>
+        (Request ID: {req.id})
+        """, 404
+
+    if req.entry_time:
+        attendance.entry_time = req.entry_time
+    if req.exit_time:
+        attendance.exit_time = req.exit_time
+
+    req.status = 'approved'
+    db.session.commit()
+
+    return f"""
+    ✅ Edit approved and applied for Attendance ID {req.attendance_id}.<br><br>
+    New Entry Time: {attendance.entry_time}<br>
+    New Exit Time: {attendance.exit_time}<br>
+    Request ID: {req.id}
+    """
+
+@views.route('/edit_requests')
+@login_required
+def edit_requests():
+    if current_user.email != 'maneesh@nadiya.in':
+        flash("Unauthorized access.", "error")
+        return redirect(url_for('views.home'))
+
+    pending_requests = EditRequest.query.filter_by(status='pending').order_by(EditRequest.created_at.desc()).all()
+    return render_template('edit_requests.html', requests=pending_requests)
+
+
+@views.route('/edit_requests/approve/<int:request_id>', methods=['POST'])
+@login_required
+def approve_edit_request(request_id):
+    req = EditRequest.query.get_or_404(request_id)
+
+    if req.status != 'pending':
+        flash("Request already processed.", "warning")
+        return redirect(url_for('views.edit_requests'))
+
+    attendance = Attendance.query.get(req.attendance_id)
+
+    if not attendance:
+        flash(f"No attendance record found for ID {req.attendance_id}.", "error")
+        return redirect(url_for('views.edit_requests'))
+
+    if req.entry_time:
+        attendance.entry_time = req.entry_time
+    if req.exit_time:
+        attendance.exit_time = req.exit_time
+
+    req.status = 'approved'
+    db.session.commit()
+
+    # ✅ Send approval email
+    send_email(
+        recipient=req.requested_by,
+        subject="Attendance Edit Request Approved",
+        body=(
+            f"Hello,\n\n"
+            f"Your request to edit attendance ID {req.attendance_id} has been approved.\n\n"
+            f"New Entry Time: {attendance.entry_time.strftime('%H:%M') if attendance.entry_time else '—'}\n"
+            f"New Exit Time: {attendance.exit_time.strftime('%H:%M') if attendance.exit_time else '—'}\n\n"
+            f"Best regards,\nHR Team"
+        )
+    )
+
+    flash(f"Approved request {request_id}.", "success")
+    return redirect(url_for('views.edit_requests'))
+
+
+@views.route('/edit_requests/reject/<int:request_id>', methods=['POST'])
+@login_required
+def reject_edit_request(request_id):
+    req = EditRequest.query.get_or_404(request_id)
+
+    if req.status != 'pending':
+        flash("Request already processed.", "warning")
+        return redirect(url_for('views.edit_requests'))
+
+    remarks = request.form.get('remarks')
+
+    req.status = 'rejected'
+    db.session.commit()
+
+    # ❌ Send rejection email with remarks
+    send_email(
+        recipient=req.requested_by,
+        subject="Attendance Edit Request Rejected",
+        body=(
+            f"Hello,\n\n"
+            f"Your request to edit attendance ID {req.attendance_id} has been rejected.\n\n"
+            f"Remarks: {remarks}\n\n"
+            f"Best regards,\nHR Team"
+        )
+    )
+
+    flash(f"Rejected request {request_id}.", "info")
+    return redirect(url_for('views.edit_requests'))
