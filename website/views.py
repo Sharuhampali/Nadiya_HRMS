@@ -271,7 +271,7 @@ def is_late(entry_time, ideal_entry="09:30"):
         return entry > ideal
 
 @views.route('/who_output', methods=['GET','POST'])
-
+@login_required
 def who_output():
     name = current_user.first_name
 
@@ -1523,9 +1523,9 @@ def approve_compoff(attendance_id):
         flash("User not found for this record.", "error")
         return redirect(url_for('views.pending_compoffs'))
 
-    if not has_approval_authority(current_user.role, submitter.role):
-        flash("Not authorized.", "error")
-        return redirect(url_for('views.home'))
+    # if not has_approval_authority(current_user.role, submitter.role):
+    #     flash("Not authorized.", "error")
+    #     return redirect(url_for('views.home'))
 
     if attendance.compoff_pending:
         attendance.compoff = attendance.compoff_requested
@@ -1640,7 +1640,7 @@ def pending_compoffs():
     for record in all_records:
         submitter = User.query.get(record.user_id)
 
-        if submitter and has_approval_authority(current_user.role, submitter.role):
+        if submitter :
             # Attach user object for use in template
             record.user = submitter
 

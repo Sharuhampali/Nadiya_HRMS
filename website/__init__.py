@@ -25,9 +25,9 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    CORS(app, supports_credentials=True, origins=[
-        "https://high-essence-464010-f6.web.app"
-    ])
+    CORS(app,
+     supports_credentials=True,
+     origins=["https://high-essence-464010-f6.web.app"])
 
 
     # General config
@@ -47,8 +47,13 @@ def create_app():
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = (os.getenv('MAIL_DEFAULT_SENDER_NAME'), os.getenv('MAIL_DEFAULT_SENDER_EMAIL'))
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config.update(
+    SESSION_COOKIE_SAMESITE='None',
+    SESSION_COOKIE_SECURE=True,
+    REMEMBER_COOKIE_SAMESITE='None',
+    REMEMBER_COOKIE_SECURE=True
+)
+
 
    
     from .auth import oauth
