@@ -53,9 +53,9 @@ def create_app():
     REMEMBER_COOKIE_SAMESITE='None',
     REMEMBER_COOKIE_SECURE=True
 )
+    app.config['SESSION_COOKIE_NAME'] = '__session'
 
-
-   
+ 
     from .auth import oauth
     oauth.init_app(app)
 
