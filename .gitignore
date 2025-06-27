@@ -2,4 +2,4 @@
 website/__pycache__
 website/database.db
 .env
-.env
+.env.local

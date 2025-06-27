@@ -61,7 +61,7 @@
     --header-bg: #ffffff;
     --header-text: #2d3748;
     --header-border: #7c3aed;
-        --toggle-btn-color: #7c3aed; !important
+        --toggle-btn-color: #7c3aed !important;
 }
 
 [data-theme="dark"] {
@@ -456,7 +456,7 @@ select option {
                 <div class="nav-section-title">Leave Management</div>
                 <div class="nav-item">
                     <a href="/apply_leave" class="nav-link">
-                        <i class="fas fa-file-plus"></i>
+                        <i class="fas fa-plus"></i>
                         <span>Apply Leave</span>
                     </a>
                 </div>
@@ -727,6 +727,31 @@ select option {
                 }
             });
         });
+        window.addEventListener("load", function () {
+    if (performance.getEntriesByType("navigation")[0].type === "reload") {
+      // Optional: flash only on reload if you want
+    }
+
+    if (document.readyState === "complete") {
+      // Check for generic problems like 500 fallback
+      fetch(window.location.href, { method: "HEAD" })
+        .then(res => {
+          if (res.status >= 500) {
+            showFlash("An error occurred. Try refreshing.", "error");
+          }
+        })
+        .catch(() => {
+          showFlash("Something went wrong. Please refresh the page.", "error");
+        });
+    }
+  });
+
+  function showFlash(message, category = "error") {
+    const div = document.createElement("div");
+    div.className = `alert alert-${category}`;
+    div.textContent = message;
+    document.body.prepend(div);
+  }
     </script>
     {% block scripts %}{% endblock %}
 </body>
