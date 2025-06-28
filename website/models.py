@@ -130,6 +130,13 @@ class Holiday(db.Model):
     name = db.Column(db.String(150))
     date = db.Column(db.Date, nullable=False)
 
+announcement_user = db.Table(
+    'announcement_user',
+    db.Column('announcement_id', db.Integer, db.ForeignKey('announcement.id', ondelete='CASCADE')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+)
+
+
 class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -137,6 +144,12 @@ class Announcement(db.Model):
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     image_url = db.Column(db.String(300)) 
     doc_url = db.Column(db.String(300)) 
+    recipients = db.relationship('User',
+    secondary=announcement_user,
+    backref=db.backref('announcements_received', lazy='dynamic'),
+    lazy='dynamic'
+)
+
 
 # class Upload(db.Model):
 #     __tablename__ = 'uploads'

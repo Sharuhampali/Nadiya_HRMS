@@ -218,6 +218,37 @@
             margin-bottom: 0.5rem;
         }
     }
+    .recipient-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    margin-top: 0.5rem;
+    box-shadow: inset 0 0 4px var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.form-check-input {
+    margin-right: 0.75rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--accent-primary); /* Works in modern browsers */
+}
+
+.form-check-label {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
 </style>
 
 <div class="page-header">
@@ -295,6 +326,21 @@
     <small style="color: var(--text-muted); font-size: 0.85rem;">Accepted formats: PDF, DOC, DOCX, JPG, PNG, GIF</small>
 </div>
             </div>
+            <div class="form-group">
+    <label><i class="fas fa-users"></i> Select Recipients (Visible & Notified)</label>
+    <div class="recipient-container">
+        {% for user in users %}
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="recipients" value="{{ user.id }}" id="recipient_{{ user.id }}">
+                <label class="form-check-label" for="recipient_{{ user.id }}">
+                    {{ user.name }} ({{ user.email }})
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+
 
             <div class="form-actions">
                 <button type="button" class="btn-preview" onclick="togglePreview()">
@@ -326,6 +372,12 @@
 </div>
 
 <script>
+function toggleSelectAll(selectId, checkbox) {
+    const select = document.getElementById(selectId);
+    const allOptions = Array.from(select.options);
+    allOptions.forEach(option => option.selected = checkbox.checked);
+}
+
 // Character counting
 document.getElementById('title').addEventListener('input', function () {
     const count = this.value.length;

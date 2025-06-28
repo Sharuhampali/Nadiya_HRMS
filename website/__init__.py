@@ -34,6 +34,7 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['GOOGLE_API_KEY'] = os.getenv("GOOGLE_MAPS_API_KEY")
 
     # Uploads
     app.config['UPLOADS_DEFAULT_DEST'] = os.getenv('UPLOADS_DEFAULT_DEST')

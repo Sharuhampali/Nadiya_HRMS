@@ -421,8 +421,8 @@
                     <th>Total Time</th>
                     <th>Extra Time</th>
                     <th>Comp Off</th>
-                    <th>Entry Location</th>
-                    <th>Exit Location</th>
+                    <!-- <th>Entry Location</th>
+                    <th>Exit Location</th> -->
                     <th>Place Visited (entry)</th>
                     <th>Place Visited (exit)</th>
                     <th>Shift</th>
@@ -447,7 +447,7 @@
                     <td>{{ attendance.total_time_worked() }}</td>
                     <td>{{ attendance.extra_time_worked() }}</td>
                     <td><span class="status-badge status-ontime">{{ attendance.compoff }}</span></td>
-                    <td>
+                    <!-- <td>
                         {% if attendance.entry_location %}
                             <a href="{{ attendance.entry_location | maps_url }}" target="_blank" class="location-link">
                                 {{ attendance.entry_location | extract_area }}
@@ -464,7 +464,7 @@
                         {% else %}
                             -
                         {% endif %}
-                    </td>
+                    </td> -->
                     <td>{{ attendance.site_name_e or '-' }}</td>
                     <td>{{ attendance.site_name or '-' }}</td>
                     <td>{{ attendance.entry_time | determine_shift }}</td>

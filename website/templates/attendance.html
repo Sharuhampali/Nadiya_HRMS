@@ -263,44 +263,67 @@ document.addEventListener("DOMContentLoaded", function () {
     const latField = document.getElementById("latitude");
     const lonField = document.getElementById("longitude");
     const form = document.getElementById("attendanceForm");
+    const submitBtn = form.querySelector("button[type='submit']");
 
     let locationFetched = false;
+    let source = "Unknown";
+
+    function logStatus(message, type = "info") {
+        const colorMap = {
+            info: "#0d6efd",
+            success: "#198754",
+            warning: "#ffc107",
+            error: "#dc3545"
+        };
+
+        loadingText.innerHTML = `
+            <div style="color: ${colorMap[type]}; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-info-circle"></i> ${message}
+            </div>`;
+    }
 
     function setLocation(lat, lon) {
-        latField.value = lat;
-        lonField.value = lon;
-        document.getElementById("location-loading").innerHTML = `
-        <div class="location-success">
-            <i class="fas fa-check-circle location-icon"></i>
-            <span>Location found successfully!</span>
-        </div>`;
-        status.classList.remove("text-muted");
-        status.classList.add("text-success");
-        locationFetched = true;
+        setTimeout(() => {
+            latField.value = lat;
+            lonField.value = lon;
+            locationFetched = true;
+            logStatus(`✅ Location found using ${source}.`, "success");
+            status.classList.remove("text-muted", "text-danger");
+            status.classList.add("text-success");
+            submitBtn.disabled = false;
+        }, 10000); // 10 seconds wait
     }
 
     function handleError() {
-        loadingText.textContent = "❌ Unable to fetch location.";
+        logStatus("❌ Failed to fetch your location. Please try again or check your browser settings.", "error");
         status.classList.remove("text-muted");
         status.classList.add("text-danger");
+        submitBtn.disabled = true;
     }
+
+    // Start process
+    submitBtn.disabled = true;
+    logStatus("📍 Attempting to retrieve your current GPS location...", "info");
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
+                source = "GPS";
                 setLocation(position.coords.latitude, position.coords.longitude);
             },
             (error) => {
+                logStatus("⚠️ GPS failed. Trying IP-based fallback...", "warning");
                 fetch("https://ipapi.co/json/")
                     .then(response => response.json())
                     .then(data => {
                         if (data.latitude && data.longitude) {
+                            source = "IP Address";
                             setLocation(data.latitude, data.longitude);
                         } else {
                             handleError();
                         }
                     })
-                    .catch(handleError);
+                    .catch(() => handleError());
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
@@ -316,6 +339,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+
 </script>
 
 {% endblock %}

@@ -10,6 +10,24 @@ from datetime import datetime
 auth = Blueprint('auth', __name__)
 
 
+# @auth.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         email = request.form.get('email')
+#         password = request.form.get('password')
+
+#         user = User.query.filter_by(email=email).first()
+#         if user:
+#             if check_password_hash(user.password, password):
+#                 flash('Logged in successfully!', category='success')
+#                 login_user(user, remember=True)
+#                 return redirect(url_for('views.home'))
+#             else:
+#                 flash('Incorrect password, try again.', category='error')
+#         else:
+#             flash('Email does not exist.', category='error')
+
+#     return render_template("login.html", user=current_user)
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -19,6 +37,12 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
+                if password == "1234567":
+                    # Store user ID temporarily in session
+                    session['temp_user_id'] = user.id
+                    flash('Please change your default password before continuing.', category='warning')
+                    return redirect(url_for('auth.change_password'))
+                
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
@@ -29,97 +53,11 @@ def login():
 
     return render_template("login.html", user=current_user)
 
-
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('auth.login'))
-
-
-# @auth.route('/sign-up', methods=['GET', 'POST'])
-# def sign_up():
-    
-#     if request.method == 'POST':
-#         email = request.form.get('email')
-#         first_name = request.form.get('firstName')
-#         password1 = request.form.get('password1')
-#         password2 = request.form.get('password2')
-
-#         user = User.query.filter_by(email=email).first()
-#         if user:
-#             flash('Email already exists.', category='error')
-#         elif len(email) < 4:
-#             flash('Email must be greater than 3 characters.', category='error')
-#         elif len(first_name) < 2:
-#             flash('First name must be greater than 1 character.', category='error')
-#         elif password1 != password2:
-#             flash('Passwords don\'t match.', category='error')
-#         elif len(password1) < 1:
-#             flash('Password must be at least 7 characters.', category='error')
-#         else:
-#             new_user = User(email=email, first_name=first_name, password=generate_password_hash(
-#                 password1, method='scrypt'))
-#             db.session.add(new_user)
-#             db.session.commit()
-#             login_user(new_user, remember=True)
-#             for leave in current_user.leaves:
-#                 leave.medic = 0
-#                 leave.earned = 0
-#                 leave.pay = 0 
-#             flash('Account created!', category='success')
-#             return redirect(url_for('views.home'))
-
-#     return render_template("sign_up.html", user=current_user)
-
-# @auth.route('/sign-up', methods=['GET', 'POST'])
-# def sign_up():
-#     user_count = User.query.count()
-
-#     # ✅ Step 1: Block non-admins from even seeing the form once the first user is created
-#     if user_count > 0:
-#         if not current_user.is_authenticated:
-#             flash('Sign-up is restricted. Please contact the administrator.', 'error')
-#             return redirect(url_for('auth.login'))
-#         elif current_user.email != 'sumana@nadiya.in':
-#             flash('Only the admin can create new accounts.', 'error')
-#             return redirect(url_for('views.home'))
-
-#     if request.method == 'POST':
-#         email = request.form.get('email')
-#         first_name = request.form.get('firstName')
-#         password1 = request.form.get('password1')
-#         password2 = request.form.get('password2')
-
-#         user = User.query.filter_by(email=email).first()
-#         if user:
-#             flash('Email already exists.', category='error')
-#         elif len(email) < 4:
-#             flash('Email must be greater than 3 characters.', category='error')
-#         elif len(first_name) < 2:
-#             flash('First name must be greater than 1 character.', category='error')
-#         elif password1 != password2:
-#             flash('Passwords don\'t match.', category='error')
-#         elif len(password1) < 7:
-#             flash('Password must be at least 7 characters.', category='error')
-#         else:
-#             new_user = User(
-#                 email=email,
-#                 first_name=first_name,
-#                 password=generate_password_hash(password1, method='scrypt')
-#             )
-#             db.session.add(new_user)
-#             db.session.commit()
-
-#             flash('Account created successfully.', category='success')
-
-#             # Only log in the first ever user
-#             if user_count == 0:
-#                 login_user(new_user, remember=True)
-
-#             return redirect(url_for('auth.login'))
-
-#     return render_template("sign_up.html", user=current_user)
 
 
 
@@ -185,42 +123,6 @@ def google_login():
     return oauth.google.authorize_redirect(redirect_uri)
 
 
-# @auth.route('/login/google/callback')
-# def google_callback():
-#     google = oauth.create_client('google')
-#     token = oauth.google.authorize_access_token()
-#     if google.token.is_expired():
-#         new_token = google.refresh_token(
-#             url='https://oauth2.googleapis.com/token',
-#             client_id=google.client_id,
-#             client_secret=google.client_secret
-#         )
-#         token = new_token
-    
-#     user_info = token.get('userinfo') or oauth.google.parse_id_token(token, nonce=None)
-#     print("User info received:", user_info)  # Debugging line to check user info
-    
-#     if user_info is None:
-#         flash("Failed to authenticate with Google.", "error")
-#         return redirect(url_for('auth.login'))
-    
-#     email = user_info.get('email')
-#     first_name = user_info.get('given_name', '')
-
-#     # Check if user exists, else create new
-#     user = User.query.filter_by(email=email).first()
-#     # if not user:
-#     #     user = User(email=email, first_name=first_name, password='')  # No password for OAuth users
-#     #     db.session.add(user)
-#     #     db.session.commit()
-#     if not user:
-#         flash("Access denied: Your account is not registered in the system.", "error")
-#         return redirect(url_for('auth.login'))
-
-#     login_user(user, remember=True)
-#     flash('Logged in successfully with Google!', 'success')
-#     return redirect(url_for('views.home'))
-
 @auth.route('/login/google/callback')
 def google_callback():
     google = oauth.create_client('google')
@@ -255,3 +157,37 @@ def google_callback():
     login_user(user, remember=True)
     flash('Logged in successfully with Google!', 'success')
     return redirect(url_for('views.home'))
+from flask import session
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    from werkzeug.security import generate_password_hash
+
+    user_id = session.get('temp_user_id')
+    if not user_id:
+        flash("Session expired. Please log in again.", "error")
+        return redirect(url_for('auth.login'))
+
+    user = User.query.get(user_id)
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not new_password or not confirm_password:
+            flash("Please fill out both fields.", "error")
+        elif new_password != confirm_password:
+            flash("Passwords do not match.", "error")
+        elif new_password == "1234567":
+            flash("You must choose a stronger password.", "error")
+        else:
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+            session.pop('temp_user_id', None)
+            flash("Password updated. Please log in again.", "success")
+            return redirect(url_for('auth.login'))
+
+    return render_template("change_password.html")
