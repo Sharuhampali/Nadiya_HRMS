@@ -147,6 +147,7 @@ class Announcement(db.Model):
     recipients = db.relationship('User',
     secondary=announcement_user,
     backref=db.backref('announcements_received', lazy='dynamic'),
+    passive_deletes=True,
     lazy='dynamic'
 )
 
