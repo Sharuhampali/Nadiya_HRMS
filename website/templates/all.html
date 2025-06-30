@@ -237,18 +237,7 @@
                 <div class="stat-number">{{ user|length }}</div>
                 <div class="stat-label">Total Employees</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ user|selectattr('role', 'equalto', 'manager')|list|length }}</div>
-                <div class="stat-label">Managers</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ user|selectattr('role', 'equalto', 'member')|list|length }}</div>
-                <div class="stat-label">Members</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ user|selectattr('role', 'equalto', 'director')|list|length }}</div>
-                <div class="stat-label">Directors</div>
-            </div>
+           
         </div>
 
         <div class="table-container">

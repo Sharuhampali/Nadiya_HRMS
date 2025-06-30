@@ -256,7 +256,6 @@
         </form>
     </div>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const status = document.getElementById("location-status");
@@ -267,7 +266,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitBtn = form.querySelector("button[type='submit']");
 
     let locationFetched = false;
-    let source = "Unknown";
 
     function logStatus(message, type = "info") {
         const colorMap = {
@@ -284,66 +282,47 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function setLocation(lat, lon) {
-        setTimeout(() => {
-            latField.value = lat;
-            lonField.value = lon;
-            locationFetched = true;
-            logStatus(`✅ Location found using ${source}.`, "success");
-            status.classList.remove("text-muted", "text-danger");
-            status.classList.add("text-success");
-            submitBtn.disabled = false;
-        }, 10000); // 10 seconds wait
+        latField.value = lat;
+        lonField.value = lon;
+        locationFetched = true;
+        logStatus(`✅ Location successfully retrieved using GPS.`, "success");
+        status.classList.remove("text-muted", "text-danger");
+        status.classList.add("text-success");
+        submitBtn.disabled = false;
     }
 
-    function handleError() {
-        logStatus("❌ Failed to fetch your location. Please try again or check your browser settings.", "error");
+    function handleError(err) {
+        logStatus(`❌ Failed to fetch your location: ${err.message}. Please allow GPS access and wait.`, "error");
         status.classList.remove("text-muted");
         status.classList.add("text-danger");
         submitBtn.disabled = true;
     }
 
-    // Start process
+    // Begin GPS request
     submitBtn.disabled = true;
-    logStatus("📍 Attempting to retrieve your current GPS location...", "info");
+    logStatus("📍 Waiting for accurate GPS location... please allow location access.", "info");
 
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-        source = "GPS";
-        setLocation(position.coords.latitude, position.coords.longitude);
-    },
-    (error) => {
-        console.warn("Geolocation failed:", error);
-        logStatus(`⚠️ GPS failed (${error.message}). Trying IP-based fallback...`, "warning");
-        fetch("https://ipapi.co/json/")
-            .then(response => response.json())
-            .then(data => {
-                if (data.latitude && data.longitude) {
-                    source = "IP Address";
-                    setLocation(data.latitude, data.longitude);
-                } else {
-                    handleError();
-                }
-            })
-            .catch(() => handleError());
-    },
-    {
-        enableHighAccuracy: true,
-        timeout: 15000,  // increase from 5s to 10s
-        maximumAge: 0
-    }
-);
-
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            setLocation(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+            handleError(error);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: Infinity, // Let it wait indefinitely (well, until the user allows)
+            maximumAge: 0
+        }
+    );
 
     form.addEventListener("submit", function (e) {
         if (!locationFetched) {
             e.preventDefault();
-            alert("Please wait — your location is still being fetched.");
+            alert("Please wait — your GPS location is still being fetched.");
             status.scrollIntoView({ behavior: "smooth" });
         }
     });
 });
-
-
 </script>
-
 {% endblock %}
