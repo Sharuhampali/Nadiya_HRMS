@@ -373,7 +373,7 @@ def request_edit():
     # Send approval email 
     approval_link = url_for('views.edit_requests', _external=True)
     send_email(
-        recipient="hampalisharu@gmail.com",
+        recipient="maneesh@nadiya.in",
         subject="Attendance Edit Request Approval",
         body=(
             f"{current_user.email} has requested to edit attendance record ID {attendance_id}.\n\n"
@@ -751,40 +751,41 @@ def apply_leave():
         total_days = 0.0
         summary = {'Earned': 0.0, 'Medical/Sick': 0.0, 'Compoff': 0.0, 'Leave w/o Pay': 0.0}
 
-        # Build leave entry list
+        # Available leave balances
+        available_balances = {
+            'Earned': 15 - current_user.earned,
+            'Medical/Sick': 6 - current_user.medic,
+            'Leave w/o Pay': 10 - current_user.pay,
+            'Compoff': current_user.total_compoff
+        }
+
+        # Row-by-row validation and leave entry collection
         for date_str, dur_str, ltype in zip(dates, durations, types):
             if not date_str or not ltype:
                 continue  # Skip incomplete rows
 
             duration = float(dur_str)
-            total_days += duration
+
+            # Check availability per row
+            if ltype not in available_balances:
+                flash(f"Invalid leave type: {ltype}", 'error')
+                return redirect(url_for('views.apply_leave'))
+
+            if available_balances[ltype] < duration:
+                flash(f"Not enough {ltype} leave available. You tried to use {duration}, but only {available_balances[ltype]:.1f} left.", 'error')
+                return redirect(url_for('views.apply_leave'))
+
+            available_balances[ltype] -= duration
             summary[ltype] += duration
+            total_days += duration
 
             leave_entries.append({
                 'date': date_str,
                 'duration': duration,
                 'type': ltype
             })
-        
 
-        # Validate leave quotas
-        if summary['Medical/Sick'] > (6 - current_user.medic):
-            flash("Not enough Medical/Sick leaves left.", 'error')
-            return redirect(url_for('views.apply_leave'))
-
-        if summary['Earned'] > (15 - current_user.earned):
-            flash("Not enough Earned leaves left.", 'error')
-            return redirect(url_for('views.apply_leave'))
-
-        if summary['Leave w/o Pay'] > (10 - current_user.pay):
-            flash("Leave w/o Pay quota exceeded.", 'error')
-            return redirect(url_for('views.apply_leave'))
-
-        if summary['Compoff'] > current_user.total_compoff:
-            flash("Not enough Compoff leaves left.", 'error')
-            return redirect(url_for('views.apply_leave'))
-
-        # Deduct compoff from attendance record
+        # Deduct compoff from attendance
         if summary['Compoff'] > 0:
             remaining = summary['Compoff']
             for att in current_user.attendances:
@@ -793,7 +794,7 @@ def apply_leave():
                     db.session.commit()
                     break
 
-        # Apply leave balances
+        # Apply to user leave counts
         current_user.medic += summary['Medical/Sick']
         current_user.earned += summary['Earned']
         current_user.pay += summary['Leave w/o Pay']
@@ -811,11 +812,10 @@ def apply_leave():
             leaves_data=json.dumps(leave_entries)
         )
 
-
         db.session.add(new_leave)
         db.session.commit()
 
-        # Manager logic unchanged
+        # Manager notification
         manager_roles = ROLES_HIERARCHY.get(current_user.role)
         if not manager_roles:
             flash("No manager assigned for your role.", 'error')
@@ -830,7 +830,7 @@ def apply_leave():
         if STATIC_MANAGER_EMAIL not in recipient_emails:
             recipient_emails.append(STATIC_MANAGER_EMAIL)
 
-        approval_url = url_for('views.leave_requests',  _external=True)
+        approval_url = url_for('views.leave_requests', _external=True)
 
         msg = Message('New Leave Application', recipients=recipient_emails)
         msg.body = (
@@ -852,7 +852,6 @@ def apply_leave():
         return redirect(url_for('views.apply_leave'))
 
     return render_template('apply_leave.html', user=current_user, today=datetime.today().date().strftime("%d-%m-%y"))
-
 
 @views.route('/add_compoff', methods=['GET', 'POST'])
 @login_required
@@ -1358,8 +1357,10 @@ def upload():
 @login_required
 
 def create_user():
-    users = User.query.all()
-    return render_template('create_user.html', users=users)
+    if current_user.email in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
+        users = User.query.all()
+        return render_template('create_user.html', users=users)
+    return redirect(url_for('views.home'))
 
 @views.route('/uploaded_file/<setname>/<filename>')
 @login_required
@@ -1427,11 +1428,13 @@ def assign_roles():
         user_id = request.form['user_id']
         role = request.form['role']
         is_probation = request.form.get('probation') == 'on'
+        nad_id = request.form.get('nad_id') or None
 
         user = User.query.get(user_id)
         if user:
             previously_probation = user.probation
             user.role = role
+            user.nad_id = nad_id
             user.set_probation_status(is_probation)
 
             if previously_probation and not is_probation:

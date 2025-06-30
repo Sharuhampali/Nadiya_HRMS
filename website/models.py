@@ -12,7 +12,7 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(150))
-    last_name = db.Column(db.String(150))
+    nad_id = db.Column(db.String(150))
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(512), nullable=False)
     earned =  db.Column(db.Float, default=0)

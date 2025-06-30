@@ -2952,7 +2952,7 @@ def request_edit():
     # Send approval email 
     approval_link = url_for('views.edit_requests', _external=True)
     send_email(
-        recipient="hampalisharu@gmail.com",
+        recipient="maneesh@nadiya.in",
         subject="Attendance Edit Request Approval",
         body=(
             f"{current_user.email} has requested to edit attendance record ID {attendance_id}.\n\n"

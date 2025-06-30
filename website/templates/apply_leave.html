@@ -173,11 +173,18 @@
         .form-container {
             padding: 1.5rem;
         }
-        
+
         .page-header h1 {
             font-size: 1.5rem;
         }
     }
+    select:disabled {
+    background-color: #0b82f9 !important; /* Light grey or whatever you prefer */
+    color: #6c757d; /* Optional: muted text */
+    cursor: not-allowed;
+    border-color: #ced4da;
+}
+
 </style>
 
 <div class="page-header">
@@ -191,61 +198,64 @@
         <i class="fas fa-arrow-left"></i> Back to Leave Management
     </a>
 
-   <form id="leaveForm" method="POST">
-    {% if confirm_override %}
-    <div class="alert alert-warning" id="confirmBox">
-        <strong>Warning:</strong> You’re applying for more than your accrued leaves.<br>
-        Click confirm to proceed anyway.
-        <input type="hidden" name="confirm_override" value="true">
-        <!-- Keep previous form data alive -->
-        {% for key, value in form_data.items() %}
-            {% if key != 'confirm_override' %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-            {% endif %}
-        {% endfor %}
-        <button type="submit" class="btn btn-danger">Confirm and Apply</button>
-        <a href="{{ url_for('views.apply_leave') }}" class="btn btn-secondary">Cancel</a>
+    <form id="leaveForm" method="POST">
+        {% if confirm_override %}
+        <div class="alert alert-warning" id="confirmBox">
+            <strong>Warning:</strong> You’re applying for more than your accrued leaves.<br>
+            Click confirm to proceed anyway.
+            <input type="hidden" name="confirm_override" value="true">
+            {% for key, value in form_data.items() %}
+                {% if key != 'confirm_override' %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-danger">Confirm and Apply</button>
+            <a href="{{ url_for('views.apply_leave') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+        {% endif %}
+
+        <h2 class="form-title">Leave Application Form</h2>
+
+        {% for i in range(7) %}
+<div class="row mb-2">
+    <div class="col-md-4">
+        <input type="date" class="form-control" name="leave_dates" min="{{ today }}">
     </div>
-{% endif %}
-
-    <h2 class="form-title">Leave Application Form</h2>
-
-    {% for i in range(7) %}
-    <div class="row mb-2">
-        <div class="col-md-4">
-            <input type="date" class="form-control" name="leave_dates" min="{{ today }}">
-        </div>
-        <div class="col-md-3">
-            <select class="form-control" name="leave_durations">
-                <option value="1">Full Day</option>
-                <option value="0.5">Half Day</option>
-            </select>
-        </div>
-        <div class="col-md-5">
-            <select class="form-control" name="leave_types">
-                <option value="">Select Leave Type</option>
-                <option value="Compoff">Compoff Leave</option>
+    <div class="col-md-3">
+        <select class="form-control" name="leave_durations">
+            <option value="1">Full Day</option>
+            <option value="0.5">Half Day</option>
+        </select>
+    </div>
+    <div class="col-md-5">
+        <select class="form-control leave-type" name="leave_types"
+            {% if i < current_user.total_compoff %} disabled {% endif %}>
+            <option value="">Select Leave Type</option>
+            <option value="Compoff" {% if i < current_user.total_compoff %}selected{% endif %}>Compoff Leave</option>
+            {% if i >= current_user.total_compoff %}
                 <option value="Earned">Earned Leave</option>
                 <option value="Medical/Sick">Medical/Sick Leave</option>
                 {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
                     <option value="Leave w/o Pay">Leave w/o Pay</option>
                 {% endif %}
-            </select>
+            {% endif %}
+        </select>
+    </div>
+</div>
+{% endfor %}
+
+
+        <div class="form-group">
+            <label for="reason">Reason (Optional):</label>
+            <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason for leave..."></textarea>
         </div>
-    </div>
-    {% endfor %}
 
-    <div class="form-group">
-        <label for="reason">Reason (Optional):</label>
-        <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason for leave..."></textarea>
-    </div>
+        <button type="submit" class="btn-submit">
+            <i class="fas fa-paper-plane"></i> Submit Leave Application
+        </button>
+    </form>
 
-    <button type="submit" class="btn-submit">
-        <i class="fas fa-paper-plane"></i> Submit Leave Application
-    </button>
-</form>
-
- <br>
+    <br>
 
     <div class="leave-balance-table">
         <h3 class="table-title"><i class="fas fa-chart-bar"></i> Your Leave Balance</h3>
@@ -279,35 +289,35 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const startDateInput = document.getElementById('start_date');
-    const endDateInput = document.getElementById('end_date');
-    const daysInput = document.getElementById('days');
+document.addEventListener('DOMContentLoaded', function () {
+    const totalCompoff = Number("{{ current_user.total_compoff | default(0) }}");
+    const leaveTypeSelectors = document.querySelectorAll('select.leave-type');
 
-    function calculateDays() {
-        const startDate = new Date(startDateInput.value);
-        const endDate = new Date(endDateInput.value);
-        
-        if (startDate && endDate && endDate >= startDate) {
-            const timeDiff = endDate.getTime() - startDate.getTime();
-            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-            daysInput.value = daysDiff;
-        } else {
-            daysInput.value = 0;
-        }
+    function updateLeaveTypeOptions() {
+        let compoffSelected = 0;
+
+        leaveTypeSelectors.forEach(select => {
+            if (select.value === 'Compoff') {
+                compoffSelected += 1;
+            }
+        });
+
+        const compoffRemaining = totalCompoff - compoffSelected;
+
+        leaveTypeSelectors.forEach(select => {
+            Array.from(select.options).forEach(opt => {
+                if (opt.value !== 'Compoff' && opt.value !== "") {
+                    opt.disabled = compoffRemaining > 0;
+                }
+            });
+        });
     }
 
-    startDateInput.addEventListener('change', calculateDays);
-    endDateInput.addEventListener('change', calculateDays);
-    
-    // Update end date minimum when start date changes
-    startDateInput.addEventListener('change', function() {
-        endDateInput.min = this.value;
-        if (endDateInput.value < this.value) {
-            endDateInput.value = this.value;
-        }
-        calculateDays();
+    leaveTypeSelectors.forEach(select => {
+        select.addEventListener('change', updateLeaveTypeOptions);
     });
+
+    updateLeaveTypeOptions();
 });
 </script>
 {% endblock %}

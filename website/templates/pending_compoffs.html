@@ -72,7 +72,6 @@
         <table class="table table-bordered table-hover">
             <thead class="table-light">
                 <tr>
-                    <th>#</th>
                     <th>Name</th>
                     <th>Role</th>
                     <th>Date</th>
@@ -84,6 +83,8 @@
                     <th>Place Visited (Exit)</th>
                     <th>Comp Off</th>
                     <th>Status</th>
+                    <th>Remarks</th>
+
                     <th colspan="2">Actions</th>
                 </tr>
             </thead>
@@ -95,7 +96,6 @@
                     else 'rejected' if record.compoff_requested > 0
                     else 'unknown' %}
                 <tr class="record-row" data-status="{{ status }}">
-                    <td>{{ loop.index }}</td>
                     <td>{{ record.name }}</td>
                     <td>{{ record.user.role.replace('_', ' ') if record.user.role else '—' }}</td>
                     <td>{{ record.date }}</td>
@@ -123,6 +123,8 @@
                             {{ status.capitalize() }}
                         </span>
                     </td>
+                    <td>{{ record.remarks if record.remarks else '-' }}</td>
+
                     <td>
                         {% if status == 'pending' %}
                             <form method="POST" action="{{ url_for('views.approve_compoff', attendance_id=record.id) }}" style="display:inline;">

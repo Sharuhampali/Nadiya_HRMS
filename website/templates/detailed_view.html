@@ -31,6 +31,7 @@
               <th>Time</th>
               <th>Location</th>
               <th>Place Visited</th>
+              <th>Remarks</th>
             </tr>
           </thead>
           <tbody>
@@ -43,6 +44,8 @@
                 <td class="x">{{ attendance.entry_time.strftime('%H:%M') if attendance.entry_time else '-' }}</td>
                 <td class="x">{{ attendance.entry_location or '-' }}</td>
                 <td class="x">{{ attendance.site_name_e or '-' }}</td>
+                <td class="x">{{ attendance.remarks or '-' }}</td>
+
               </tr>
         
             {% endif %}
@@ -54,6 +57,7 @@
                 <td>{{ log.time.strftime('%H:%M') }}</td>
                 <td>{{ log.location }}</td>
                 <td>{{ log.site or '-' }}</td>
+                <td>{{ log.remarks or '-' }}</td>
               </tr>
               
             {% endfor %}
@@ -71,6 +75,8 @@
                 </td>
                 <td class="x">{{ attendance.exit_location or '-' }}</td>
                 <td class="x">{{ attendance.site_name or '-' }}</td>
+                <td class="x">{{ attendance.remarks or '-' }}</td>
+
               </tr>
             {% endif %}
 
