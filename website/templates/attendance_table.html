@@ -194,7 +194,35 @@
             max-width: 100%;
         }
     }
+      .day-header {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        margin-top: 1rem;
+    }
+
+    .nav-btn {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .nav-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+    }
 </style>
+
 <div class="page-header">
     <div class="container">
         <h1><i class="fas fa-table"></i> Attendance Records</h1>
@@ -213,93 +241,107 @@
         </div>
     </div>
 
-    <div class="table-container">
-        <table class="table" id="attendanceTable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Date</th>
-                    <th>Day</th>
-                    <th>Entry Time</th>
-                    <th>Exit Time</th>
-                    <th>Total Time</th>
-                    <th>Extra Time</th>
-                    <th>Comp Off</th>
-                    <th>Entry Location</th>
-                    <th>Exit Location</th>
-                    <th>Place Visited (entry)</th>
-                    <th>Place Visited (exit)</th>
-                    <th>Shift</th>
-                    <th>Status</th>
-                    <th>Reason</th>
-                    <th>View</th>
-                    <th>Edit</th>
-                </tr>
-            </thead>
-            <tbody id="attendanceTableBody">
-                {% for attendance in attendances|sort(attribute='date', reverse=True) %}
-                <tr>
-                    <td><strong>{{ attendance.name }}</strong></td>
-                    <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
-                    <td>{{ attendance.day }}</td>
-                    <td>{{ attendance.entry_time }}</td>
-                    <td>{{ attendance.exit_time or '-' }}</td>
-                    <td>{{ attendance.total_time_worked() }}</td>
-                    <td>{{ attendance.extra_time_worked() }}</td>
-                    <td><span class="status-badge status-ontime">{{ attendance.compoff }}</span></td>
-                    <td>
-                        {% if attendance.entry_location %}
-                            <a href="{{ attendance.entry_location | maps_url }}" target="_blank" class="location-link">
-                                {{ attendance.entry_location | extract_area }}
-                            </a>
-                        {% else %}-{% endif %}
-                    </td>
-                    <td>
-                        {% if attendance.exit_location %}
-                            <a href="{{ attendance.exit_location | maps_url }}" target="_blank" class="location-link">
-                                {{ attendance.exit_location | extract_area }}
-                            </a>
-                        {% else %}-{% endif %}
-                    </td>
-                    <td>{{ attendance.site_name_e or '-' }}</td>
-                    <td>{{ attendance.site_name or '-' }}</td>
-                    <td>{{ attendance.entry_time | determine_shift }}</td>
-                    <td>
-                        {% if attendance.entry_time | is_late %}
-                            <span class="status-badge status-late">Late</span>
-                        {% else %}
-                            <span class="status-badge status-ontime">On Time</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ attendance.reason or '-' }}</td>
-                    <td>
-                        <a href="{{ url_for('views.detailed_view', user_id=attendance.user_id, date=attendance.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
-                    </td>
-                    <td>
-                        {% if current_user.email == 'sumana@nadiya.in' or current_user.email== 'maneesh@nadiya.in' %}
-                            <button class="request-edit-btn btn btn-outline-warning btn-sm"
-                                    data-attendance-id="{{ attendance.id }}"
-                                    data-user-id="{{ attendance.user_id }}"
-                                    data-date="{{ attendance.date.strftime('%Y-%m-%d') }}"
-                                    data-entry="{{ attendance.entry_time }}"
-                                    data-exit="{{ attendance.exit_time }}"
-                                    data-toggle="modal"
-                                    data-target="#editRequestModal">
-                                Request Edit
-                            </button>
-                        {% else %}-{% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+   
 
-        <div id="noResults" class="no-results" style="display: none;">
-            <i class="fas fa-search"></i>
-            <p>No records found matching your search criteria.</p>
+    <div id="current-day-block">
+        <div class="day-header">Records for {{ target_date.strftime('%Y-%m-%d') }}</div>
+        <div class="table-container">
+            <table class="table" id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Entry Time</th>
+                        <th>Exit Time</th>
+                        <th>Total Time</th>
+                        <th>Extra Time</th>
+                        <th>Comp Off</th>
+                        <th>Entry Location</th>
+                        <th>Exit Location</th>
+                        <th>Place Visited (entry)</th>
+                        <th>Place Visited (exit)</th>
+                        <th>Shift</th>
+                        <th>Status</th>
+                        <th>Reason</th>
+                        <th>View</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in attendances %}
+                    <tr>
+                        <td><strong>{{ a.name }}</strong></td>
+                        <td>{{ a.date.strftime('%d-%m-%Y') }}</td>
+                        <td>{{ a.day }}</td>
+                        <td>{{ a.entry_time }}</td>
+                        <td>{{ a.exit_time or '-' }}</td>
+                        <td>{{ a.total_time_worked() }}</td>
+                        <td>{{ a.extra_time_worked() }}</td>
+                        <td><span class="status-badge status-ontime">{{ a.compoff }}</span></td>
+                        <td>
+                            {% if a.entry_location %}
+                                <a href="{{ a.entry_location | maps_url }}" class="location-link" target="_blank">{{ a.entry_location | extract_area }}</a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if a.exit_location %}
+                                <a href="{{ a.exit_location | maps_url }}" class="location-link" target="_blank">{{ a.exit_location | extract_area }}</a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>{{ a.site_name_e or '-' }}</td>
+                        <td>{{ a.site_name or '-' }}</td>
+                        <td>{{ a.entry_time | determine_shift }}</td>
+                        <td>
+                            {% if a.entry_time | is_late %}
+                                <span class="status-badge status-late">Late</span>
+                            {% else %}
+                                <span class="status-badge status-ontime">On Time</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ a.reason or '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('views.detailed_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                        </td>
+                        <td>
+                            {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
+                                <button class="request-edit-btn btn btn-outline-warning btn-sm"
+                                        data-attendance-id="{{ a.id }}"
+                                        data-user-id="{{ a.user_id }}"
+                                        data-date="{{ a.date.strftime('%Y-%m-%d') }}"
+                                        data-entry="{{ a.entry_time }}"
+                                        data-exit="{{ a.exit_time }}"
+                                        data-toggle="modal"
+                                        data-target="#editRequestModal">
+                                    Request Edit
+                                </button>
+                            {% else %}-{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <p>No records found matching your search criteria.</p>
+            </div>
+            
         </div>
     </div>
+     <div class="navigation-buttons" style="text-align:right;margin-bottom:1rem;">
+        {% if prev_date %}
+            <a class="nav-btn" href="{{ url_for('views.attendance_table', date=prev_date) }}">Previous Day</a>
+        {% else %}
+            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">Previous Day</span>
+        {% endif %}
+        {% if next_date %}
+            <a class="nav-btn" href="{{ url_for('views.attendance_table', date=next_date) }}">Next Day</a>
+        {% else %}
+            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">Next Day</span>
+        {% endif %}
+    </div>
 </div>
+
 
 <!-- Modal for Edit Request -->
 <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
@@ -316,24 +358,20 @@
           <input type="hidden" name="attendance_id" id="edit-attendance-id" value="">
           <input type="hidden" name="data_user_id" id="edit-user-id" value="">
           <input type="hidden" name="date" id="edit-date" value="">
-
           <div class="form-group">
             <label for="edit-entry-time">New Entry Time</label>
             <input type="time" class="form-control" id="edit-entry-time" name="entry_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
           </div>
-
           <div class="form-group">
             <label for="edit-exit-time">New Exit Time</label>
             <input type="time" class="form-control" id="edit-exit-time" name="exit_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
           </div>
-
           <div class="form-group">
             <label for="edit-reason">Reason</label>
             <textarea class="form-control" id="edit-reason" name="reason" rows="3" required
                       style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);"></textarea>
           </div>
         </div>
-
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Submit Request</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -345,66 +383,44 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const searchInput = document.getElementById('searchInput');
-  const tableBody = document.getElementById('attendanceTableBody');
-  const noResults = document.getElementById('noResults');
-  const rows = Array.from(tableBody?.getElementsByTagName('tr') || []);
-
-  if (searchInput) {
-    searchInput.addEventListener('input', function () {
-      const searchTerm = this.value.toLowerCase().trim();
-      let visibleRows = 0;
-
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-          row.style.display = '';
-          visibleRows++;
-        } else {
-          row.style.display = 'none';
-        }
-      });
-
-      if (noResults)
-        noResults.style.display = visibleRows === 0 && searchTerm !== '' ? 'block' : 'none';
-    });
-  }
-
-  // Handle "Request Edit" modal population
-  const buttons = document.querySelectorAll('.request-edit-btn');
-  buttons.forEach(button => {
-    button.addEventListener('click', function () {
-      const attendanceId = this.getAttribute('data-attendance-id');
-      const userId = this.getAttribute('data-user-id');
-      const date = this.getAttribute('data-date');
-      const entry = this.getAttribute('data-entry');
-      const exit = this.getAttribute('data-exit');
-
-      function toHHMM(timeStr) {
-        if (!timeStr || !timeStr.includes(':')) return '';
-        const parts = timeStr.split(':');
-        return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
-      }
-
-      document.getElementById('edit-attendance-id').value = attendanceId || '';
-      document.getElementById('edit-user-id').value = userId || '';
-      document.getElementById('edit-date').value = date || '';
-      document.getElementById('edit-entry-time').value = toHHMM(entry);
-      document.getElementById('edit-exit-time').value = toHHMM(exit);
-    });
-  });
-
-  // Optional: Focus search on Ctrl+F
-  document.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && e.key === 'f') {
-      e.preventDefault();
-      searchInput?.focus();
+    // Search logic for current day's table
+    const searchInput = document.getElementById('searchInput');
+    function filterTable() {
+        if (!searchInput) return;
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const table = document.getElementById('attendanceTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.getElementsByTagName('tr'));
+        let visibleRows = 0;
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        const noResults = document.getElementById('noResults');
+        if (noResults) noResults.style.display = visibleRows === 0 && searchTerm !== '' ? 'block' : 'none';
     }
-  });
+    if (searchInput) {
+        searchInput.addEventListener('input', filterTable);
+    }
+
+    // Modal population for edit buttons
+    const buttons = document.querySelectorAll('.request-edit-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function () {
+            document.getElementById('edit-attendance-id').value = this.getAttribute('data-attendance-id') || '';
+            document.getElementById('edit-user-id').value = this.getAttribute('data-user-id') || '';
+            document.getElementById('edit-date').value = this.getAttribute('data-date') || '';
+            document.getElementById('edit-entry-time').value = (this.getAttribute('data-entry') || '').slice(0,5);
+            document.getElementById('edit-exit-time').value = (this.getAttribute('data-exit') || '').slice(0,5);
+        });
+    });
 });
 </script>
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-
 {% endblock %}

@@ -269,17 +269,64 @@ def submit_attendance():
     
 
 # Attendance table route
+# @views.route('/attendance_table')
+# @login_required
+# def attendance_table():
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
+#         flash("You do not have permission to view this page.", category='error')
+#         return redirect(url_for('views.home'))
+
+#     attendances = Attendance.query.all()
+
+
+#     return render_template('attendance_table.html', attendances=attendances)
+
+from sqlalchemy import desc
+from datetime import timedelta
+
 @views.route('/attendance_table')
 @login_required
 def attendance_table():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
+    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in']:
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
-    attendances = Attendance.query.all()
+    date_str = request.args.get('date')
+    india_tz = pytz.timezone('Asia/Kolkata')
+    today = datetime.now(india_tz).date()
 
+    # If no date provided, default to latest available date
+    if not date_str:
+        latest_entry = Attendance.query.order_by(Attendance.date.desc()).first()
+        target_date = latest_entry.date if latest_entry else today
+    else:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-    return render_template('attendance_table.html', attendances=attendances)
+    attendances = Attendance.query.filter_by(date=target_date).order_by(desc(Attendance.entry_time)).all()
+
+    # Get next and previous dates available in the DB
+    next_date = (
+        Attendance.query
+        .filter(Attendance.date > target_date)
+        .order_by(Attendance.date.asc())
+        .first()
+    )
+
+    prev_date = (
+        Attendance.query
+        .filter(Attendance.date < target_date)
+        .order_by(Attendance.date.desc())
+        .first()
+    )
+
+    return render_template(
+        'attendance_table.html',
+        attendances=attendances,
+        target_date=target_date,
+        prev_date=prev_date.date if prev_date else None,
+        next_date=next_date.date if next_date else None
+    )
+
 
 
 def convert_to_str(time_obj):
@@ -1623,3 +1670,4 @@ def has_approval_authority(approver_role, submitter_role):
         allowed_roles = [allowed_roles]
     return approver_role in allowed_roles
     
+

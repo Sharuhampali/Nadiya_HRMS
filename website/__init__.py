@@ -24,7 +24,7 @@ mail = Mail()
 def create_app():
     load_dotenv()
 
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='website/static', static_url_path='/static')
     CORS(app,
      supports_credentials=True,
      origins=["https://high-essence-464010-f6.web.app"])
@@ -95,17 +95,39 @@ def create_app():
     def extract_area(address):
         if not address:
             return ''
-        parts = address.split(',')
-        if len(parts) > 1:
-            return parts[1].strip()  # Assuming the second last part is the area
+        
+        parts = [p.strip() for p in address.split(',')]
+
+        # Prioritize known locality keywords
+        locality_keywords = ['Nagar', 'Layout', 'Colony', 'Extension', 'Enclave', 'Block', 'Phase', 'Sector', 'Town', 'Garden', 'Road', 'Main']
+
+        for part in parts:
+            if any(kw.lower() in part.lower() for kw in locality_keywords):
+                return part
+
+        # Fallback: try returning something between house number and city
+        if len(parts) >= 3:
+            return parts[-4]  # often a good guess
+        elif len(parts) >= 2:
+            return parts[0]  # fallback to first item
         return address
+
 
     app.jinja_env.filters['extract_area'] = extract_area
 
-    def generate_maps_url(address):
-        return f"https://www.google.com/maps/search/?api=1&query={address}"
+
+    def generate_maps_url(lat=None, lon=None, address=None):
+        from urllib.parse import quote_plus
+        if lat and lon:
+            return f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
+        elif address:
+            return f"https://www.google.com/maps/search/?api=1&query={quote_plus(address)}"
+        return "#"
+
+
 
     app.jinja_env.filters['maps_url'] = generate_maps_url
+
 
     
 
