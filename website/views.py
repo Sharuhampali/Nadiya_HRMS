@@ -1773,6 +1773,7 @@ def exit_report_form(attendance_id):
             # Optional fields (handle index errors and default to None)
             site = site_names[i].strip() if i < len(site_names) and site_names[i].strip() else ''
             customer = customer_names[i].strip() if i < len(customer_names) and customer_names[i].strip() else ''
+            remarks = remarks_list[i].strip() if i < len(remarks_list) and remarks_list[i].strip() else ''
 
             report = ExitReport(
                 user_id=current_user.id,
@@ -1783,6 +1784,7 @@ def exit_report_form(attendance_id):
                 end_time=end_time,
                 activities_completed=activity,
                 tomorrow_plan=plan,
+                remarks=remarks
             )
             db.session.add(report)
             saved_any = True

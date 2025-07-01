@@ -206,7 +206,7 @@ class ExitReport(db.Model):
 
     site_name = db.Column(db.String(100), nullable=False)
     customer_name = db.Column(db.String(100), nullable=False)
-
+    remarks = db.Column(db.Text, nullable=True)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
 

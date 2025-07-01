@@ -27,6 +27,8 @@
                                     <th>End</th>
                                     <th>Activities Completed</th>
                                     <th>Tomorrow's Plan</th>
+                                    <th>Remarks</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -43,6 +45,8 @@
                                         <td>{{ report.end_time.strftime('%H:%M') }}</td>
                                         <td>{{ report.activities_completed }}</td>
                                         <td>{{ report.tomorrow_plan }}</td>
+                                        <td>{{ report.remarks }}</td>
+
                                     </tr>
                                 {% endfor %}
                             </tbody>
