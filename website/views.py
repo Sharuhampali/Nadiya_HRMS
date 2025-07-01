@@ -67,7 +67,7 @@ ROLES_HIERARCHY = {
 @login_required
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' :
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in' :
         
     
         return render_template(
@@ -287,7 +287,7 @@ from datetime import timedelta
 @views.route('/attendance_table')
 @login_required
 def attendance_table():
-    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in']:
+    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in', 'support@nadiya.in']:
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
@@ -678,7 +678,7 @@ def approved_leaves():
 @views.route('/reset_leaves', methods=['GET', 'POST'])
 @login_required
 def reset_leaves():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in':
         flash("You do not have permission to reset leaves.", category='error')
         return redirect(url_for('views.home'))
 
@@ -1311,7 +1311,7 @@ def acknowledge_announcement(announcement_id):
 @views.route('/announcement-read-status/<int:announcement_id>')
 @login_required
 def read_status(announcement_id):
-    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
         flash("Access denied.", "danger")
         return redirect(url_for('views.announcements'))
 
@@ -1454,7 +1454,7 @@ def all():
 @views.route('/display_compoff', methods=['GET'])
 @login_required
 def display_compoff():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in'and current_user.email!='support@nadiya.in':
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
@@ -1626,7 +1626,7 @@ def export_all_data():
 
     # Send the email
     msg = Message(subject="HRMS System Backup",
-                  recipients=["sumana@nadiya.in", "maneesh@nadiya.in"])  # Replace with actual recipient
+                  recipients=["sumana@nadiya.in", "maneesh@nadiya.in","support@nafiya.in"])  
     msg.body = "Attached is the latest system backup of all tables before reset."
     msg.attach("all_data_export.xlsx", 
                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1670,4 +1670,58 @@ def has_approval_authority(approver_role, submitter_role):
         allowed_roles = [allowed_roles]
     return approver_role in allowed_roles
     
+@views.route('/attendance_table_mgr')
+@login_required
+def attendance_table_mgr():
+    if current_user.role not in ROLES_HIERARCHY:  # assuming 'role' is a field on your User model
+        flash("You do not have managerial access.", category='error')
+        return redirect(url_for('views.home'))
+
+    date_str = request.args.get('date')
+    india_tz = pytz.timezone('Asia/Kolkata')
+    today = datetime.now(india_tz).date()
+
+    # Determine the date to fetch
+    if not date_str:
+        latest_entry = Attendance.query.order_by(Attendance.date.desc()).first()
+        target_date = latest_entry.date if latest_entry else today
+    else:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+    # Filter users who are reportees
+    reportee_users = [
+        user.id for user in User.query.all()
+        if has_approval_authority(current_user.role, user.role)
+    ]
+
+    # Get attendance records for those users
+    attendances = (
+        Attendance.query
+        .filter(Attendance.date == target_date, Attendance.user_id.in_(reportee_users))
+        .order_by(desc(Attendance.entry_time))
+        .all()
+    )
+
+    # Next and previous dates with entries for reportees
+    next_date = (
+        Attendance.query
+        .filter(Attendance.date > target_date, Attendance.user_id.in_(reportee_users))
+        .order_by(Attendance.date.asc())
+        .first()
+    )
+
+    prev_date = (
+        Attendance.query
+        .filter(Attendance.date < target_date, Attendance.user_id.in_(reportee_users))
+        .order_by(Attendance.date.desc())
+        .first()
+    )
+
+    return render_template(
+        'attendance_table.html',
+        attendances=attendances,
+        target_date=target_date,
+        prev_date=prev_date.date if prev_date else None,
+        next_date=next_date.date if next_date else None
+    )
 
