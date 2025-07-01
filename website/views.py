@@ -270,6 +270,7 @@ def submit_attendance():
         db.session.commit()
         if( entry_exit == 'entry'):
             flash('Attendance entry recorded successfully.', 'success')
+            return redirect(url_for('views.home'))
         return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
         
     except Exception as e:
