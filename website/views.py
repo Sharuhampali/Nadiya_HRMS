@@ -32,7 +32,7 @@ from . import db, mail
 from .models import (
     User, Attendance, Leave, Document, Holiday, Announcement,
     IntermediateLog, AnnouncementAcknowledgment, EditRequest,
-    announcement_user
+    announcement_user, ExitReport
 )
 from leave_calculator import calculate_initial_leaves
 
@@ -228,35 +228,37 @@ def submit_attendance():
 
     # Exit logic
     elif entry_exit == 'exit' and user_attendance:
-        site_name = request.form.get('site_name')
-        try:
-            exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
-            exit_address = exit_location.address if exit_location else "Unknown"
-        except Exception as e:
-            print(f"Error fetching exit location: {str(e)}")
-            exit_address = "Unknown"
+        return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
 
-        def is_second_or_fourth_saturday(date):
-            first = date.replace(day=1)
-            first_weekday = first.weekday()
-            first_sat = first + timedelta(days=(5 - first_weekday) % 7)
-            second_sat = first_sat + timedelta(days=7)
-            fourth_sat = first_sat + timedelta(days=21)
-            return date == second_sat or date == fourth_sat
+        # site_name = request.form.get('site_name')
+        # try:
+        #     exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
+        #     exit_address = exit_location.address if exit_location else "Unknown"
+        # except Exception as e:
+        #     print(f"Error fetching exit location: {str(e)}")
+        #     exit_address = "Unknown"
 
-        def is_holiday(date):
-            return date.weekday() == 6 or is_second_or_fourth_saturday(date)
+        # def is_second_or_fourth_saturday(date):
+        #     first = date.replace(day=1)
+        #     first_weekday = first.weekday()
+        #     first_sat = first + timedelta(days=(5 - first_weekday) % 7)
+        #     second_sat = first_sat + timedelta(days=7)
+        #     fourth_sat = first_sat + timedelta(days=21)
+        #     return date == second_sat or date == fourth_sat
 
-        if request.form.get('holiday'):
-            user_attendance.hol = 10000
+        # def is_holiday(date):
+        #     return date.weekday() == 6 or is_second_or_fourth_saturday(date)
 
-        if Holiday.query.filter_by(date=today).first() or is_holiday(today):
-            user_attendance.hol = 10000
+        # if request.form.get('holiday'):
+        #     user_attendance.hol = 10000
 
-        user_attendance.exit_time = now_time.replace(microsecond=0)
-        user_attendance.exit_location = exit_address
-        user_attendance.site_name = site_name
-        user_attendance.calculate_comp_off()
+        # if Holiday.query.filter_by(date=today).first() or is_holiday(today):
+        #     user_attendance.hol = 10000
+
+        # user_attendance.exit_time = now_time.replace(microsecond=0)
+        # user_attendance.exit_location = exit_address
+        # user_attendance.site_name = site_name
+        # user_attendance.calculate_comp_off()
 
     # Final DB commit
     try:
@@ -1725,3 +1727,107 @@ def attendance_table_mgr():
         next_date=next_date.date if next_date else None
     )
 
+@views.route('/exit_report/<int:attendance_id>', methods=['GET', 'POST'])
+@login_required
+def exit_report_form(attendance_id):
+    attendance = Attendance.query.get_or_404(attendance_id)
+
+    if attendance.exit_time:
+        flash("Exit already marked. You may not submit again.", "info")
+        return redirect(url_for('views.home'))
+
+    if request.method == 'POST':
+        start_times = request.form.getlist('start_time')
+        end_times = request.form.getlist('end_time')
+        site_names = request.form.getlist('site_name')
+        customer_names = request.form.getlist('customer_name')
+        activities = request.form.getlist('activities_completed')
+        plans = request.form.getlist('tomorrow_plan')
+
+        if not any(start_times):
+            flash("You must submit at least one completed row.", "warning")
+            return redirect(request.url)
+
+        saved_any = False
+        for i in range(len(start_times)):
+            if not([start_times[i], end_times[i], site_names[i], customer_names[i], activities[i], plans[i]]):
+                continue
+
+            try:
+                start_time = datetime.strptime(start_times[i], "%H:%M").time()
+                end_time = datetime.strptime(end_times[i], "%H:%M").time()
+            except ValueError:
+                continue
+
+            report = ExitReport(
+                user_id=current_user.id,
+                attendance_id=attendance.id,
+                site_name=site_names[i],
+                customer_name=customer_names[i],
+                start_time=start_time,
+                end_time=end_time,
+                activities_completed=activities[i],
+                tomorrow_plan=plans[i]
+            )
+            db.session.add(report)
+            saved_any = True
+
+        if not saved_any:
+            flash("Please submit at least one valid row.", "warning")
+            return redirect(request.url)
+
+        # ✅ Mark Exit in Attendance now
+        now = datetime.now(pytz.timezone('Asia/Kolkata'))
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
+
+        try:
+            location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
+            exit_location = location_obj.address if location_obj else "Unknown"
+        except Exception as e:
+            print(f"Geo error on exit: {e}")
+            exit_location = "Unknown"
+
+        attendance.exit_time = now.time().replace(microsecond=0)
+        attendance.exit_location = exit_location
+        attendance.calculate_comp_off()
+
+        try:
+            db.session.commit()
+            flash("Exit report and attendance exit submitted successfully.", "success")
+        except Exception as e:
+            db.session.rollback()
+            print("Exit report error:", e)
+            flash("Error saving report. Please try again.", "error")
+
+        return redirect(url_for('views.home'))
+
+    return render_template('exit_report.html', attendance=attendance)
+@views.route('/exit_reports_summary')
+@login_required
+def exit_reports_summary():
+    # Ensure the user has authority over *at least one other role*
+    visible_users = [
+        user for user in User.query.all()
+        if has_approval_authority(current_user.role, user.role)
+    ]
+
+    if not visible_users:
+        flash("You do not have permission to view this page.", "error")
+        return redirect(url_for('views.home'))
+
+    # Collect reports from only users the approver can view
+    summary_data = (
+        db.session.query(User, ExitReport)
+        .join(ExitReport, User.id == ExitReport.user_id)
+        .filter(User.id.in_([u.id for u in visible_users]))
+        .order_by(ExitReport.attendance_id.desc())
+        .all()
+    )
+
+    # Group reports by user
+    user_reports = {}
+    for user, report in summary_data:
+        user_reports.setdefault(user, []).append(report)
+
+    return render_template('exit_reports_summary.html', user_reports=user_reports)

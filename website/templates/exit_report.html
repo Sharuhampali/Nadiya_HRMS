@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Exit Report for {{ attendance.date }}</h3>
+
+    <form method="POST">
+        <!-- Hidden location fields -->
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" value="{{ current_user.first_name }} {{ current_user.last_name }}" readonly>
+        </div>
+
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="min-width: 120px;">Start Time</th>
+                    <th style="min-width: 120px;">End Time</th>
+                    {% if current_user.role == 'service_member' or current_user.role == 'service_manager ' %}
+                    <th>Site Name</th>
+                    {% endif %}
+                    {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' %}
+                    <th>Customer Name</th>
+                     {%endif %}
+                    <th>Activities Completed</th>
+                    <th>Tomorrow's Plan</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(5) %}
+                <tr>
+                    <td><input type="time" name="start_time" class="form-control"></td>
+                    <td><input type="time" name="end_time" class="form-control"></td>
+                    {% if current_user.role == 'service_member' or current_user.role == 'service_manager ' %}
+                    <td><input type="text" name="site_name" class="form-control"></td>
+                    {% endif %}
+                    {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' %}
+                    <td><input type="text" name="customer_name" class="form-control"></td>
+                    {%endif %}
+                    <td><textarea name="activities_completed" class="form-control" rows="2"></textarea></td>
+                    <td><textarea name="tomorrow_plan" class="form-control" rows="2"></textarea></td>
+                    <td><textarea name="remarks" class="form-control" rows="2"></textarea></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-5">Submit Report & Complete Exit</button>
+        </div>
+    </form>
+</div>
+
+<!-- JS for geolocation -->
+<script>
+navigator.geolocation.getCurrentPosition(function(position) {
+    document.getElementById("latitude").value = position.coords.latitude;
+    document.getElementById("longitude").value = position.coords.longitude;
+});
+</script>
+{% endblock %}

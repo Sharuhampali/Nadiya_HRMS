@@ -116,13 +116,10 @@ def create_app():
     app.jinja_env.filters['extract_area'] = extract_area
 
 
-    def generate_maps_url(lat=None, lon=None, address=None):
-        from urllib.parse import quote_plus
-        if lat and lon:
-            return f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
-        elif address:
-            return f"https://www.google.com/maps/search/?api=1&query={quote_plus(address)}"
-        return "#"
+    def generate_maps_url(address):
+        return f"https://www.google.com/maps/search/?api=1&query={address}"
+
+    app.jinja_env.filters['maps_url'] = generate_maps_url
 
 
 

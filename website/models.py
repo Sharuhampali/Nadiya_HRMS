@@ -198,3 +198,22 @@ class EditRequest(db.Model):
     token = db.Column(db.String(64), unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class ExitReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    attendance_id = db.Column(db.Integer, db.ForeignKey('attendance.id'), nullable=False)
+
+    site_name = db.Column(db.String(100), nullable=False)
+    customer_name = db.Column(db.String(100), nullable=False)
+
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+
+    activities_completed = db.Column(db.Text, nullable=False)
+    tomorrow_plan = db.Column(db.Text, nullable=False)
+
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='exit_reports')
+    attendance = db.relationship('Attendance', backref='exit_report')

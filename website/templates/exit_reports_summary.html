@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Exit Reports Summary</h2>
+    <p class="text-muted">Only users you're authorized to view will be listed below.</p>
+
+    {% if user_reports %}
+        {% for user, reports in user_reports.items() %}
+            <div class="card my-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                    <span class="text-muted">({{ user.role }}) - {{ user.email }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    {% if current_user.role == 'service_member' or current_user.role == 'service_manager ' %}
+                                    <th>Site</th>
+                                    {% endif %}
+                    {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' %}
+                                    <th>Customer</th>
+                                     {%endif %}
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th>Activities Completed</th>
+                                    <th>Tomorrow's Plan</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                    <tr>
+                                        <td>{{ report.attendance.date }}</td>
+                                        {% if current_user.role == 'service_member' or current_user.role == 'service_manager ' %}
+                                        <td>{{ report.site_name }}</td>
+                                        {% endif %}
+                    {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' %}
+                                        <td>{{ report.customer_name }}</td>
+                                         {%endif %}
+                                        <td>{{ report.start_time.strftime('%H:%M') }}</td>
+                                        <td>{{ report.end_time.strftime('%H:%M') }}</td>
+                                        <td>{{ report.activities_completed }}</td>
+                                        <td>{{ report.tomorrow_plan }}</td>
+                                        <td>{{ report.remarks or '' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">No exit reports available for your approval authority level.</div>
+    {% endif %}
+</div>
+{% endblock %}
