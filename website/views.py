@@ -262,11 +262,14 @@ def submit_attendance():
         user_attendance.site_name = site_name
         user_attendance.calculate_comp_off()
         
+       
+        
 
     # Final DB commit
     try:
         db.session.commit()
         return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+        
     except Exception as e:
         print(e)
         flash('There was an issue submitting your attendance.', 'error')
@@ -1734,10 +1737,6 @@ def attendance_table_mgr():
 @login_required
 def exit_report_form(attendance_id):
     attendance = Attendance.query.get_or_404(attendance_id)
-
-    if attendance.exit_time:
-        flash("Exit already marked. You may not submit again.", "info")
-        return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         start_times = request.form.getlist('start_time')
