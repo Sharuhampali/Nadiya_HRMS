@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+ 
+
+
+  <div class="container py-5">
+    <h3 class="mb-4 text-primary">
+      Exit Report for {{ user.first_name }} on {{ date.strftime('%d-%b-%Y') }}
+    </h3>
+
+    {% if reports %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Start Time</th>
+            <th scope="col">End Time</th>
+            {% if current_user.role == 'service_member' or current_user.role == 'service_manager' or current_user.role == 'director' %}
+            <th scope="col">Site</th>
+            {% endif %}
+            {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' or current_user.role=='business_development_manager' %}
+            <th scope="col">Customer</th>
+            {% endif %}
+            <th scope="col">Activities Completed</th>
+            <th scope="col">Tomorrow's Plan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td>{{ report.start_time.strftime('%H:%M') }}</td>
+            <td>{{ report.end_time.strftime('%H:%M') }}</td>
+                        {% if current_user.role == 'service_member' or current_user.role == 'service_manager' or current_user.role == 'director' %}
+
+            <td>{{ report.site_name or '—' }}</td>
+              {% endif %}
+            {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' or current_user.role=='business_development_manager' %}
+            <td>{{ report.customer_name or '—' }}</td>
+            {% endif %}
+            <td>{{ report.activities_completed }}</td>
+            <td>{{ report.tomorrow_plan }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="no-data">No exit reports submitted for this day.</p>
+    {% endif %}
+
+    <a href="{{ url_for('views.home') }}" class="btn btn-outline-secondary mt-4">Back to home</a>
+  </div>
+
+{% endblock %}

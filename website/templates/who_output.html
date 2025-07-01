@@ -429,6 +429,8 @@
                     <th>Status</th>
                     <th>Reason</th>
                     <th> View</th>
+                    <th> Report</th>
+
                 </tr>
             </thead>
             <tbody id="attendanceTableBody">
@@ -481,6 +483,9 @@
    class="btn btn-outline-primary btn-sm">
    View Details
 </a></td>
+ <td>
+                            <a href="{{ url_for('views.exit_report_view', user_id=attendance.user_id, date=attendance.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
+                        </td>
                 </tr>
                 {% endfor %}
             </tbody>

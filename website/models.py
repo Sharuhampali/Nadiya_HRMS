@@ -86,11 +86,24 @@ class Attendance(db.Model):
 
     def extra_time_worked(self):
         total_time = self.total_time_worked()
-        if total_time:
-            if self.hol == 10000:
-                return total_time
-            return total_time - timedelta(hours=8.5)
-        return None
+        if not total_time:
+            return None
+
+        # Holiday override: all time is extra
+        if self.hol == 10000:
+            return total_time
+
+        # User-specific thresholds
+        expected_hours = timedelta(hours=8.5)  # default
+        try:
+            user = User.query.get(self.user_id)
+            if user and user.email == "support@nadiya.in":
+                expected_hours = timedelta(hours=6.5)
+        except:
+            pass
+
+        return total_time - expected_hours
+
 
     def calculate_comp_off(self):
         extra_time = self.extra_time_worked()

@@ -228,42 +228,45 @@ def submit_attendance():
 
     # Exit logic
     elif entry_exit == 'exit' and user_attendance:
-        return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+        
 
-        # site_name = request.form.get('site_name')
-        # try:
-        #     exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
-        #     exit_address = exit_location.address if exit_location else "Unknown"
-        # except Exception as e:
-        #     print(f"Error fetching exit location: {str(e)}")
-        #     exit_address = "Unknown"
+        site_name = request.form.get('site_name')
+        try:
+            exit_location = geoLoc.reverse(f"{latitude}, {longitude}")
+            exit_address = exit_location.address if exit_location else "Unknown"
+        except Exception as e:
+            print(f"Error fetching exit location: {str(e)}")
+            exit_address = "Unknown"
 
-        # def is_second_or_fourth_saturday(date):
-        #     first = date.replace(day=1)
-        #     first_weekday = first.weekday()
-        #     first_sat = first + timedelta(days=(5 - first_weekday) % 7)
-        #     second_sat = first_sat + timedelta(days=7)
-        #     fourth_sat = first_sat + timedelta(days=21)
-        #     return date == second_sat or date == fourth_sat
+        def is_second_or_fourth_saturday(date):
+            first = date.replace(day=1)
+            first_weekday = first.weekday()
+            first_sat = first + timedelta(days=(5 - first_weekday) % 7)
+            second_sat = first_sat + timedelta(days=7)
+            fourth_sat = first_sat + timedelta(days=21)
+            return date == second_sat or date == fourth_sat
 
-        # def is_holiday(date):
-        #     return date.weekday() == 6 or is_second_or_fourth_saturday(date)
+        def is_holiday(date):
+            if(current_user.email == 'support@nadiya.in'):
+                return date.weekday() == 6 or date.weekday() == 5 
+            return date.weekday() == 6 or is_second_or_fourth_saturday(date)
 
-        # if request.form.get('holiday'):
-        #     user_attendance.hol = 10000
+        if request.form.get('holiday'):
+            user_attendance.hol = 10000
 
-        # if Holiday.query.filter_by(date=today).first() or is_holiday(today):
-        #     user_attendance.hol = 10000
+        if Holiday.query.filter_by(date=today).first() or is_holiday(today):
+            user_attendance.hol = 10000
 
-        # user_attendance.exit_time = now_time.replace(microsecond=0)
-        # user_attendance.exit_location = exit_address
-        # user_attendance.site_name = site_name
-        # user_attendance.calculate_comp_off()
+        user_attendance.exit_time = now_time.replace(microsecond=0)
+        user_attendance.exit_location = exit_address
+        user_attendance.site_name = site_name
+        user_attendance.calculate_comp_off()
+        
 
     # Final DB commit
     try:
         db.session.commit()
-        return redirect(url_for('views.home'))
+        return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
     except Exception as e:
         print(e)
         flash('There was an issue submitting your attendance.', 'error')
@@ -1849,3 +1852,34 @@ def exit_reports_summary():
         user_reports.setdefault(user, []).append(report)
 
     return render_template('exit_reports_summary.html', user_reports=user_reports)
+@views.route('/exit_report_view/<int:user_id>/<date>')
+@login_required
+def exit_report_view(user_id, date):
+    from datetime import datetime
+
+    user = User.query.get_or_404(user_id)
+    parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
+
+    # Ensure the current user has authority to view the selected user's reports
+    if user.id != current_user.id and not has_approval_authority(current_user.role, user.role):
+        flash("You do not have permission to view this report.", "error")
+        return redirect(url_for('views.home'))
+
+    # Get attendance record
+    attendance = Attendance.query.filter_by(user_id=user_id, date=date).first()
+
+    # No attendance, no report
+    if not attendance:
+        flash("No attendance found for the selected date.", "warning")
+        return redirect(url_for('views.home'))
+
+    # Get exit reports tied to that attendance
+    reports = ExitReport.query.filter_by(attendance_id=attendance.id).order_by(ExitReport.start_time).all()
+
+    return render_template(
+        'exit_reports_view.html',
+        user=user,
+        date=parsed_date,
+        attendance=attendance,
+        reports=reports
+    )

@@ -17,10 +17,10 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Date</th>
-                                    {% if current_user.role == 'service_member' or current_user.role == 'service_manager ' %}
+                        {% if current_user.role == 'service_member' or current_user.role == 'service_manager' or current_user.role == 'director' %}
                                     <th>Site</th>
                                     {% endif %}
-                    {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' %}
+            {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' or current_user.role=='business_development_manager' %}
                                     <th>Customer</th>
                                      {%endif %}
                                     <th>Start</th>
@@ -35,10 +35,10 @@
                                 {% for report in reports %}
                                     <tr>
                                         <td>{{ report.attendance.date }}</td>
-                                        {% if current_user.role == 'service_member' or current_user.role == 'service_manager ' %}
+                        {% if current_user.role == 'service_member' or current_user.role == 'service_manager' or current_user.role == 'director' %}
                                         <td>{{ report.site_name }}</td>
                                         {% endif %}
-                    {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' %}
+            {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' or current_user.role=='business_development_manager' %}
                                         <td>{{ report.customer_name }}</td>
                                          {%endif %}
                                         <td>{{ report.start_time.strftime('%H:%M') }}</td>

@@ -265,6 +265,7 @@
                         <th>Status</th>
                         <th>Reason</th>
                         <th>View</th>
+                        <th>Report</th>
                         <th>Edit</th>
                     </tr>
                 </thead>
@@ -303,6 +304,7 @@
                         <td>
                             <a href="{{ url_for('views.detailed_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
                         </td>
+                       
                         <td>
                             {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
                                 <button class="request-edit-btn btn btn-outline-warning btn-sm"
