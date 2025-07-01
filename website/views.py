@@ -893,13 +893,17 @@ def apply_leave():
 
         msg = Message('New Leave Application', recipients=recipient_emails)
         msg.body = (
-            f'{current_user.first_name} has applied for leave.\n\n'
-            f'Total Days: {total_days}\n'
-            f'Breakdown:\n' +
-            '\n'.join([f"{k}: {v}" for k, v in summary.items() if v > 0]) +
-            f'\nReason: {reason}\n\n'
-            f'Approve here: {approval_url}'
+            f"Dear Approver,\n\n"
+            f"{current_user.first_name} has submitted a leave application.\n\n"
+            f"📅 Total Days: {total_days}\n"
+            f"🗂️ Breakdown:\n" +
+            '\n'.join([f"  • {k}: {v} day(s)" for k, v in summary.items() if v > 0]) +
+            f"\n\n📝 Reason: {reason or 'Not specified'}\n\n"
+            f"You can review and approve the request at the following link:\n{approval_url}\n\n"
+            f"Kind regards,\n"
+            f"HRMS System"
         )
+
 
         try:
             mail.send(msg)
@@ -1269,7 +1273,16 @@ def post_announcement():
                         sender=current_app.config['MAIL_DEFAULT_SENDER'],
                         recipients=[user.email]
                     )
-                    msg.body = f'A new announcement has been posted:\n\nTitle: {title}\nContent: {content}'
+                    announcement_link = url_for('views.announcements', _external=True)
+                    msg.body = (
+                        f"Dear {user.first_name},\n\n"
+                        f"A new announcement has been posted on the portal.\n"
+                        f"Please log in to view the details.\n\n"
+                        f"View Announcements: {announcement_link}\n\n"
+                        f"Regards,\n"
+                        f"HR Team"
+                    )
+
                     mail.send(msg)
 
         # Commit after all changes
@@ -1570,7 +1583,16 @@ def forgot_password():
             # Send reset email
             reset_link = url_for('views.reset_password', token=reset_token, _external=True)
             msg = Message('Password Reset Request', recipients=[email])
-            msg.body = f'Click the link below to reset your password:\n{reset_link}\n\nThis link will expire in 1 hour.'
+            msg.body = (
+                        f"Dear {user.first_name},\n\n"
+                        f"We received a request to reset your password. Please use the link below to proceed:\n\n"
+                        f"{reset_link}\n\n"
+                        f"Note: This link will expire in 1 hour for security purposes.\n\n"
+                        f"If you did not request this, please ignore this email or contact support.\n\n"
+                        f"Best regards,\n"
+                        f"HR Team"
+                    )
+
             try:
                 mail.send(msg)
                 flash('Password reset link sent to your email.', 'success')
@@ -1639,7 +1661,14 @@ def export_all_data():
     # Send the email
     msg = Message(subject="HRMS System Backup",
                   recipients=["sumana@nadiya.in", "maneesh@nadiya.in","support@nafiya.in"])  
-    msg.body = "Attached is the latest system backup of all tables before reset."
+    msg.body = (
+            f"Hello,\n\n"
+            f"Attached is the latest backup of all system tables taken prior to the reset.\n"
+            f"Please retain this copy for your reference or restoration if required.\n\n"
+            f"Best regards,\n"
+            f"HR Team"
+        )
+
     msg.attach("all_data_export.xlsx", 
                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                output.read())
