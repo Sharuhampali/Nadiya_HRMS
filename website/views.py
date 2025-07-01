@@ -1739,35 +1739,50 @@ def exit_report_form(attendance_id):
     if request.method == 'POST':
         start_times = request.form.getlist('start_time')
         end_times = request.form.getlist('end_time')
-        site_names = request.form.getlist('site_name')
-        customer_names = request.form.getlist('customer_name')
         activities = request.form.getlist('activities_completed')
         plans = request.form.getlist('tomorrow_plan')
+
+        # Optional fields
+        site_names = request.form.getlist('site_name') or []
+        customer_names = request.form.getlist('customer_name') or []
+        remarks_list = request.form.getlist('remarks') or []
 
         if not any(start_times):
             flash("You must submit at least one completed row.", "warning")
             return redirect(request.url)
 
         saved_any = False
-        for i in range(len(start_times)):
-            if not([start_times[i], end_times[i], site_names[i], customer_names[i], activities[i], plans[i]]):
-                continue
+        row_count = len(start_times)
+
+        for i in range(row_count):
+            # Required fields
+            start = start_times[i].strip()
+            end = end_times[i].strip()
+            activity = activities[i].strip()
+            plan = plans[i].strip()
+
+            if not (start and end and activity and plan):
+                continue  # Skip incomplete row (required fields)
 
             try:
-                start_time = datetime.strptime(start_times[i], "%H:%M").time()
-                end_time = datetime.strptime(end_times[i], "%H:%M").time()
+                start_time = datetime.strptime(start, "%H:%M").time()
+                end_time = datetime.strptime(end, "%H:%M").time()
             except ValueError:
                 continue
+
+            # Optional fields (handle index errors and default to None)
+            site = site_names[i].strip() if i < len(site_names) and site_names[i].strip() else ''
+            customer = customer_names[i].strip() if i < len(customer_names) and customer_names[i].strip() else ''
 
             report = ExitReport(
                 user_id=current_user.id,
                 attendance_id=attendance.id,
-                site_name=site_names[i],
-                customer_name=customer_names[i],
+                site_name=site,
+                customer_name=customer,
                 start_time=start_time,
                 end_time=end_time,
-                activities_completed=activities[i],
-                tomorrow_plan=plans[i]
+                activities_completed=activity,
+                tomorrow_plan=plan,
             )
             db.session.add(report)
             saved_any = True
@@ -1803,6 +1818,7 @@ def exit_report_form(attendance_id):
         return redirect(url_for('views.home'))
 
     return render_template('exit_report.html', attendance=attendance)
+
 @views.route('/exit_reports_summary')
 @login_required
 def exit_reports_summary():
@@ -1812,7 +1828,7 @@ def exit_reports_summary():
         if has_approval_authority(current_user.role, user.role)
     ]
 
-    if not visible_users:
+    if not visible_users: 
         flash("You do not have permission to view this page.", "error")
         return redirect(url_for('views.home'))
 
