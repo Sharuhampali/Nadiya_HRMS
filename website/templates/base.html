@@ -399,7 +399,7 @@ select option {
             {% if current_user.is_authenticated %}
             <div class="user-profile" onclick="window.location.href='/profile/{{ current_user.id }}'">
                 {% if current_user.photo %}
-                    <img src="{{ url_for('views.uploaded_file', setname='photos', filename=current_user.photo) }}" alt="Profile">
+                    <img src="{{ url_for('static', filename='uploads/photos/' + current_user.photo) }}" alt="Profile Photo" class="profile-photo">
                 {% else %}
                     <img src="{{ url_for('static', filename='logo.png') }}" alt="Profile">
                 {% endif %}

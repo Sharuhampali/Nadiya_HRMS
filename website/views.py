@@ -1235,24 +1235,24 @@ def post_announcement():
         file = request.files.get('attachments')   # Image
         file1 = request.files.get('attachments1') # Document
         recipient_ids = request.form.getlist('recipients')  # List of selected user IDs
-        recipient_ids.append(current_user.id)
+        # recipient_ids.append(current_user.id)
         # Save image file
         image_url = None
         if file and file.filename != '':
             filename = secure_filename(file.filename)
-            file_path = os.path.join('static', 'uploads', 'docs', filename)
+            file_path = os.path.join(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             file.save(file_path)
-            image_url = f'uploads/docs/{filename}'
+            image_url = f'website/uploads/photos/{filename}'
 
         # Save document file
         doc_url = None
         if file1 and file1.filename != '':
             filename = secure_filename(file1.filename)
-            file_path = os.path.join('static', 'uploads', 'docs', filename)
+            file_path = os.path.join(current_app.config['UPLOADED_DOCS_DEST'], filename)
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             file1.save(file_path)
-            doc_url = f'uploads/docs/{filename}'
+            doc_url = f'website/uploads/docs/{filename}'
 
         # Create the announcement object once
         announcement = Announcement(title=title, content=content, image_url=image_url, doc_url=doc_url)
