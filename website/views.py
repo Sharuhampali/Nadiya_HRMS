@@ -267,11 +267,12 @@ def submit_attendance():
 
     # Final DB commit
     try:
-        db.session.commit()
-        if( entry_exit == 'entry'):
+        
+        if( entry_exit == 'exit'):
+            return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+        else:
             flash('Attendance entry recorded successfully.', 'success')
-            return redirect(url_for('views.home'))
-        return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+            db.session.commit()
         
     except Exception as e:
         print(e)
@@ -1760,25 +1761,32 @@ def exit_report_form(attendance_id):
         row_count = len(start_times)
 
         for i in range(row_count):
-            # Required fields
             start = start_times[i].strip()
             end = end_times[i].strip()
             activity = activities[i].strip()
             plan = plans[i].strip()
 
-            if not (start and end and activity and plan):
-                continue  # Skip incomplete row (required fields)
+            # Optional fields
+            site = site_names[i].strip() if i < len(site_names) else ''
+            customer = customer_names[i].strip() if i < len(customer_names) else ''
+            remarks = remarks_list[i].strip() if i < len(remarks_list) else ''
 
+            if i == 0:
+                # Row 1: all required fields must be filled
+                if not start or not end or not activity or not plan:
+                    flash("Row 1 must be completely filled.", "warning")
+                    return redirect(request.url)
+            else:
+                # Row 2+: skip if ALL fields are empty
+                if not start and not end and not activity and not plan and not site and not customer and not remarks:
+                    continue  # skip empty row
+
+            # Try parsing time only if provided
             try:
-                start_time = datetime.strptime(start, "%H:%M").time()
-                end_time = datetime.strptime(end, "%H:%M").time()
+                start_time = datetime.strptime(start, "%H:%M").time() if start else None
+                end_time = datetime.strptime(end, "%H:%M").time() if end else None
             except ValueError:
-                continue
-
-            # Optional fields (handle index errors and default to None)
-            site = site_names[i].strip() if i < len(site_names) and site_names[i].strip() else ''
-            customer = customer_names[i].strip() if i < len(customer_names) and customer_names[i].strip() else ''
-            remarks = remarks_list[i].strip() if i < len(remarks_list) and remarks_list[i].strip() else ''
+                continue  # skip this row if time is invalid
 
             report = ExitReport(
                 user_id=current_user.id,
@@ -1793,6 +1801,7 @@ def exit_report_form(attendance_id):
             )
             db.session.add(report)
             saved_any = True
+
 
         if not saved_any:
             flash("Please submit at least one valid row.", "warning")
@@ -1832,7 +1841,7 @@ def exit_reports_summary():
     # Ensure the user has authority over *at least one other role*
     visible_users = [
         user for user in User.query.all()
-        if has_approval_authority(current_user.role, user.role)
+        if has_approval_authority(current_user.role, user.role) 
     ]
 
     if not visible_users: 
