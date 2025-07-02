@@ -317,12 +317,18 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     form.addEventListener("submit", function (e) {
-        if (!locationFetched) {
-            e.preventDefault();
-            alert("Please wait — your GPS location is still being fetched.");
-            status.scrollIntoView({ behavior: "smooth" });
-        }
-    });
+    if (!locationFetched) {
+        e.preventDefault();
+        alert("Please wait — your GPS location is still being fetched.");
+        status.scrollIntoView({ behavior: "smooth" });
+        return;
+    }
+
+    // Disable submit button to avoid double submissions
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+});
+
 });
 </script>
 {% endblock %}

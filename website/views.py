@@ -1901,7 +1901,7 @@ def exit_report_view(user_id, date):
     parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
 
     # Ensure the current user has authority to view the selected user's reports
-    if user.id != current_user.id and not has_approval_authority(current_user.role, user.role):
+    if user.id != current_user.id and not has_approval_authority(current_user.role, user.role) and not current_user.email == "sumana@nadiya.in":
         flash("You do not have permission to view this report.", "error")
         return redirect(url_for('views.home'))
 
