@@ -292,6 +292,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     const totalCompoff = Number("{{ current_user.total_compoff | default(0) }}");
     const leaveTypeSelectors = document.querySelectorAll('select.leave-type');
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector("button[type='submit']");
 
     function updateLeaveTypeOptions() {
         let compoffSelected = 0;
@@ -318,6 +320,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     updateLeaveTypeOptions();
+
+    // 🚫 Prevent double submit
+    form.addEventListener('submit', function (e) {
+        if (submitBtn.disabled) {
+            e.preventDefault();
+            return false;
+        }
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    });
 });
 </script>
+
 {% endblock %}
