@@ -261,23 +261,29 @@ def submit_attendance():
         user_attendance.exit_location = exit_address
         user_attendance.site_name = site_name
         user_attendance.calculate_comp_off()
-        
+      
        
         
 
     # Final DB commit
+    # try:
+    #     db.session.commit()
+    #     if( entry_exit == 'exit'):
+    #         return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+    #     else:
+    #         flash('Attendance entry recorded successfully.', 'success')
+    #         db.session.commit()
     try:
-        
+        db.session.commit()
         if( entry_exit == 'exit'):
-            return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
-        else:
-            flash('Attendance entry recorded successfully.', 'success')
-            db.session.commit()
-        
+             return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+        return redirect(url_for('views.home'))
     except Exception as e:
         print(e)
-        # flash('There was an issue submitting your attendance.', 'error')
+        flash('There was an issue submitting your attendance.', 'error')
         return redirect(url_for('views.home'))
+        
+   
     
 
 # Attendance table route
