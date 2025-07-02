@@ -1777,6 +1777,9 @@ def attendance_table_mgr():
 def exit_report_form(attendance_id):
     attendance = Attendance.query.get_or_404(attendance_id)
 
+    if attendance.user_id != current_user.id:
+        flash("You are not authorized to access this exit report.", "error")
+        return redirect(url_for('views.home'))
     if request.method == 'POST':
         start_times = request.form.getlist('start_time')
         end_times = request.form.getlist('end_time')
@@ -1843,20 +1846,20 @@ def exit_report_form(attendance_id):
             return redirect(request.url)
 
         # ✅ Mark Exit in Attendance now
-        now = datetime.now(pytz.timezone('Asia/Kolkata'))
-        latitude = request.form.get('latitude')
-        longitude = request.form.get('longitude')
+        # now = datetime.now(pytz.timezone('Asia/Kolkata'))
+        # latitude = request.form.get('latitude')
+        # longitude = request.form.get('longitude')
 
-        try:
-            location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
-            exit_location = location_obj.address if location_obj else "Unknown"
-        except Exception as e:
-            print(f"Geo error on exit: {e}")
-            exit_location = "Unknown"
+        # try:
+        #     location_obj = geoLoc.reverse(f"{latitude}, {longitude}")
+        #     exit_location = location_obj.address if location_obj else "Unknown"
+        # except Exception as e:
+        #     print(f"Geo error on exit: {e}")
+        #     exit_location = "Unknown"
 
-        attendance.exit_time = now.time().replace(microsecond=0)
-        attendance.exit_location = exit_location
-        attendance.calculate_comp_off()
+        # attendance.exit_time = now.time().replace(microsecond=0)
+        # attendance.exit_location = exit_location
+        # attendance.calculate_comp_off()
 
         try:
             db.session.commit()
