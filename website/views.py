@@ -1550,14 +1550,17 @@ def profile(user_id):
         if 'photo' in request.files and request.files['photo']:
             file = request.files['photo']
             filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-            photo_url = upload_file_to_gcs(file, filename, subfolder='photos')
+            photo_url = upload_file_to_gcs(file, filename, subfolder='uploads/photos')
             user.photo = photo_url
 
         if 'document' in request.files and request.files['document']:
             file = request.files['document']
             document_type = request.form.get('document_type')
+            if not document_type:
+                flash('Please select a document type when uploading a document.', category='error')
+                return redirect(url_for('views.profile', user_id=user_id))
             filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-            doc_url = upload_file_to_gcs(file,filename, subfolder='docs')
+            doc_url = upload_file_to_gcs(file,filename, subfolder='uploads/docs')
 
             if user.documents:
                 for doc in user.documents:
@@ -1587,7 +1590,7 @@ def upload():
         try:
             if 'document' in request.files:
                 file = request.files['document']
-                doc_url = upload_file_to_gcs(file, subfolder='docs')
+                doc_url = upload_file_to_gcs(file, subfolder='upload/docs')
                 flash('Document uploaded successfully.', 'success')
             else:
                 flash('No document selected for upload.', 'warning')
