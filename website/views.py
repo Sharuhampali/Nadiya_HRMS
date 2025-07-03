@@ -1510,14 +1510,14 @@ docs = UploadSet('docs', ('pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'))
 
 #     return "Method not allowed", 405
 
-# @views.route('/create_user', methods=['GET', 'POST'])
-# @login_required
+@views.route('/create_user', methods=['GET', 'POST'])
+@login_required
 
-# def create_user():
-#     if current_user.email in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
-#         users = User.query.all()
-#         return render_template('create_user.html', users=users)
-#     return redirect(url_for('views.home'))
+def create_user():
+    if current_user.email in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
+        users = User.query.all()
+        return render_template('create_user.html', users=users)
+    return redirect(url_for('views.home'))
 
 # @views.route('/uploaded_file/<setname>/<filename>')
 # @login_required
@@ -1538,6 +1538,54 @@ docs = UploadSet('docs', ('pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'))
 #         return send_from_directory(current_app.config['UPLOADED_DOCS_DEST'], filename)
 #     else:
 #         return "File type not supported", 400
+# @views.route('/profile/<int:user_id>', methods=['GET', 'POST'])
+# @login_required
+# def profile(user_id):
+#     user = User.query.get(user_id)
+#     if not user:
+#         flash("User not found.", category='error')
+#         return redirect(url_for('index'))
+
+#     if request.method == 'POST':
+#         if 'photo' in request.files and request.files['photo']:
+#             file = request.files['photo']
+#             filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+#             photo_url = upload_file_to_gcs(file, filename, subfolder='uploads/photos')
+#             user.photo = photo_url
+
+#         if 'document' in request.files and request.files['document']:
+#             file = request.files['document']
+#             document_type = request.form.get('document_type')
+#             if not document_type:
+#                 flash('Please select a document type when uploading a document.', category='error')
+#                 return redirect(url_for('views.profile', user_id=user_id))
+#             filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+#             doc_url = upload_file_to_gcs(file,filename, subfolder='uploads/docs')
+
+#             if user.documents:
+#                 for doc in user.documents:
+#                     if doc.document_type == document_type:
+#                         doc.filename = doc_url
+#                         break
+#                 else:
+#                     new_document = Document(user_id=user.id, filename=doc_url, document_type=document_type)
+#                     user.documents.append(new_document)
+#                     db.session.add(new_document)
+#             else:
+#                 new_document = Document(user_id=user.id, filename=doc_url, document_type=document_type)
+#                 user.documents.append(new_document)
+#                 db.session.add(new_document)
+#             # Determine immediate reporting managers
+#         role = user.role
+#         manager_roles = ROLES_HIERARCHY.get(role, [])
+#         reporting_managers = User.query.filter(User.role.in_(manager_roles)).all()
+
+
+#         db.session.commit()
+#         flash('Profile updated successfully')
+#         return redirect(url_for('views.profile', user_id=user_id, reporting_managers=reporting_managers))
+
+#     return render_template('profile.html', user=user)
 @views.route('/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
@@ -1560,7 +1608,7 @@ def profile(user_id):
                 flash('Please select a document type when uploading a document.', category='error')
                 return redirect(url_for('views.profile', user_id=user_id))
             filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-            doc_url = upload_file_to_gcs(file,filename, subfolder='uploads/docs')
+            doc_url = upload_file_to_gcs(file, filename, subfolder='uploads/docs')
 
             if user.documents:
                 for doc in user.documents:
@@ -1580,7 +1628,23 @@ def profile(user_id):
         flash('Profile updated successfully')
         return redirect(url_for('views.profile', user_id=user_id))
 
-    return render_template('profile.html', user=user)
+    # This happens on both GET and after redirect
+    # role = user.role
+    # manager_roles = ROLES_HIERARCHY.get(role, [])
+    # reporting_managers = User.query.filter(User.role.in_(manager_roles)).all()
+
+    role = user.role
+    manager_roles = ROLES_HIERARCHY.get(role, [])
+    reporting_manager = None
+
+    for mgr_role in manager_roles:
+        manager = User.query.filter_by(role=mgr_role).first()
+        if manager:
+            reporting_manager = manager
+            break
+
+    return render_template('profile.html', user=user, reporting_manager=reporting_manager)
+
 
 @views.route('/upload', methods=['POST', 'GET'])
 @login_required

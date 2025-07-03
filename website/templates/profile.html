@@ -350,13 +350,22 @@
                     </div> 
                 {% endif %}
             </div>
-            <div class="profile-info">
-                <h2>{{ user.first_name }}</h2>
-                <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
-                {% if user.role %}
-                    <p><i class="fas fa-briefcase"></i> {{ user.role.replace('_', ' ').title() }}</p>
-                {% endif %}
-            </div>
+           <div class="profile-info">
+    <h2>{{ user.first_name }}</h2>
+    <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+    {% if user.role %}
+        <p><i class="fas fa-briefcase"></i> {{ user.role.replace('_', ' ').title() }}</p>
+    {% endif %}
+    
+   
+        <p><i class="fas fa-user-tie"></i> Reporting Manager: {{ reporting_manager.first_name }}
+            <!-- {% for manager in reporting_managers %}
+                {{ manager.first_name }}{% if not loop.last %}, {% endif %}
+            {% endfor %} -->
+        </p>
+   
+</div>
+
         </div>
 
         {% if current_user.email == 'sumana@nadiya.in' or current_user.email== 'maneesh@nadiya.in' %}
