@@ -1301,6 +1301,8 @@ def announcements():
 #     return render_template('post_announcement.html', users=users)
 
 
+from google.cloud import storage
+
 def upload_file_to_gcs(file, filename, subfolder=None, bucket_name='hrms-bucket'):
     client = storage.Client()
     bucket = client.bucket(bucket_name)
@@ -2042,22 +2044,5 @@ def exit_report_view(user_id, date):
         reports=reports
     )
 
-from google.cloud import storage
-from werkzeug.utils import secure_filename
-
-def upload_file_to_gcs(file, filename, bucket_name='hrms-bucket', subfolder='uploads/docs'):
-    client = storage.Client()
-    bucket = client.bucket(bucket_name)
-
-    # Proper path inside the bucket
-    blob_path = f"{subfolder}/{filename}"
-    blob = bucket.blob(blob_path)
-
-    blob.upload_from_file(file, content_type=file.content_type)
-
-    # Make public (or use signed URLs if preferred)
-    blob.make_public()
-
-    return blob.public_url
 
 
