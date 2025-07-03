@@ -418,7 +418,7 @@
                     {% if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
                         <div class="announcement-attachment">
                             <strong><i class="fas fa-image"></i> Attached Image:</strong><br>
-                            <img src="{{ url_for('static', filename=announcement.image_url) }}"
+                            <img src="{{ announcement.photo_url }}" alt="Image">
                                  alt="Announcement Attachment"
                                  onclick="window.open(this.src, '_blank')">
                         </div>
@@ -428,7 +428,7 @@
                 {% if announcement.doc_url %}
                     <div class="announcement-attachment">
                         <strong><i class="fas fa-paperclip"></i> Document Attachment:</strong><br>
-                        <a href="{{ url_for('static', filename=announcement.doc_url) }}" target="_blank">
+                        <a href="{{ announcement.doc_url }}" target="_blank">
                             <i class="fas fa-file-alt"></i> View Document
                         </a>
                     </div>

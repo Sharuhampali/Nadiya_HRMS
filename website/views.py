@@ -1901,6 +1901,7 @@ def exit_reports_summary():
         user_reports.setdefault(user, []).append(report)
 
     return render_template('exit_reports_summary.html', user_reports=user_reports)
+
 @views.route('/exit_report_view/<int:user_id>/<date>')
 @login_required
 def exit_report_view(user_id, date):
@@ -1910,9 +1911,9 @@ def exit_report_view(user_id, date):
     parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
 
     # Ensure the current user has authority to view the selected user's reports
-    if user.id != current_user.id and not has_approval_authority(current_user.role, user.role) and not current_user.email == "sumana@nadiya.in":
-        flash("You do not have permission to view this report.", "error")
-        return redirect(url_for('views.home'))
+    # if user.id != current_user.id and not has_approval_authority(current_user.role, user.role) and not current_user.email == "sumana@nadiya.in":
+    #     flash("You do not have permission to view this report.", "error")
+    #     return redirect(url_for('views.home'))
 
     # Get attendance record
     attendance = Attendance.query.filter_by(user_id=user_id, date=date).first()
