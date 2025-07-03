@@ -1341,26 +1341,26 @@ def post_announcement():
         )
         db.session.add(announcement)
 
-        # # Associate recipients and send emails
-        # for user_id in recipient_ids:
-        #     user = User.query.get(int(user_id))
-        #     if user:
-        #         announcement.recipients.append(user)
-        #         if user.email:
-        #             msg = Message(
-        #                 subject='New Announcement Posted',
-        #                 sender=current_app.config['MAIL_DEFAULT_SENDER'],
-        #                 recipients=[user.email]
-        #             )
-        #             announcement_link = url_for('views.announcements', _external=True)
-        #             msg.body = (
-        #                 f"Dear {user.first_name},\n\n"
-        #                 f"A new announcement has been posted on the portal.\n"
-        #                 f"Please log in to view the details.\n\n"
-        #                 f"View Announcements: {announcement_link}\n\n"
-        #                 f"Regards,\n"
-        #                 f"HR Team"
-        #             )
+        # Associate recipients and send emails
+        for user_id in recipient_ids:
+            user = User.query.get(int(user_id))
+            if user:
+                announcement.recipients.append(user)
+                if user.email:
+                    msg = Message(
+                        subject='New Announcement Posted',
+                        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                        recipients=[user.email]
+                    )
+                    announcement_link = url_for('views.announcements', _external=True)
+                    msg.body = (
+                        f"Dear {user.first_name},\n\n"
+                        f"A new announcement has been posted on the portal.\n"
+                        f"Please log in to view the details.\n\n"
+                        f"View Announcements: {announcement_link}\n\n"
+                        f"Regards,\n"
+                        f"HR Team"
+                    )
         #             mail.send(msg)
 
         db.session.commit()
@@ -2054,4 +2054,5 @@ def upload_file_to_gcs(file, filename, bucket_name='hrms-bucket', subfolder='upl
     blob.make_public()
 
     return blob.public_url
+
 
