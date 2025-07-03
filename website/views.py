@@ -1368,7 +1368,7 @@ def post_announcement():
                         f"Regards,\n"
                         f"HR Team"
                     )
-        #             mail.send(msg)
+                    mail.send(msg)
 
         db.session.commit()
 
