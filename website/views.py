@@ -1549,13 +1549,15 @@ def profile(user_id):
     if request.method == 'POST':
         if 'photo' in request.files and request.files['photo']:
             file = request.files['photo']
-            photo_url = upload_file_to_gcs(file, subfolder='photos')
+            filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+            photo_url = upload_file_to_gcs(file, filename, subfolder='photos')
             user.photo = photo_url
 
         if 'document' in request.files and request.files['document']:
             file = request.files['document']
             document_type = request.form.get('document_type')
-            doc_url = upload_file_to_gcs(file, subfolder='docs')
+            filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+            doc_url = upload_file_to_gcs(file,filename, subfolder='docs')
 
             if user.documents:
                 for doc in user.documents:
