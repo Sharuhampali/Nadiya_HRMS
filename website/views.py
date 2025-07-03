@@ -1444,6 +1444,100 @@ def read_status(announcement_id):
 photos = UploadSet('photos', IMAGES)
 docs = UploadSet('docs', ('pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'))
 
+# @views.route('/profile/<int:user_id>', methods=['GET', 'POST'])
+# @login_required
+# def profile(user_id):
+#     user = User.query.get(user_id)
+#     if not user:
+#         flash("User not found.", category='error')
+#         return redirect(url_for('index'))
+
+#     if request.method == 'POST':
+#         if 'photo' in request.files and request.files['photo']:
+#             filename = photos.save(request.files['photo'])
+#             user.photo = filename
+
+#         if 'document' in request.files and request.files['document']:
+#             file = request.files['document']
+#             if file:
+#                 filename = docs.save(file)
+#                 document_type = request.form.get('document_type')  # Assuming document type is selected in form
+#                 if user.documents:
+#                     # Delete the old document file if it exists
+#                     for doc in user.documents:
+#                         if doc.document_type == document_type:
+#                             doc.filename = filename
+#                             break
+#                     else:
+#                         new_document = Document(user_id=user.id, filename=filename, document_type=document_type)
+#                         user.documents.append(new_document)
+#                         db.session.add(new_document)
+#                 else:
+#                     new_document = Document(user_id=user.id, filename=filename, document_type=document_type)
+#                     user.documents.append(new_document)
+#                     db.session.add(new_document)
+
+#         db.session.commit()
+#         flash('Profile updated successfully')
+#         return redirect(url_for('views.profile', user_id=user_id))
+
+#     return render_template('profile.html', user=user)
+
+# @views.route('/upload', methods=['POST', 'GET'])
+# @login_required
+
+# def upload():
+#     if request.method == 'POST':
+#         user_id = request.form.get('user_id')
+#         try:
+#             if 'document' in request.files:
+#                 filename = docs.save(request.files['document'])
+#                 flash('Document uploaded successfully.', 'success')
+#             else:
+#                 flash('No document selected for upload.', 'warning')
+#         except UploadNotAllowed:
+#             flash('Upload not allowed. Please check the file type.', 'error')
+
+#         return redirect(url_for('views.profile', user_id=user_id))
+
+#     elif request.method == 'GET':
+#         setname = request.args.get('setname')
+#         filename = request.args.get('filename')
+#         if setname and filename:
+#             return redirect(url_for('uploaded_file', setname=setname, filename=filename))
+#         else:
+#             return "Bad Request", 400
+
+#     return "Method not allowed", 405
+
+# @views.route('/create_user', methods=['GET', 'POST'])
+# @login_required
+
+# def create_user():
+#     if current_user.email in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
+#         users = User.query.all()
+#         return render_template('create_user.html', users=users)
+#     return redirect(url_for('views.home'))
+
+# @views.route('/uploaded_file/<setname>/<filename>')
+# @login_required
+# def uploaded_file(setname, filename):
+#     if setname == 'photos':
+#         file_path = os.path.join(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
+#         print(f"Serving photo from: {file_path}")
+#         if not os.path.exists(file_path):
+#             print("File not found:", file_path)
+#             return abort(404)  # Return 404 Not Found if the file does not exist
+#         return send_from_directory(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
+#     elif setname == 'docs':
+#         file_path = os.path.join(current_app.config['UPLOADED_DOCS_DEST'], filename)
+#         print(f"Serving doc from: {file_path}")
+#         if not os.path.exists(file_path):
+#             print("File not found:", file_path)
+#             return abort(404)  # Return 404 Not Found if the file does not exist
+#         return send_from_directory(current_app.config['UPLOADED_DOCS_DEST'], filename)
+#     else:
+#         return "File type not supported", 400
 @views.route('/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
@@ -1454,28 +1548,28 @@ def profile(user_id):
 
     if request.method == 'POST':
         if 'photo' in request.files and request.files['photo']:
-            filename = photos.save(request.files['photo'])
-            user.photo = filename
+            file = request.files['photo']
+            photo_url = upload_file_to_gcs(file, subfolder='photos')
+            user.photo = photo_url
 
         if 'document' in request.files and request.files['document']:
             file = request.files['document']
-            if file:
-                filename = docs.save(file)
-                document_type = request.form.get('document_type')  # Assuming document type is selected in form
-                if user.documents:
-                    # Delete the old document file if it exists
-                    for doc in user.documents:
-                        if doc.document_type == document_type:
-                            doc.filename = filename
-                            break
-                    else:
-                        new_document = Document(user_id=user.id, filename=filename, document_type=document_type)
-                        user.documents.append(new_document)
-                        db.session.add(new_document)
+            document_type = request.form.get('document_type')
+            doc_url = upload_file_to_gcs(file, subfolder='docs')
+
+            if user.documents:
+                for doc in user.documents:
+                    if doc.document_type == document_type:
+                        doc.filename = doc_url
+                        break
                 else:
-                    new_document = Document(user_id=user.id, filename=filename, document_type=document_type)
+                    new_document = Document(user_id=user.id, filename=doc_url, document_type=document_type)
                     user.documents.append(new_document)
                     db.session.add(new_document)
+            else:
+                new_document = Document(user_id=user.id, filename=doc_url, document_type=document_type)
+                user.documents.append(new_document)
+                db.session.add(new_document)
 
         db.session.commit()
         flash('Profile updated successfully')
@@ -1485,13 +1579,13 @@ def profile(user_id):
 
 @views.route('/upload', methods=['POST', 'GET'])
 @login_required
-
 def upload():
     if request.method == 'POST':
         user_id = request.form.get('user_id')
         try:
             if 'document' in request.files:
-                filename = docs.save(request.files['document'])
+                file = request.files['document']
+                doc_url = upload_file_to_gcs(file, subfolder='docs')
                 flash('Document uploaded successfully.', 'success')
             else:
                 flash('No document selected for upload.', 'warning')
@@ -1501,43 +1595,10 @@ def upload():
         return redirect(url_for('views.profile', user_id=user_id))
 
     elif request.method == 'GET':
-        setname = request.args.get('setname')
-        filename = request.args.get('filename')
-        if setname and filename:
-            return redirect(url_for('uploaded_file', setname=setname, filename=filename))
-        else:
-            return "Bad Request", 400
+        return "This endpoint is for uploading only.", 405
 
     return "Method not allowed", 405
 
-@views.route('/create_user', methods=['GET', 'POST'])
-@login_required
-
-def create_user():
-    if current_user.email in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
-        users = User.query.all()
-        return render_template('create_user.html', users=users)
-    return redirect(url_for('views.home'))
-
-@views.route('/uploaded_file/<setname>/<filename>')
-@login_required
-def uploaded_file(setname, filename):
-    if setname == 'photos':
-        file_path = os.path.join(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
-        print(f"Serving photo from: {file_path}")
-        if not os.path.exists(file_path):
-            print("File not found:", file_path)
-            return abort(404)  # Return 404 Not Found if the file does not exist
-        return send_from_directory(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
-    elif setname == 'docs':
-        file_path = os.path.join(current_app.config['UPLOADED_DOCS_DEST'], filename)
-        print(f"Serving doc from: {file_path}")
-        if not os.path.exists(file_path):
-            print("File not found:", file_path)
-            return abort(404)  # Return 404 Not Found if the file does not exist
-        return send_from_directory(current_app.config['UPLOADED_DOCS_DEST'], filename)
-    else:
-        return "File type not supported", 400
     
 #########################################################################################################################################################
 #Miscellaneous Routes

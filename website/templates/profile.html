@@ -343,7 +343,7 @@
         <div class="profile-header">
             <div class="profile-photo-container">
                 {% if user.photo %}
-                    <img src="{{ url_for('static', filename='uploads/photos/' + user.photo) }}" alt="Profile Photo" class="profile-photo">
+                    <img src="{{ user.photo }}" alt="Profile Photo" class="profile-photo">
                 {% else %}
                     <div class="profile-photo-placeholder">
                         {{ user.first_name[0].upper() if user.first_name else 'U' }}
@@ -467,10 +467,9 @@
                     </div>
                     <div class="document-details">
                         <h4>{{ document.document_type.replace('_', ' ').title() }}</h4>
-                        <p>{{ document.filename }}</p>
                     </div>
                 </div>
-                <a href="{{ url_for('static', filename='uploads/docs/' + document.filename) }}" class="btn-download" target="_blank">
+                <a href="{{ document.filename }}" class="btn-download" target="_blank">
                     <i class="fas fa-download"></i> Download
                 </a>
             </div>
