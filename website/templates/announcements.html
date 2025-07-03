@@ -418,9 +418,8 @@
                     {% if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
                         <div class="announcement-attachment">
                             <strong><i class="fas fa-image"></i> Attached Image:</strong><br>
-                            <img src="{{ announcement.photo_url }}" alt="Image">
-                                 alt="Announcement Attachment"
-                                 onclick="window.open(this.src, '_blank')">
+            <img src="{{ announcement.image_url }}" alt="Image" style="max-width: 100%; height: auto;">
+                                 
                         </div>
                     {% endif %}
                 {% endif %}
