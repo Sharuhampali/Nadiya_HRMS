@@ -1236,62 +1236,133 @@ def announcements():
     return render_template('announcements.html', announcements=announcements)
 
 
+# @views.route('/post_announcement', methods=['GET', 'POST'])
+# @login_required
+# def post_announcement():
+#     if request.method == 'POST':
+#         title = request.form.get('title')
+#         content = request.form.get('content')
+#         file = request.files.get('attachments')   # Image
+#         file1 = request.files.get('attachments1') # Document
+#         recipient_ids = request.form.getlist('recipients')  # List of selected user IDs
+#         # recipient_ids.append(current_user.id)
+#         # Save image file
+#         image_url = None
+#         if file and file.filename != '':
+#             filename = secure_filename(file.filename)
+#             file_path = os.path.join(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
+#             os.makedirs(os.path.dirname(file_path), exist_ok=True)
+#             file.save(file_path)
+#             image_url = f'website/uploads/photos/{filename}'
+
+#         # Save document file
+#         file = request.files.get('document')
+#         if file and file.filename != '':
+#             filename = secure_filename(file.filename)
+#             public_url = upload_file_to_gcs(file, filename)
+#             announcement.doc_url = public_url  # save this to DB
+
+
+#         # Create the announcement object once
+#         announcement = Announcement(title=title, content=content, image_url=image_url)
+#         db.session.add(announcement)
+
+#         # Associate selected users and send emails
+#         for user_id in recipient_ids:
+#             user = User.query.get(int(user_id))
+#             if user:
+#                 announcement.recipients.append(user)  # Associate recipient
+#                 if user.email:
+#                     msg = Message(
+#                         subject='New Announcement Posted',
+#                         sender=current_app.config['MAIL_DEFAULT_SENDER'],
+#                         recipients=[user.email]
+#                     )
+#                     announcement_link = url_for('views.announcements', _external=True)
+#                     msg.body = (
+#                         f"Dear {user.first_name},\n\n"
+#                         f"A new announcement has been posted on the portal.\n"
+#                         f"Please log in to view the details.\n\n"
+#                         f"View Announcements: {announcement_link}\n\n"
+#                         f"Regards,\n"
+#                         f"HR Team"
+#                     )
+
+#                     mail.send(msg)
+
+#         # Commit after all changes
+#         db.session.commit()
+
+#         flash('Announcement posted successfully and notifications sent to selected users!', 'success')
+#         return redirect(url_for('views.announcements'))
+
+#     # GET request
+#     users = User.query.order_by(User.first_name.asc()).all()
+#     return render_template('post_announcement.html', users=users)
+
+
+def upload_file_to_gcs(file, filename, bucket_name='hrms-bucket', subfolder='uploads/docs'):
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(f'{subfolder}/{filename}')
+    blob.upload_from_file(file, content_type=file.content_type)
+    blob.make_public()  # optional, for easy access
+    return blob.public_url
+
 @views.route('/post_announcement', methods=['GET', 'POST'])
 @login_required
 def post_announcement():
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
-        file = request.files.get('attachments')   # Image
-        file1 = request.files.get('attachments1') # Document
-        recipient_ids = request.form.getlist('recipients')  # List of selected user IDs
-        # recipient_ids.append(current_user.id)
-        # Save image file
+        recipient_ids = request.form.getlist('recipients')
+
         image_url = None
-        if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            file.save(file_path)
-            image_url = f'website/uploads/photos/{filename}'
-
-        # Save document file
         doc_url = None
-        if file1 and file1.filename != '':
-            filename = secure_filename(file1.filename)
-            file_path = os.path.join(current_app.config['UPLOADED_DOCS_DEST'], filename)
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            file1.save(file_path)
-            doc_url = f'website/uploads/docs/{filename}'
 
-        # Create the announcement object once
-        announcement = Announcement(title=title, content=content, image_url=image_url, doc_url=doc_url)
+        # Handle image upload to GCS
+        image_file = request.files.get('attachments')
+        if image_file and image_file.filename != '':
+            image_filename = f"{uuid.uuid4().hex}_{secure_filename(image_file.filename)}"
+            image_url = upload_file_to_gcs(image_file, image_filename, subfolder='uploads/photos')
+
+        # Handle document upload to GCS
+        doc_file = request.files.get('attachments1') or request.files.get('document')
+        if doc_file and doc_file.filename != '':
+            doc_filename = f"{uuid.uuid4().hex}_{secure_filename(doc_file.filename)}"
+            doc_url = upload_file_to_gcs(doc_file, doc_filename, subfolder='uploads/docs')
+
+        # Create the announcement
+        announcement = Announcement(
+            title=title,
+            content=content,
+            image_url=image_url,
+            doc_url=doc_url
+        )
         db.session.add(announcement)
 
-        # Associate selected users and send emails
-        for user_id in recipient_ids:
-            user = User.query.get(int(user_id))
-            if user:
-                announcement.recipients.append(user)  # Associate recipient
-                if user.email:
-                    msg = Message(
-                        subject='New Announcement Posted',
-                        sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                        recipients=[user.email]
-                    )
-                    announcement_link = url_for('views.announcements', _external=True)
-                    msg.body = (
-                        f"Dear {user.first_name},\n\n"
-                        f"A new announcement has been posted on the portal.\n"
-                        f"Please log in to view the details.\n\n"
-                        f"View Announcements: {announcement_link}\n\n"
-                        f"Regards,\n"
-                        f"HR Team"
-                    )
+        # # Associate recipients and send emails
+        # for user_id in recipient_ids:
+        #     user = User.query.get(int(user_id))
+        #     if user:
+        #         announcement.recipients.append(user)
+        #         if user.email:
+        #             msg = Message(
+        #                 subject='New Announcement Posted',
+        #                 sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        #                 recipients=[user.email]
+        #             )
+        #             announcement_link = url_for('views.announcements', _external=True)
+        #             msg.body = (
+        #                 f"Dear {user.first_name},\n\n"
+        #                 f"A new announcement has been posted on the portal.\n"
+        #                 f"Please log in to view the details.\n\n"
+        #                 f"View Announcements: {announcement_link}\n\n"
+        #                 f"Regards,\n"
+        #                 f"HR Team"
+        #             )
+        #             mail.send(msg)
 
-                    mail.send(msg)
-
-        # Commit after all changes
         db.session.commit()
 
         flash('Announcement posted successfully and notifications sent to selected users!', 'success')
@@ -1300,6 +1371,7 @@ def post_announcement():
     # GET request
     users = User.query.order_by(User.first_name.asc()).all()
     return render_template('post_announcement.html', users=users)
+
 
 
 @views.route('/delete_announcement/<int:announcement_id>', methods=['POST'])
@@ -1902,6 +1974,37 @@ def exit_reports_summary():
 
     return render_template('exit_reports_summary.html', user_reports=user_reports)
 
+# @views.route('/exit_report_view/<int:user_id>/<date>')
+# @login_required
+# def exit_report_view(user_id, date):
+#     from datetime import datetime
+
+#     user = User.query.get_or_404(user_id)
+#     parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
+
+#     # Ensure the current user has authority to view the selected user's reports
+#     # if user.id != current_user.id and not has_approval_authority(current_user.role, user.role) and not current_user.email == "sumana@nadiya.in":
+#     #     flash("You do not have permission to view this report.", "error")
+#     #     return redirect(url_for('views.home'))
+
+#     # Get attendance record
+#     attendance = Attendance.query.filter_by(user_id=user_id, date=date).all()
+
+#     # No attendance, no report
+#     if not attendance:
+#         flash("No attendance found for the selected date.", "warning")
+#         return redirect(url_for('views.home'))
+
+#     # Get exit reports tied to that attendance
+#     reports = ExitReport.query.filter_by(attendance_id=attendance.id).order_by(ExitReport.start_time).all()
+
+#     return render_template(
+#         'exit_reports_view.html',
+#         user=user,
+#         date=parsed_date,
+#         attendance=attendance,
+#         reports=reports
+#     )
 @views.route('/exit_report_view/<int:user_id>/<date>')
 @login_required
 def exit_report_view(user_id, date):
@@ -1910,26 +2013,45 @@ def exit_report_view(user_id, date):
     user = User.query.get_or_404(user_id)
     parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
 
-    # Ensure the current user has authority to view the selected user's reports
-    # if user.id != current_user.id and not has_approval_authority(current_user.role, user.role) and not current_user.email == "sumana@nadiya.in":
+    # Uncomment this if you want role-based access enforcement
+    # if user.id != current_user.id and not has_approval_authority(current_user.role, user.role) and current_user.email != "sumana@nadiya.in":
     #     flash("You do not have permission to view this report.", "error")
     #     return redirect(url_for('views.home'))
 
-    # Get attendance record
-    attendance = Attendance.query.filter_by(user_id=user_id, date=date).first()
+    # Get all attendance records for that user on that date
+    attendances = Attendance.query.filter_by(user_id=user_id, date=parsed_date).all()
 
-    # No attendance, no report
-    if not attendance:
+    if not attendances:
         flash("No attendance found for the selected date.", "warning")
         return redirect(url_for('views.home'))
 
-    # Get exit reports tied to that attendance
-    reports = ExitReport.query.filter_by(attendance_id=attendance.id).order_by(ExitReport.start_time).all()
+    # Get all exit reports related to any of those attendance records
+    attendance_ids = [a.id for a in attendances]
+    reports = ExitReport.query.filter(ExitReport.attendance_id.in_(attendance_ids)).order_by(ExitReport.start_time).all()
 
     return render_template(
         'exit_reports_view.html',
         user=user,
         date=parsed_date,
-        attendance=attendance,
+        attendance=attendances,
         reports=reports
     )
+
+from google.cloud import storage
+from werkzeug.utils import secure_filename
+
+def upload_file_to_gcs(file, filename, bucket_name='hrms-bucket', subfolder='uploads/docs'):
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    # Proper path inside the bucket
+    blob_path = f"{subfolder}/{filename}"
+    blob = bucket.blob(blob_path)
+
+    blob.upload_from_file(file, content_type=file.content_type)
+
+    # Make public (or use signed URLs if preferred)
+    blob.make_public()
+
+    return blob.public_url
+

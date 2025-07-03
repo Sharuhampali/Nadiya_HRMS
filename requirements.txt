@@ -111,3 +111,4 @@ h2~=4.2
 # railroad, importlib_metadata omitted
 pandas~=2.2
 openpyxl~=3.1
+google-cloud-storage
