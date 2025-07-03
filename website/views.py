@@ -1301,13 +1301,18 @@ def announcements():
 #     return render_template('post_announcement.html', users=users)
 
 
-def upload_file_to_gcs(file, filename, bucket_name='hrms-bucket', subfolder='uploads/docs'):
+def upload_file_to_gcs(file, filename, subfolder=None, bucket_name='hrms-bucket'):
     client = storage.Client()
     bucket = client.bucket(bucket_name)
-    blob = bucket.blob(f'{subfolder}/{filename}')
+
+    blob_path = f'{subfolder}/{filename}' if subfolder else filename
+    blob = bucket.blob(blob_path)
+
     blob.upload_from_file(file, content_type=file.content_type)
-    # blob.make_public()  # optional, for easy access
-    return blob.public_url
+
+    # Do NOT call blob.make_public() when using Uniform Bucket-Level Access
+    return f"https://storage.googleapis.com/{bucket_name}/{blob_path}"
+
 
 @views.route('/post_announcement', methods=['GET', 'POST'])
 @login_required
