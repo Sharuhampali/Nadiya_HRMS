@@ -1306,7 +1306,7 @@ def upload_file_to_gcs(file, filename, bucket_name='hrms-bucket', subfolder='upl
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(f'{subfolder}/{filename}')
     blob.upload_from_file(file, content_type=file.content_type)
-    blob.make_public()  # optional, for easy access
+    # blob.make_public()  # optional, for easy access
     return blob.public_url
 
 @views.route('/post_announcement', methods=['GET', 'POST'])
