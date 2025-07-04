@@ -1316,6 +1316,73 @@ def upload_file_to_gcs(file, filename, subfolder=None, bucket_name='hrms-bucket'
     return f"https://storage.googleapis.com/{bucket_name}/{blob_path}"
 
 
+# @views.route('/post_announcement', methods=['GET', 'POST'])
+# @login_required
+# def post_announcement():
+#     if request.method == 'POST':
+#         title = request.form.get('title')
+#         content = request.form.get('content')
+#         recipient_ids = request.form.getlist('recipients')
+
+#         image_url = None
+#         doc_url = None
+
+#         # Handle image upload to GCS
+#         image_file = request.files.get('attachments')
+#         if image_file and image_file.filename != '':
+#             image_filename = f"{uuid.uuid4().hex}_{secure_filename(image_file.filename)}"
+#             image_url = upload_file_to_gcs(image_file, image_filename, subfolder='uploads/photos')
+
+#         # Handle document upload to GCS
+#         doc_file = request.files.get('attachments1') or request.files.get('document')
+#         if doc_file and doc_file.filename != '':
+#             doc_filename = f"{uuid.uuid4().hex}_{secure_filename(doc_file.filename)}"
+#             doc_url = upload_file_to_gcs(doc_file, doc_filename, subfolder='uploads/docs')
+
+#         # Create the announcement
+#         announcement = Announcement(
+#             title=title,
+#             content=content,
+#             image_url=image_url,
+#             doc_url=doc_url
+#         )
+#         db.session.add(announcement)
+
+#         # Associate recipients and send emails
+#         for user_id in recipient_ids:
+#             user = User.query.get(int(user_id))
+#             if user:
+#                 announcement.recipients.append(user)
+#                 if user.email:
+#                     try:
+#                         msg = Message(
+#                             subject='New Announcement Posted',
+#                             sender=current_app.config['MAIL_DEFAULT_SENDER'],
+#                             recipients=[user.email]
+#                         )
+#                         announcement_link = url_for('views.announcements', _external=True)
+#                         msg.body = (
+#                             f"Dear {user.first_name},\n\n"
+#                             f"A new announcement has been posted on the portal.\n"
+#                             f"Please log in to view the details.\n\n"
+#                             f"View Announcements: {announcement_link}\n\n"
+#                             f"Regards,\n"
+#                             f"HR Team"
+#                         )
+#                         mail.send(msg)
+#                     except Exception as e:
+#                         # You can log the problematic email or store it for admin review
+#                         print(f"[!] Failed to send to {user.email}: {str(e)}")
+
+
+#         db.session.commit()
+
+#         flash('Announcement posted successfully and notifications sent to selected users!', 'success')
+#         return redirect(url_for('views.announcements'))
+
+#     # GET request
+#     users = User.query.order_by(User.first_name.asc()).all()
+#     return render_template('post_announcement.html', users=users)
 @views.route('/post_announcement', methods=['GET', 'POST'])
 @login_required
 def post_announcement():
@@ -1347,42 +1414,54 @@ def post_announcement():
             doc_url=doc_url
         )
         db.session.add(announcement)
+        db.session.flush()  # Flush to get announcement.id if needed before sending mail
 
-        # Associate recipients and send emails
-        for user_id in recipient_ids:
-            user = User.query.get(int(user_id))
-            if user:
-                announcement.recipients.append(user)
-                if user.email:
-                    try:
-                        msg = Message(
-                            subject='New Announcement Posted',
-                            sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                            recipients=[user.email]
-                        )
-                        announcement_link = url_for('views.announcements', _external=True)
-                        msg.body = (
-                            f"Dear {user.first_name},\n\n"
-                            f"A new announcement has been posted on the portal.\n"
-                            f"Please log in to view the details.\n\n"
-                            f"View Announcements: {announcement_link}\n\n"
-                            f"Regards,\n"
-                            f"HR Team"
-                        )
-                        mail.send(msg)
-                    except Exception as e:
-                        # You can log the problematic email or store it for admin review
-                        print(f"[!] Failed to send to {user.email}: {str(e)}")
+        # Email batching
+        import time
+        batch_size = 3
+        failed_emails = []
 
+        for i in range(0, len(recipient_ids), batch_size):
+            batch = recipient_ids[i:i + batch_size]
+            for user_id in batch:
+                user = User.query.get(int(user_id))
+                if user:
+                    announcement.recipients.append(user)
+                    if user.email:
+                        try:
+                            msg = Message(
+                                subject='New Announcement Posted',
+                                sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                                recipients=[user.email]
+                            )
+                            announcement_link = url_for('views.announcements', _external=True)
+                            msg.body = (
+                                f"Dear {user.first_name},\n\n"
+                                f"A new announcement has been posted on the portal.\n"
+                                f"Please log in to view the details.\n\n"
+                                f"View Announcements: {announcement_link}\n\n"
+                                f"Regards,\n"
+                                f"HR Team"
+                            )
+                            mail.send(msg)
+                        except Exception as e:
+                            failed_emails.append((user.email, str(e)))
+                            print(f"[!] Failed to send to {user.email}: {e}")
+            time.sleep(1)  # Sleep after each batch
 
         db.session.commit()
 
-        flash('Announcement posted successfully and notifications sent to selected users!', 'success')
+        if failed_emails:
+            flash(f"Announcement posted, but failed to send email to {len(failed_emails)} users. Check logs.", 'warning')
+        else:
+            flash('Announcement posted successfully and notifications sent to selected users!', 'success')
+
         return redirect(url_for('views.announcements'))
 
     # GET request
     users = User.query.order_by(User.first_name.asc()).all()
     return render_template('post_announcement.html', users=users)
+
 
 
 
