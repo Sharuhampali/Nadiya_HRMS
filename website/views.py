@@ -1350,25 +1350,30 @@ def post_announcement():
 
         # Associate recipients and send emails
         for user_id in recipient_ids:
-            user = User.query.get(int(user_id))
-            if user:
-                announcement.recipients.append(user)
-                if user.email:
-                    msg = Message(
-                        subject='New Announcement Posted',
-                        sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                        recipients=[user.email]
-                    )
-                    announcement_link = url_for('views.announcements', _external=True)
-                    msg.body = (
-                        f"Dear {user.first_name},\n\n"
-                        f"A new announcement has been posted on the portal.\n"
-                        f"Please log in to view the details.\n\n"
-                        f"View Announcements: {announcement_link}\n\n"
-                        f"Regards,\n"
-                        f"HR Team"
-                    )
-                    # mail.send(msg)
+    user = User.query.get(int(user_id))
+    if user:
+        announcement.recipients.append(user)
+        if user.email:
+            try:
+                msg = Message(
+                    subject='New Announcement Posted',
+                    sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                    recipients=[user.email]
+                )
+                announcement_link = url_for('views.announcements', _external=True)
+                msg.body = (
+                    f"Dear {user.first_name},\n\n"
+                    f"A new announcement has been posted on the portal.\n"
+                    f"Please log in to view the details.\n\n"
+                    f"View Announcements: {announcement_link}\n\n"
+                    f"Regards,\n"
+                    f"HR Team"
+                )
+                mail.send(msg)
+            except Exception as e:
+                # You can log the problematic email or store it for admin review
+                print(f"[!] Failed to send to {user.email}: {str(e)}")
+
 
         db.session.commit()
 
