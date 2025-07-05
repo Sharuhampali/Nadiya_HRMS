@@ -424,7 +424,12 @@
                     {% endif %}
                 {% endif %}
 
-                {% if announcement.doc_url %}
+               
+
+                <div class="announcement-content">
+                    {{ announcement.content }}
+                </div>
+                 {% if announcement.doc_url %}
                     <div class="announcement-attachment">
                         <strong><i class="fas fa-paperclip"></i> Document Attachment:</strong><br>
                         <a href="{{ announcement.doc_url }}" target="_blank">
@@ -432,10 +437,6 @@
                         </a>
                     </div>
                 {% endif %}
-
-                <div class="announcement-content">
-                    {{ announcement.content }}
-                </div>
 
                 <div class="announcement-date">
                     <i class="fas fa-calendar-alt"></i> 

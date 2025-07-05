@@ -511,6 +511,7 @@ def approve_edit(token):
         return f"""
         Attendance record not found for ID {req.attendance_id}.<br><br>
         Requested Edit:<br>
+        Name: {req.first_name}<br>
         Entry: {req.entry_time}<br>
         Exit: {req.exit_time}<br>
         Reason: {req.reason}<br>

@@ -18,6 +18,7 @@
         {% for req in requests %}
         <tr>
             <td>{{ req.id }}</td>
+            <td>{{req.first_name}}</td>
             <td>{{ req.user_id }}</td>
             <td>{{ req.requested_by }}</td>
             <td>{{ req.entry_time or "—" }}</td>
