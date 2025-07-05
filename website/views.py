@@ -95,6 +95,9 @@ def home():
 #Attendance Routes
 #########################################################################################################################################################
 
+# Initialize geolocator for address lookup
+geoLoc = Nominatim(user_agent="hrms-app")
+
 # Attendance home route
 @views.route('/attendance-category')
 @login_required
@@ -103,13 +106,35 @@ def attendance_category():
 
 
 @views.route('/attendance')
+@login_required
 def attendance_form():
+    from datetime import datetime
+    from pytz import timezone
+
+    india_tz = timezone('Asia/Kolkata')
+    today = datetime.now(india_tz).date()
+    user_id = current_user.id
     name = current_user.first_name
 
-    return render_template('attendance.html', name = name)
+    # Get all attendance records for this user today
+    attendances = Attendance.query.filter_by(user_id=user_id, date=today.strftime('%Y-%m-%d')).all()
 
-from datetime import  timedelta
-geoLoc = Nominatim(user_agent="my_app")
+    # Check if any of today's attendances has an associated exit report
+    attendance_ids = [att.id for att in attendances]
+    has_exit_report = (
+        ExitReport.query.filter(ExitReport.attendance_id.in_(attendance_ids)).first() is not None
+        if attendance_ids else False
+    )
+
+    # Use the latest attendance_id for the Exit Report redirect URL
+    latest_attendance_id = attendances[-1].id if attendances else None
+
+    return render_template(
+        'attendance.html',
+        name=name,
+        has_exit_report=has_exit_report,
+        attendance_id=latest_attendance_id
+    )
 
 
 # attendance submission route
@@ -275,8 +300,8 @@ def submit_attendance():
     #         db.session.commit()
     try:
         db.session.commit()
-        if( entry_exit == 'exit'):
-             return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+        # if( entry_exit == 'exit'):
+            #  return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
         return redirect(url_for('views.home'))
     except Exception as e:
         print(e)
@@ -2227,13 +2252,14 @@ def exit_report_form(attendance_id):
 
         try:
             db.session.commit()
-            flash("Exit report and attendance exit submitted successfully.", "success")
+            flash("Exit report submitted successfully.", "success")
         except Exception as e:
             db.session.rollback()
             print("Exit report error:", e)
             flash("Error saving report. Please try again.", "error")
 
-        return redirect(url_for('views.home'))
+        return redirect(url_for('views.attendance_form'))
+
 
     return render_template('exit_report.html', attendance=attendance)
 

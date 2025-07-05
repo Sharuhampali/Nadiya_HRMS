@@ -244,7 +244,10 @@
                     <option value="intermediate_entry">Intermediate Entry</option>
                     <option value="intermediate_exit">Intermediate Exit</option>
                 </select>
+                
             </div>
+            <div id="exit-check" data-has-exit-report="{% if has_exit_report %}true{% else %}false{% endif %}" data-exit-url="{% if attendance_id %}{{ url_for('views.exit_report_form', attendance_id=attendance_id) }}{% endif %}"></div>
+
               <div class="form-group">
                 <label for="reason">Remarks (If any)</label>
                 <input type="text" class="form-control" id="reason" name="reason" placeholder="Enter remarks if any">
@@ -264,8 +267,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const lonField = document.getElementById("longitude");
     const form = document.getElementById("attendanceForm");
     const submitBtn = form.querySelector("button[type='submit']");
+    const entryExit = document.getElementById("entry_exit");
 
     let locationFetched = false;
+
+    const exitCheckEl = document.getElementById("exit-check");
+    const hasExitReport = exitCheckEl.dataset.hasExitReport === "true";
+    const exitReportUrl = exitCheckEl.dataset.exitUrl;
 
     function logStatus(message, type = "info") {
         const colorMap = {
@@ -298,7 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
         submitBtn.disabled = true;
     }
 
-    // Begin GPS request
+    // Initial state
     submitBtn.disabled = true;
     logStatus("📍 Waiting for accurate GPS location... please allow location access.", "info");
 
@@ -311,24 +319,49 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         {
             enableHighAccuracy: true,
-            timeout: Infinity, // Let it wait indefinitely 
+            timeout: Infinity,
             maximumAge: 0
         }
     );
 
     form.addEventListener("submit", function (e) {
-    if (!locationFetched) {
-        e.preventDefault();
-        alert("Please wait — your GPS location is still being fetched.");
-        status.scrollIntoView({ behavior: "smooth" });
-        return;
-    }
+        if (!locationFetched) {
+            e.preventDefault();
+            alert("Please wait — your GPS location is still being fetched.");
+            status.scrollIntoView({ behavior: "smooth" });
+            return;
+        }
 
-    // Disable submit button to avoid double submissions
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-});
+        // Disable to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    });
 
+    // Exit logic
+    entryExit.addEventListener("change", function () {
+        const selected = entryExit.value;
+        const warningId = "exit-report-warning";
+        const existingWarning = document.getElementById(warningId);
+
+        if (selected === "exit" && !hasExitReport) {
+            submitBtn.disabled = true;
+
+            if (!existingWarning) {
+                const warning = document.createElement("div");
+                warning.className = "alert alert-warning mt-3";
+                warning.id = warningId;
+                warning.innerHTML = `
+                    <strong>Exit Report Required:</strong><br>
+                    You must complete your Exit Report before submitting exit attendance.<br>
+                    <a href="${exitReportUrl}" class="btn btn-sm btn-warning mt-2">Fill Exit Report</a>
+                `;
+                form.appendChild(warning);
+            }
+        } else {
+            submitBtn.disabled = false;
+            if (existingWarning) existingWarning.remove();
+        }
+    });
 });
 </script>
 {% endblock %}
