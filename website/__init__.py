@@ -93,6 +93,21 @@ def create_app():
     def load_user(id):
         return User.query.get(int(id))
     
+    def format_timedelta(td):
+        if not td:
+            return "N/A"
+
+        total_seconds = td.total_seconds()
+        sign = "-" if total_seconds < 0 else ""
+        total_seconds = abs(int(total_seconds))
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes = remainder // 60
+
+        return f"{sign}{hours}h {minutes}m"
+
+    app.jinja_env.filters['format_timedelta'] = format_timedelta
+
+
 
     def extract_area(address):
         if not address:

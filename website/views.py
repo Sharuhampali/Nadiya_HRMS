@@ -409,19 +409,19 @@ def is_late(entry_time, ideal_entry="09:30"):
         ideal = datetime.strptime(ideal_entry, "%H:%M")
         return entry > ideal
 
-#search attendance user route
-@views.route('/who', methods=['GET','POST'])
-@login_required
-def who():
-    return render_template('who.html')
+# #search attendance user route
+# @views.route('/who', methods=['GET','POST'])
+# @login_required
+# def who():
+#     return render_template('who.html')
 
-def send_email(recipient, subject, body, html=False):
-    msg = Message(subject, recipients=[recipient])
-    if html:
-        msg.html = body
-    else:
-        msg.body = body
-    mail.send(msg)
+# def send_email(recipient, subject, body, html=False):
+#     msg = Message(subject, recipients=[recipient])
+#     if html:
+#         msg.html = body
+#     else:
+#         msg.body = body
+#     mail.send(msg)
 
 #user attendance table
 @views.route('/who_output', methods=['GET','POST'])
@@ -626,7 +626,115 @@ def reject_edit_request(request_id):
 def leaves_category():
     return render_template('leaves_category.html', user=current_user)
 
-# Apply leave route
+# # Apply leave route
+# @views.route('/approve_leave/<int:leave_id>', methods=['POST'])
+# @login_required
+# def approve_leave(leave_id):
+#     leave = Leave.query.get(leave_id)
+#     if not leave:
+#         flash("Leave request not found.", category='error')
+#         return redirect(url_for('views.home'))
+
+#     if leave.approved or leave.rejected:
+#         flash("This leave has already been processed.", category='warning')
+#         return redirect(url_for('views.leave_requests'))
+
+#     leave.approved = True
+#     leave.approved_by = current_user.email
+#     db.session.commit()
+
+#     user = User.query.get(leave.user_id)
+
+#     # Compose detailed approval message
+#     leave_summary = json.loads(leave.leaves_data or "[]")
+#     details = '\n'.join(
+#         f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}" 
+#         for entry in leave_summary
+#     )
+
+#     send_email(
+#         'Leave Approved',
+#         user.email,
+#         f"Your leave request has been approved.\n\n"
+#         f"Total Days: {leave.days}\n"
+#         f"Types: {leave.ltype}\n"
+#         f"Details:\n{details}\n\n"
+#         f"Approved by: {current_user.email}"
+#     )
+
+#     return redirect(url_for('views.leave_requests'))
+
+# # Reject leave route
+# @views.route('/reject/<int:leave_id>', methods=['POST'])
+# @login_required
+# def reject(leave_id):
+#     leave = Leave.query.get(leave_id)
+#     if not leave:
+#         flash("Leave request not found.", category='error')
+#         return redirect(url_for('views.leave_requests'))
+
+#     user = User.query.get(leave.user_id)
+#     if not user:
+#         flash("User not found.", category='error')
+#         return redirect(url_for('views.leave_requests'))
+
+#     remarks = request.form.get('remarks') or "No remarks provided."
+#     leave.approved_by = current_user.email
+#     leave.rejected = True
+#     leave.remarks = remarks  # Optional: only if you have a 'remarks' field in Leave model
+
+#     # Reverse leave balances using leaves_data breakdown
+#     import json
+#     entries = json.loads(leave.leaves_data)
+
+#     for entry in entries:
+#         date = entry['date']
+#         duration = float(entry['duration'])
+#         ltype = entry['type']
+
+#         if ltype == 'Compoff':
+#             for att in user.attendances:
+#                 if att.date.strftime('%Y-%m-%d') == date:
+#                     att.compoff += duration
+#                     break
+#             else:
+#                 if user.attendances:
+#                     user.attendances[0].compoff += duration
+
+#         elif ltype == 'Earned':
+#             user.earned -= duration
+
+#         elif ltype == 'Leave w/o Pay':
+#             user.pay -= duration
+
+#         elif ltype == 'Medical/Sick':
+#             user.medic -= duration
+
+#     db.session.commit()
+#     flash("Leave request rejected and leave balances restored.", "info")
+
+#     # Construct email summary
+#     leave_summary = json.loads(leave.leaves_data or "[]")
+#     details = '\n'.join(
+#         f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}"
+#         for entry in leave_summary
+#     )
+
+#     send_email(
+#         subject='Leave Rejected',
+#         recipient=user.email,
+#         body=(
+#             f"Your leave request has been rejected.\n\n"
+#             f"Dates: {leave.start_date} to {leave.end_date}\n"
+#             f"Total Days: {leave.days}\n"
+#             f"Types: {leave.ltype}\n"
+#             f"Details:\n{details}\n\n"
+#             f"Rejected by: {current_user.email}\n"
+#             f"Remarks: {remarks}"
+#         )
+#     )
+
+#     return redirect(url_for('views.leave_requests'))
 @views.route('/approve_leave/<int:leave_id>', methods=['POST'])
 @login_required
 def approve_leave(leave_id):
@@ -641,30 +749,43 @@ def approve_leave(leave_id):
 
     leave.approved = True
     leave.approved_by = current_user.email
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print("DB commit failed on approve:", e)
+        flash("Something went wrong. Please try again.", "error")
+        return redirect(url_for('views.leave_requests'))
 
     user = User.query.get(leave.user_id)
 
-    # Compose detailed approval message
-    leave_summary = json.loads(leave.leaves_data or "[]")
+    try:
+        leave_summary = json.loads(leave.leaves_data or "[]")
+    except json.JSONDecodeError:
+        leave_summary = []
+
     details = '\n'.join(
-        f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}" 
+        f"- {entry.get('date', '?')}: {entry.get('duration', '?')} day(s) - {entry.get('type', '?')}"
         for entry in leave_summary
     )
 
-    send_email(
-        'Leave Approved',
-        user.email,
-        f"Your leave request has been approved.\n\n"
-        f"Total Days: {leave.days}\n"
-        f"Types: {leave.ltype}\n"
-        f"Details:\n{details}\n\n"
-        f"Approved by: {current_user.email}"
-    )
+    try:
+        send_email(
+            'Leave Approved',
+            user.email,
+            f"Your leave request has been approved.\n\n"
+            f"Total Days: {leave.days}\n"
+            f"Types: {leave.ltype}\n"
+            f"Details:\n{details}\n\n"
+            f"Approved by: {current_user.email}"
+        )
+    except Exception as e:
+        print("Email failed:", e)
+        flash("Leave approved, but email could not be sent.", "warning")
 
     return redirect(url_for('views.leave_requests'))
 
-# Reject leave route
 @views.route('/reject/<int:leave_id>', methods=['POST'])
 @login_required
 def reject(leave_id):
@@ -681,20 +802,25 @@ def reject(leave_id):
     remarks = request.form.get('remarks') or "No remarks provided."
     leave.approved_by = current_user.email
     leave.rejected = True
-    leave.remarks = remarks  # Optional: only if you have a 'remarks' field in Leave model
+    leave.remarks = remarks
 
-    # Reverse leave balances using leaves_data breakdown
-    import json
-    entries = json.loads(leave.leaves_data)
+    try:
+        entries = json.loads(leave.leaves_data or "[]")
+    except json.JSONDecodeError:
+        entries = []
 
     for entry in entries:
-        date = entry['date']
-        duration = float(entry['duration'])
-        ltype = entry['type']
+        try:
+            date = entry['date']
+            duration = float(entry['duration'])
+            ltype = entry['type']
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"Skipping malformed entry: {entry} – Error: {e}")
+            continue
 
         if ltype == 'Compoff':
             for att in user.attendances:
-                if att.date.strftime('%Y-%m-%d') == date:
+                if att.date and att.date.strftime('%Y-%m-%d') == date:
                     att.compoff += duration
                     break
             else:
@@ -710,31 +836,41 @@ def reject(leave_id):
         elif ltype == 'Medical/Sick':
             user.medic -= duration
 
-    db.session.commit()
-    flash("Leave request rejected and leave balances restored.", "info")
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print("DB commit failed on reject:", e)
+        flash("Something went wrong while rejecting leave.", "error")
+        return redirect(url_for('views.leave_requests'))
 
-    # Construct email summary
-    leave_summary = json.loads(leave.leaves_data or "[]")
+    # Compose summary
     details = '\n'.join(
-        f"- {entry['date']}: {entry['duration']} day(s) - {entry['type']}"
-        for entry in leave_summary
+        f"- {entry.get('date', '?')}: {entry.get('duration', '?')} day(s) - {entry.get('type', '?')}"
+        for entry in entries
     )
 
-    send_email(
-        subject='Leave Rejected',
-        recipient=user.email,
-        body=(
-            f"Your leave request has been rejected.\n\n"
-            f"Dates: {leave.start_date} to {leave.end_date}\n"
-            f"Total Days: {leave.days}\n"
-            f"Types: {leave.ltype}\n"
-            f"Details:\n{details}\n\n"
-            f"Rejected by: {current_user.email}\n"
-            f"Remarks: {remarks}"
+    try:
+        send_email(
+            subject='Leave Rejected',
+            recipient=user.email,
+            body=(
+                f"Your leave request has been rejected.\n\n"
+                f"Dates: {leave.start_date} to {leave.end_date}\n"
+                f"Total Days: {leave.days}\n"
+                f"Types: {leave.ltype}\n"
+                f"Details:\n{details}\n\n"
+                f"Rejected by: {current_user.email}\n"
+                f"Remarks: {remarks}"
+            )
         )
-    )
+    except Exception as e:
+        print("Email failed:", e)
+        flash("Leave rejected, but email could not be sent.", "warning")
 
+    flash("Leave request rejected and leave balances restored.", "info")
     return redirect(url_for('views.leave_requests'))
+
 
 
 #display approved leaves 
@@ -2131,6 +2267,11 @@ def has_approval_authority(approver_role, submitter_role):
     if isinstance(allowed_roles, str):
         allowed_roles = [allowed_roles]
     return approver_role in allowed_roles
+
+def send_email(subject, recipient, body):
+    msg = Message(subject, recipients=[recipient])
+    msg.body = body
+    mail.send(msg)
     
 @views.route('/attendance_table_mgr')
 @login_required

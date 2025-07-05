@@ -465,46 +465,12 @@
         </div>
     {% endif %}
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filterTabs = document.querySelectorAll('.filter-tab');
     const leaveRequests = document.querySelectorAll('.leave-request');
 
-    filterTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs
-            filterTabs.forEach(t => t.classList.remove('active'));
-            // Add active class to clicked tab
-            this.classList.add('active');
-
-            const filter = this.dataset.filter;
-
-            // Show/hide requests based on filter
-            leaveRequests.forEach(request => {
-                if (filter === 'all' || request.dataset.status === filter) {
-                    request.style.display = 'block';
-                } else {
-                    request.style.display = 'none';
-                }
-            });
-        });
-    });
-
-    // Confirmation for approve/reject actions
-    document.querySelectorAll('.btn-approve, .btn-reject').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const action = this.classList.contains('btn-approve') ? 'approve' : 'reject';
-            if (!confirm(`Are you sure you want to ${action} this leave request?`)) {
-                e.preventDefault();
-            }
-        });
-    });
-});
-document.addEventListener('DOMContentLoaded', function() {
-    const filterTabs = document.querySelectorAll('.filter-tab');
-    const leaveRequests = document.querySelectorAll('.leave-request');
-
+    // Handle filter tabs
     filterTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             filterTabs.forEach(t => t.classList.remove('active'));
@@ -516,23 +482,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.querySelectorAll('.btn-approve, .btn-reject').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const action = this.classList.contains('btn-approve') ? 'approve' : 'reject';
-            if (!this.classList.contains('show-remarks-btn')) {
-                if (!confirm(`Are you sure you want to ${action} this leave request?`)) {
-                    e.preventDefault();
-                }
-            }
-        });
-    });
-
+    // Show remarks textarea when rejecting
     document.querySelectorAll('.show-remarks-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const wrapper = this.closest('form').querySelector('.remarks-wrapper');
             wrapper.style.display = 'block';
             this.style.display = 'none';
+        });
+    });
+
+    // Confirm approve/reject actions
+    document.querySelectorAll('.btn-approve, .btn-reject').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Skip confirmation if it's just the show-remarks toggle
+            if (this.classList.contains('show-remarks-btn')) return;
+
+            const action = this.classList.contains('btn-approve') ? 'approve' : 'reject';
+            const confirmed = confirm(`Are you sure you want to ${action} this leave request?`);
+            if (!confirmed) {
+                e.preventDefault();
+            }
         });
     });
 });

@@ -446,8 +446,8 @@
                     <td>{{ attendance.exit_time or '-' }}</td>
                     <!-- <td>{{ attendance.exit_time | calculate_exit_early }}</td>
                     <td>{{ attendance.exit_time | calculate_exit_late }}</td> -->
-                    <td>{{ attendance.total_time_worked() }}</td>
-                    <td>{{ attendance.extra_time_worked() }}</td>
+                    <td>{{ attendance.total_time_worked()  | format_timedelta }}</td>
+                    <td>{{ attendance.extra_time_worked()  | format_timedelta}}</td>
                     <td><span class="status-badge status-ontime">{{ attendance.compoff }}</span></td>
                     <!-- <td>
                         {% if attendance.entry_location %}
