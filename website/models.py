@@ -60,7 +60,7 @@ class Attendance(db.Model):
     compoff_requested = db.Column(db.Float, default=0)  # Temporary requested value, ignored unless approved
     compoff_pending = db.Column(db.Boolean, default=False)
     approved_by_id = db.Column(db.Integer, nullable=True)
-
+    exit_report_submitted = db.Column(db.Boolean, default=False)
     hol = db.Column(db.Float, default=0)
     date = db.Column(db.Date)
     day = db.Column(db.String(150))

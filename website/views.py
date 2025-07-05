@@ -104,6 +104,35 @@ geoLoc = Nominatim(user_agent="hrms-app")
 def attendance_category():
     return render_template('attendance_category.html', user=current_user)
 
+# @views.route('/attendance')
+# @login_required
+# def attendance_form():
+#     from datetime import datetime
+#     from pytz import timezone
+
+#     india_tz = timezone('Asia/Kolkata')
+#     today = datetime.now(india_tz).date()
+#     user_id = current_user.id
+#     name = current_user.first_name
+
+#     # Get all today's attendance records for the user
+#     attendances = Attendance.query.filter_by(user_id=user_id, date=today).all()
+#     attendance_ids = [a.id for a in attendances]
+
+#     # Check if any exit report exists for these attendance IDs
+#     has_exit_report = False
+#     attendance_id = None
+
+#     if attendance_ids:
+#         attendance_id = attendance_ids[-1]  # any valid one will do for the link
+#         has_exit_report = ExitReport.query.filter(ExitReport.attendance_id.in_(attendance_ids)).first() is not None
+
+#     return render_template(
+#         'attendance.html',
+#         name=name,
+#         has_exit_report=has_exit_report,
+#         attendance_id=attendance_id
+#     )
 @views.route('/attendance')
 @login_required
 def attendance_form():
@@ -115,24 +144,19 @@ def attendance_form():
     user_id = current_user.id
     name = current_user.first_name
 
-    # Get all today's attendance records for the user
-    attendances = Attendance.query.filter_by(user_id=user_id, date=today.strftime('%Y-%m-%d')).all()
-    attendance_ids = [a.id for a in attendances]
+    attendances = Attendance.query.filter_by(user_id=user_id, date=today).all()
+    attendance_id = attendances[-1].id if attendances else None
+    attendance = attendances[-1] if attendances else None
 
-    # Check if any exit report exists for these attendance IDs
-    has_exit_report = False
-    attendance_id = None
-
-    if attendance_ids:
-        attendance_id = attendance_ids[-1]  # any valid one will do for the link
-        has_exit_report = ExitReport.query.filter(ExitReport.attendance_id.in_(attendance_ids)).first() is not None
 
     return render_template(
         'attendance.html',
         name=name,
-        has_exit_report=has_exit_report,
-        attendance_id=attendance_id
+        attendance_id=attendance_id,
+            attendance=attendance
+
     )
+
 
 
 # attendance submission route
@@ -251,7 +275,9 @@ def submit_attendance():
 
     # Exit logic
     elif entry_exit == 'exit' and user_attendance:
-        
+        if user_attendance and not user_attendance.exit_report_submitted:
+                flash("You must complete the exit report before submitting exit attendance.", "warning")
+                return redirect(url_for('views.attendance_form'))
 
         site_name = request.form.get('site_name')
         try:
@@ -1003,7 +1029,7 @@ def approve_compoff(attendance_id):
 
     if attendance.compoff_pending:
         attendance.compoff = attendance.compoff_requested
-        attendance.compoff_requested = 0
+        # attendance.compoff_requested = 0
         attendance.compoff_pending = False
         attendance.approved_by_id = current_user.id
         db.session.commit()
@@ -1039,8 +1065,8 @@ def reject_compoff(attendance_id):
     if attendance.compoff_pending:
         attendance.compoff = 0
         attendance.compoff_pending = False
-        attendance.compoff_requested = 0
-        attendance.approved_by_id = None
+        # attendance.compoff_requested = 0
+        attendance.approved_by_id = current_user.id
         db.session.commit()
 
         # Format the email
@@ -2247,6 +2273,7 @@ def exit_report_form(attendance_id):
         # attendance.exit_time = now.time().replace(microsecond=0)
         # attendance.exit_location = exit_location
         # attendance.calculate_comp_off()
+        attendance.exit_report_submitted = True
 
         try:
             db.session.commit()
