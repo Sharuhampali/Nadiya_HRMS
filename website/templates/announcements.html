@@ -466,7 +466,8 @@
                            class="read-status-link">
                             <i class="fas fa-user-check"></i> View Read Status
                         </a>
-
+                            {% endif %}
+                            {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
                         <form method="POST"
                               action="{{ url_for('views.delete_announcement', announcement_id=announcement.id) }}"
                               class="delete-form"

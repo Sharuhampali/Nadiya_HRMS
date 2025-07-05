@@ -2329,5 +2329,3 @@ def exit_report_view(user_id, date):
         reports=reports
     )
 
-
-
