@@ -216,7 +216,7 @@ class AnnouncementAcknowledgment(db.Model):
 class EditRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     attendance_id = db.Column(db.Integer)  # 👈 Add this line
-    user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     requested_by = db.Column(db.String(120), nullable=False)
     entry_time = db.Column(db.Time, nullable=True)
     exit_time = db.Column(db.Time, nullable=True)
@@ -224,6 +224,8 @@ class EditRequest(db.Model):
     status = db.Column(db.String(20), default='pending')
     token = db.Column(db.String(64), unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', backref='edit_requests')
+
 
 class ExitReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)

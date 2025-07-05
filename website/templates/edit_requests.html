@@ -5,6 +5,7 @@
     <thead>
         <tr>
             <th>Request ID</th>
+            <th>Name</th>
             <th>User ID</th>
             <th>Requested By</th>
             <th>Entry</th>
@@ -18,19 +19,26 @@
         {% for req in requests %}
         <tr>
             <td>{{ req.id }}</td>
-            <td>{{req.first_name}}</td>
+            <td>{{req.user.first_name}}</td>
             <td>{{ req.user_id }}</td>
             <td>{{ req.requested_by }}</td>
             <td>{{ req.entry_time or "—" }}</td>
             <td>{{ req.exit_time or "—" }}</td>
             <td>{{ req.reason }}</td>
             <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>
-                <form action="{{ url_for('views.approve_edit_request', request_id=req.id) }}" method="post" style="display:inline-block;">
-                    <button class="btn btn-success btn-sm">Approve</button>
-                </form>
-                <button class="btn btn-danger btn-sm" onclick="openModal('{{ req.id }}')">Reject</button>
-            </td>
+          <td class="text-center">
+    <div class="btn-group" role="group" aria-label="Edit Request Actions">
+        <form action="{{ url_for('views.approve_edit_request', request_id=req.id) }}" method="post">
+            <button type="submit" class="btn btn-outline-success btn-sm">
+                <i class="fas fa-check-circle"></i> Approve
+            </button>
+        </form>
+        <button type="button" class="btn btn-outline-danger btn-sm" onclick="openModal('{{ req.id }}')">
+            <i class="fas fa-times-circle"></i> Reject
+        </button>
+    </div>
+</td>
+
         </tr>
 
         <!-- Modal -->
@@ -64,7 +72,7 @@
 }
 
 .modal-content {
-    background-color: #fff;
+    background-color: var(--bg-primary);
     margin: 10% auto;
     padding: 1.5rem;
     border-radius: 8px;

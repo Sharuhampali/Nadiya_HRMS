@@ -511,7 +511,7 @@ def approve_edit(token):
         return f"""
         Attendance record not found for ID {req.attendance_id}.<br><br>
         Requested Edit:<br>
-        Name: {req.first_name}<br>
+        Name: {req.user.first_name if req.user else 'Unknown'}<br>
         Entry: {req.entry_time}<br>
         Exit: {req.exit_time}<br>
         Reason: {req.reason}<br>
@@ -527,7 +527,7 @@ def approve_edit(token):
     db.session.commit()
 
     return f"""
-    ✅ Edit approved and applied for Attendance ID {req.attendance_id}.<br><br>
+    ✅ Edit approved and applied for {req.user.first_name}Attendance ID {req.attendance_id}.<br><br>
     New Entry Time: {attendance.entry_time}<br>
     New Exit Time: {attendance.exit_time}<br>
     Request ID: {req.id}
@@ -537,9 +537,10 @@ def approve_edit(token):
 @views.route('/edit_requests')
 @login_required
 def edit_requests():
-    if current_user.email != 'maneesh@nadiya.in':
+    if current_user.email not in ['maneesh@nadiya.in', 'hampalisharu@gmail.com']:
         flash("Unauthorized access.", "error")
         return redirect(url_for('views.home'))
+
 
     pending_requests = EditRequest.query.filter_by(status='pending').order_by(EditRequest.created_at.desc()).all()
     return render_template('edit_requests.html', requests=pending_requests)
@@ -575,7 +576,7 @@ def approve_edit_request(request_id):
         subject="Attendance Edit Request Approved",
         body=(
             f"Hello,\n\n"
-            f"Your request to edit attendance ID {req.attendance_id} has been approved.\n\n"
+            f"Your request to edit {req.user.first_name}'s attendance has been approved.\n\n"
             f"New Entry Time: {attendance.entry_time.strftime('%H:%M') if attendance.entry_time else '—'}\n"
             f"New Exit Time: {attendance.exit_time.strftime('%H:%M') if attendance.exit_time else '—'}\n\n"
             f"Best regards,\nHR Team"
@@ -606,7 +607,7 @@ def reject_edit_request(request_id):
         subject="Attendance Edit Request Rejected",
         body=(
             f"Hello,\n\n"
-            f"Your request to edit attendance ID {req.attendance_id} has been rejected.\n\n"
+            f"Your request to edit {req.user.first_name}'s attendance has been rejected.\n\n"
             f"Remarks: {remarks}\n\n"
             f"Best regards,\nHR Team"
         )
