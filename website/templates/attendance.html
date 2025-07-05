@@ -353,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 warning.innerHTML = `
                     <strong>Exit Report Required:</strong><br>
                     You must complete your Exit Report before submitting exit attendance.<br>
-                    <a href="${exitReportUrl}" class="btn btn-sm btn-warning mt-2">Fill Exit Report</a>
+            <button type="button" class="btn btn-sm btn-warning mt-2" onclick="window.location.href='${exitReportUrl}'">Fill Exit Report</button>
                 `;
                 form.appendChild(warning);
             }

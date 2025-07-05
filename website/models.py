@@ -112,14 +112,28 @@ class Attendance(db.Model):
 
         if extra_time and extra_time.total_seconds() > 0:
             hours = extra_time.total_seconds() / 3600
+            user = User.query.get(self.user_id)
+
+            # Special condition for support@nadiya.in
+            if user and user.email == "support@nadiya.in":
+                if hours >= 6.5:
+                    self.compoff_requested = 1
+                    self.compoff_pending = True
+                elif hours >= 3:
+                    self.compoff_requested = 0.5
+                    self.compoff_pending = True
+                return self.compoff_requested  # ✅ prevent falling through to the general case
+
+            # General comp off rules
             if hours >= 8.5:
                 self.compoff_requested = 1
                 self.compoff_pending = True
             elif hours >= 4:
                 self.compoff_requested = 0.5
                 self.compoff_pending = True
-        # self.compoff remains untouched until approved
+
         return self.compoff_requested
+
 
 
 
@@ -230,3 +244,4 @@ class ExitReport(db.Model):
 
     user = db.relationship('User', backref='exit_reports')
     attendance = db.relationship('Attendance', backref='exit_report')
+ 

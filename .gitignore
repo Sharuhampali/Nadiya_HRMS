@@ -2,3 +2,4 @@
 website/__pycache__
 website/database.db
 .env.local
+instance/database.db

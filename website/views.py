@@ -64,7 +64,7 @@ ROLES_HIERARCHY = {
 
 #Home Route - admin and user home views
 @views.route('/', methods=['GET', 'POST'])
-@login_required
+@login_required 
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in' :
@@ -104,7 +104,6 @@ geoLoc = Nominatim(user_agent="hrms-app")
 def attendance_category():
     return render_template('attendance_category.html', user=current_user)
 
-
 @views.route('/attendance')
 @login_required
 def attendance_form():
@@ -116,24 +115,23 @@ def attendance_form():
     user_id = current_user.id
     name = current_user.first_name
 
-    # Get all attendance records for this user today
+    # Get all today's attendance records for the user
     attendances = Attendance.query.filter_by(user_id=user_id, date=today.strftime('%Y-%m-%d')).all()
+    attendance_ids = [a.id for a in attendances]
 
-    # Check if any of today's attendances has an associated exit report
-    attendance_ids = [att.id for att in attendances]
-    has_exit_report = (
-        ExitReport.query.filter(ExitReport.attendance_id.in_(attendance_ids)).first() is not None
-        if attendance_ids else False
-    )
+    # Check if any exit report exists for these attendance IDs
+    has_exit_report = False
+    attendance_id = None
 
-    # Use the latest attendance_id for the Exit Report redirect URL
-    latest_attendance_id = attendances[-1].id if attendances else None
+    if attendance_ids:
+        attendance_id = attendance_ids[-1]  # any valid one will do for the link
+        has_exit_report = ExitReport.query.filter(ExitReport.attendance_id.in_(attendance_ids)).first() is not None
 
     return render_template(
         'attendance.html',
         name=name,
         has_exit_report=has_exit_report,
-        attendance_id=latest_attendance_id
+        attendance_id=attendance_id
     )
 
 
@@ -244,7 +242,7 @@ def submit_attendance():
             entry_location=entry_address,
             user_id=user_id,
             entry_time=now_time.replace(microsecond=0),
-            date=today.strftime("%Y-%m-%d"),
+            date=today,
             day=now.strftime('%A'),
             reason=reason,
             site_name_e=site_name
@@ -301,7 +299,7 @@ def submit_attendance():
     try:
         db.session.commit()
         # if( entry_exit == 'exit'):
-            #  return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
+        #      return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
         return redirect(url_for('views.home'))
     except Exception as e:
         print(e)
