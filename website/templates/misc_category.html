@@ -220,46 +220,42 @@
 
     </div>
 </div>
-
-<!-- <script>
-    function confirmReset() {
-        const confirmationId = prompt("Please enter the confirmation ID:");
-        if (confirmationId === '24') {
-            window.location.href = "{{ url_for('views.reset_leaves') }}";
-        } else {
-            alert("Confirmation ID incorrect. Please try again.");
-        }
-    }
-</script> -->
 <script>
     function confirmReset(event) {
         event.preventDefault();
 
-        if (confirm("Are you sure you want to reset all leave balances and delete holiday data? This cannot be undone.")) {
-            // Trigger export download
-            const link = document.createElement('a');
-            link.href = '/export';
-            link.download = 'all_data_export.xlsx';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        const confirmed = confirm("⚠️ Are you absolutely sure you want to reset *all* leave balances and delete *all* holidays?\n\nThis action is IRREVERSIBLE and will affect ALL users.");
 
-            // Wait 1–2 seconds, then call reset endpoint
-            setTimeout(() => {
-                fetch('/reset_leaves', { method: 'POST' })
-                    .then(response => {
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        } else {
-                            alert("Reset request completed.");
-                        }
-                    })
-                    .catch(error => {
-                        alert("An error occurred while resetting: " + error);
-                    });
-            }, 2000); // Wait for download to begin before resetting
+        if (!confirmed) return;
+
+        const confirmationId = prompt("Enter confirmation ID to proceed:");
+        if (confirmationId !== '24') {
+            alert("❌ Incorrect confirmation ID. Reset aborted.");
+            return;
         }
+
+        // Trigger data export
+        const link = document.createElement('a');
+        link.href = '/export';
+        link.download = 'all_data_export.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Wait before triggering destructive action
+        setTimeout(() => {
+            fetch('/reset_leaves', { method: 'POST' })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        alert("✅ Reset operation completed.");
+                    }
+                })
+                .catch(error => {
+                    alert("⚠️ An error occurred while resetting: " + error);
+                });
+        }, 2000); // 2 second delay to allow download
     }
 </script>
-
 {% endblock %}

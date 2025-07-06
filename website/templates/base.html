@@ -380,6 +380,52 @@ select option {
         display: none !important;
     }
 }
+.user-profile {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-profile .profile-photo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1000;
+    min-width: 180px;
+}
+
+.dropdown-menu .dropdown-item {
+    padding: 0.5rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: var(--hover-bg);
+}
+.company-name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
     </style>
 </head>
 <body>
@@ -388,8 +434,18 @@ select option {
         <button class="menu-toggle" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </button>
-        <div class="header-logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Nadiya Logo">
+      <div class="header-logo d-flex align-items-center">
+  <a href="{{ url_for('views.home') }}" class="d-flex align-items-center text-decoration-none">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Nadiya Logo" style="height: 40px; margin-right: 10px;">
+    <div class="d-flex flex-column">
+      <span class="company-name" style="font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-left:20px"> NADIYA</span>
+      <span class="company-tagline" style="font-size: 0.5rem; letter-spacing: 0.1px; color: var(--text-muted); text-transform: uppercase;">design | deliver | delight</span>
+    </div>
+  </a>
+</div>
+
+
+
             
         </div>
         <div class="header-actions">
@@ -397,14 +453,36 @@ select option {
                 <i class="fas fa-moon" id="theme-icon"></i>
             </button>
             {% if current_user.is_authenticated %}
-            <div class="user-profile" onclick="window.location.href='/profile/{{ current_user.id }}'">
+            <!-- <div class="user-profile" onclick="window.location.href='/profile/{{ current_user.id }}'">
                 {% if current_user.photo %}
                     <img src="{{ current_user.photo }}" alt="Profile Photo" class="profile-photo">
                 {% else %}
                     <img src="{{ url_for('static', filename='images.png') }}" alt="Profile">
                 {% endif %}
            
-            </div>
+            </div> -->
+            <div class="user-profile dropdown">
+    <div class="dropdown-toggle" id="profileDropdownToggle" onclick="toggleProfileDropdown()">
+        {% if current_user.photo %}
+            <img src="{{ current_user.photo }}" alt="Profile Photo" class="profile-photo">
+        {% else %}
+            <img src="{{ url_for('static', filename='images.png') }}" alt="Profile">
+        {% endif %}
+    </div>
+    <div class="dropdown-menu" id="profileDropdownMenu">
+        <a class="dropdown-item" href="/profile/{{ current_user.id }}">
+            <i class="fas fa-user"></i> Profile
+        </a>
+       <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">
+    <i class="fas fa-key"></i> Change Password
+</a>
+
+        <a class="dropdown-item" href="/logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
             {% endif %}
         </div>
     </header>
@@ -448,9 +526,9 @@ select option {
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="/who" class="nav-link">
+                    <a href="/who_output" class="nav-link">
                         <i class="fas fa-user-clock"></i>
-                        <span>Employee Reports</span>
+                        <span>My Reports</span>
                     </a>
                 </div>
                 {% endif %}
@@ -756,6 +834,21 @@ select option {
     div.textContent = message;
     document.body.prepend(div);
   }
+  function toggleProfileDropdown() {
+    const menu = document.getElementById('profileDropdownMenu');
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    document.addEventListener('click', closeProfileDropdown);
+}
+
+function closeProfileDropdown(e) {
+    const dropdown = document.getElementById('profileDropdownMenu');
+    const toggle = document.getElementById('profileDropdownToggle');
+    if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
+        dropdown.style.display = 'none';
+        document.removeEventListener('click', closeProfileDropdown);
+    }
+}
+
     </script>
     {% block scripts %}{% endblock %}
 </body>

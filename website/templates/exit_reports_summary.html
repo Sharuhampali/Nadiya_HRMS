@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-3">Exit Reports Summary</h2>
-    <p class="text-muted">Only users you're authorized to view will be listed below.</p>
+    <p style="color:var(--text-secondary)">Only users you're authorized to view will be listed below.</p>
 
     {% if user_reports %}
         {% for user, reports in user_reports.items() %}

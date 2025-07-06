@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="alert alert-danger">
+    <h4 class="alert-heading">Dangerous Operation!</h4>
+    <p>This action will:</p>
+    <ul>
+      <li>Set <strong>all comp-off and leave balances to zero</strong></li>
+      <li><strong>Delete all holidays</strong></li>
+    </ul>
+    <hr>
+    <p>If you're absolutely sure, type <strong>RESET</strong> below and click confirm.</p>
+  </div>
+
+  <form method="POST">
+    <div class="mb-3">
+      <label for="confirm_reset" class="form-label">Type <code>RESET</code> to confirm:</label>
+      <input type="text" name="confirm_reset" id="confirm_reset" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-danger">Confirm Reset</button>
+    <a href="{{ url_for('views.home') }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

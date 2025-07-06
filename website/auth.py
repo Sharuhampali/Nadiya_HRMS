@@ -159,18 +159,54 @@ def google_callback():
     return redirect(url_for('views.home'))
 from flask import session
 
+# @auth.route('/change-password', methods=['GET', 'POST'])
+# def change_password():
+#     from werkzeug.security import generate_password_hash
+
+#     user_id = session.get('temp_user_id')
+#     if not user_id:
+#         flash("Session expired. Please log in again.", "error")
+#         return redirect(url_for('auth.login'))
+
+#     user = User.query.get(user_id)
+#     if not user:
+#         flash("User not found.", "error")
+#         return redirect(url_for('auth.login'))
+
+#     if request.method == 'POST':
+#         new_password = request.form.get('new_password')
+#         confirm_password = request.form.get('confirm_password')
+
+#         if not new_password or not confirm_password:
+#             flash("Please fill out both fields.", "error")
+#         elif new_password != confirm_password:
+#             flash("Passwords do not match.", "error")
+#         elif new_password == "1234567":
+#             flash("You must choose a stronger password.", "error")
+#         else:
+#             user.password = generate_password_hash(new_password)
+#             db.session.commit()
+#             session.pop('temp_user_id', None)
+#             flash("Password updated. Please log in again.", "success")
+#             return redirect(url_for('auth.login'))
+
+#     return render_template("change_password.html")
+
+
 @auth.route('/change-password', methods=['GET', 'POST'])
 def change_password():
     from werkzeug.security import generate_password_hash
 
-    user_id = session.get('temp_user_id')
-    if not user_id:
-        flash("Session expired. Please log in again.", "error")
-        return redirect(url_for('auth.login'))
+    user = None
+    if current_user.is_authenticated:
+        user = User.query.get(current_user.id)
+    else:
+        user_id = session.get('temp_user_id')
+        if user_id:
+            user = User.query.get(user_id)
 
-    user = User.query.get(user_id)
     if not user:
-        flash("User not found.", "error")
+        flash("Session expired or user not found. Please log in again.", "error")
         return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
@@ -183,11 +219,30 @@ def change_password():
             flash("Passwords do not match.", "error")
         elif new_password == "1234567":
             flash("You must choose a stronger password.", "error")
+        elif not is_strong_password(new_password):
+            flash("Password must be at least 7 characters long and include an uppercase letter, a lowercase letter, a digit, and a special character.", "error")
         else:
             user.password = generate_password_hash(new_password)
             db.session.commit()
             session.pop('temp_user_id', None)
-            flash("Password updated. Please log in again.", "success")
-            return redirect(url_for('auth.login'))
+            flash("Password updated successfully.", "success")
+            return redirect(url_for('views.home'))
 
     return render_template("change_password.html")
+
+
+
+import re
+
+def is_strong_password(password):
+    if len(password) < 7:
+        return False
+    if not re.search(r"[A-Z]", password):
+        return False
+    if not re.search(r"[a-z]", password):
+        return False
+    if not re.search(r"[0-9]", password):
+        return False
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False
+    return True

@@ -632,7 +632,7 @@ def leaves_category():
 # def approve_leave(leave_id):
 #     leave = Leave.query.get(leave_id)
 #     if not leave:
-#         flash("Leave request not found.", category='error')
+#         flash("Leave request not found.", category='error')c
 #         return redirect(url_for('views.home'))
 
 #     if leave.approved or leave.rejected:
@@ -880,38 +880,78 @@ def approved_leaves():
     approved_leaves = Leave.query.filter_by(user_id=current_user.id, ).all()
     return render_template('approved_leaves.html', leaves=approved_leaves)
 
+# @views.route('/reset_leaves', methods=['GET', 'POST'])
+# @login_required
+# def reset_leaves():
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in':
+#         flash("You do not have permission to reset leaves.", category='error')
+#         return redirect(url_for('views.home'))
+
+#     users = User.query.all()
+#     for user in users:
+#         attendances = Attendance.query.filter_by(user_id=user.id).all()
+
+#         # Reset compoff for each attendance record
+#         for attendance in attendances:
+#             attendance.compoff = 0
+
+#     for user in users:
+#         e = min(10, 15 - user.earned)
+
+#     for user in users:
+#         user.medic = 0
+#         user.pay = 0
+#         user.earned = 0 - e
+#         # Add other leave types if applicable
+
+#     # Delete all contents of the Holiday table
+#     holidays = Holiday.query.all()
+#     for holiday in holidays:
+#         db.session.delete(holiday)
+
+#     db.session.commit()
+#     flash("All users' leave counts have been reset to zero, and all holidays have been deleted.", category='success')
+#     return redirect(url_for('views.home'))
 @views.route('/reset_leaves', methods=['GET', 'POST'])
 @login_required
 def reset_leaves():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in':
+    # Only allow extremely specific users
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
         flash("You do not have permission to reset leaves.", category='error')
         return redirect(url_for('views.home'))
 
-    users = User.query.all()
-    for user in users:
-        attendances = Attendance.query.filter_by(user_id=user.id).all()
+    # Require POST confirmation via a form
+    if request.method == 'POST':
+        confirm = request.form.get('confirm_reset')
+        if confirm != 'RESET':
+            flash("Reset not confirmed. Type 'RESET' to confirm.", category='warning')
+            return redirect(url_for('views.reset_leaves'))
 
-        # Reset compoff for each attendance record
-        for attendance in attendances:
-            attendance.compoff = 0
+        # Proceed with irreversible actions
+        users = User.query.all()
 
-    for user in users:
-        e = min(10, 15 - user.earned)
+        # Reset compoff in attendance
+        for user in users:
+            for attendance in Attendance.query.filter_by(user_id=user.id).all():
+                attendance.compoff = 0
 
-    for user in users:
-        user.medic = 0
-        user.pay = 0
-        user.earned = 0 - e
-        # Add other leave types if applicable
+        # Reset other leave counters
+        for user in users:
+            e = min(10, 15 - user.earned)
+            user.medic = 0
+            user.pay = 0
+            user.earned = 0 - e
 
-    # Delete all contents of the Holiday table
-    holidays = Holiday.query.all()
-    for holiday in holidays:
-        db.session.delete(holiday)
+        # Delete holidays
+        for holiday in Holiday.query.all():
+            db.session.delete(holiday)
 
-    db.session.commit()
-    flash("All users' leave counts have been reset to zero, and all holidays have been deleted.", category='success')
-    return redirect(url_for('views.home'))
+        db.session.commit()
+        flash("Leave counts reset and holidays deleted successfully.", category='success')
+        return redirect(url_for('views.home'))
+
+    return render_template('confirm_reset.html')
+
 
 #display user leave summary
 @views.route('/who1', methods=['GET','POST'])
@@ -2217,7 +2257,7 @@ def export_all_data():
 
     # Send the email
     msg = Message(subject="HRMS System Backup",
-                  recipients=["sumana@nadiya.in", "maneesh@nadiya.in","support@nafiya.in"])  
+                  recipients=["sumana@nadiya.in", "maneesh@nadiya.in","support@nadiya.in"])  
     msg.body = (
             f"Hello,\n\n"
             f"Attached is the latest backup of all system tables taken prior to the reset.\n"
