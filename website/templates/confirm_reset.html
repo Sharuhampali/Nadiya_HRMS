@@ -1,24 +1,338 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-  <div class="alert alert-danger">
-    <h4 class="alert-heading">Dangerous Operation!</h4>
-    <p>This action will:</p>
-    <ul>
-      <li>Set <strong>all comp-off and leave balances to zero</strong></li>
-      <li><strong>Delete all holidays</strong></li>
-    </ul>
-    <hr>
-    <p>If you're absolutely sure, type <strong>RESET</strong> below and click confirm.</p>
-  </div>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
 
-  <form method="POST">
-    <div class="mb-3">
-      <label for="confirm_reset" class="form-label">Type <code>RESET</code> to confirm:</label>
-      <input type="text" name="confirm_reset" id="confirm_reset" class="form-control" required />
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .warning-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .alert-danger {
+        background: rgba(220, 38, 38, 0.1);
+        border: 2px solid #dc2626;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+    }
+
+    .alert-heading {
+        color: #dc2626;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-heading i {
+        margin-right: 0.75rem;
+        font-size: 1.8rem;
+    }
+
+    .alert-danger p {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .alert-danger ul {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+
+    .alert-danger li {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .alert-danger hr {
+        border-color: rgba(220, 38, 38, 0.3);
+        margin: 1.5rem 0;
+    }
+
+    .form-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+        transition: all 0.3s ease;
+        font-family: 'Courier New', monospace;
+        text-align: center;
+        font-weight: 600;
+        letter-spacing: 2px;
+    }
+
+    .form-control:focus {
+        border-color: #dc2626;
+        outline: none;
+        background: var(--bg-primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        border: none;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-decoration: none;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-decoration: none;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-secondary:hover {
+        background: var(--text-muted);
+        color: white;
+        border-color: var(--text-muted);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .btn i {
+        margin-right: 0.5rem;
+    }
+
+    .confirmation-code {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .warning-container,
+        .form-container {
+            padding: 1.5rem;
+            margin: 0 -1rem 2rem -1rem;
+            border-radius: 0;
+        }
+
+        .alert-heading {
+            font-size: 1.3rem;
+        }
+
+        .alert-danger p {
+            font-size: 1rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .form-control {
+            padding: 0.875rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 0 0.5rem;
+        }
+
+        .warning-container,
+        .form-container {
+            padding: 1rem;
+        }
+
+        .alert-heading {
+            font-size: 1.2rem;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .alert-heading i {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-exclamation-triangle"></i> System Reset Confirmation</h1>
     </div>
-    <button type="submit" class="btn btn-danger">Confirm Reset</button>
-    <a href="{{ url_for('views.home') }}" class="btn btn-secondary ms-2">Cancel</a>
-  </form>
 </div>
+
+<div class="container">
+    <div class="warning-container">
+        <div class="alert alert-danger">
+            <h4 class="alert-heading">
+                <i class="fas fa-skull-crossbones"></i>
+                Dangerous Operation!
+            </h4>
+            <p>This action will permanently:</p>
+            <ul>
+                <li>Set <strong>all comp-off and leave balances to zero</strong></li>
+                <li><strong>Delete all holidays</strong> from the system</li>
+                <li><strong>Reset all employee leave records</strong></li>
+            </ul>
+            <hr>
+            <p class="mb-0">
+                If you're absolutely sure, type <span class="confirmation-code">RESET</span> below and click confirm.
+                <strong>This action cannot be undone!</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form method="POST">
+            <div class="form-group">
+                <label for="confirm_reset" class="form-label">
+                    <i class="fas fa-keyboard"></i> Type "RESET" to confirm:
+                </label>
+                <input type="text" 
+                       name="confirm_reset" 
+                       id="confirm_reset" 
+                       class="form-control" 
+                       placeholder="Type RESET here"
+                       required 
+                       autocomplete="off"
+                       spellcheck="false" />
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-bomb"></i> Confirm Reset
+                </button>
+                <a href="{{ url_for('views.home') }}" class="btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const input = document.getElementById('confirm_reset');
+    const submitBtn = form.querySelector('.btn-danger');
+
+    // Real-time validation
+    input.addEventListener('input', function() {
+        if (this.value.toUpperCase() === 'RESET') {
+            this.style.borderColor = '#dc2626';
+            this.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
+            submitBtn.disabled = false;
+        } else {
+            this.style.borderColor = 'var(--border-color)';
+            this.style.backgroundColor = 'var(--bg-secondary)';
+            submitBtn.disabled = true;
+        }
+    });
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        if (input.value.toUpperCase() !== 'RESET') {
+            e.preventDefault();
+            alert('Please type "RESET" exactly to confirm this dangerous operation.');
+            input.focus();
+            return false;
+        }
+
+        // Final confirmation
+        const confirmed = confirm('Are you absolutely sure? This will permanently delete all leave and holiday data!');
+        if (!confirmed) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Initialize button state
+    submitBtn.disabled = true;
+});
+</script>
 {% endblock %}

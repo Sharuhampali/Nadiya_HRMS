@@ -6,13 +6,19 @@
         color: white;
         padding: 2rem 0;
         margin-bottom: 2rem;
+        text-align: center;
     }
 
     .page-header h1 {
         font-size: 2rem;
         font-weight: 700;
         margin: 0;
-        text-align: center;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
     }
 
     .back-btn {
@@ -30,15 +36,51 @@
     }
 
     .back-btn:hover {
-        background: var(--purple);
+        background: #8b5cf6;
         color: white;
-        border-color: var(--purple);
+        border-color: #8b5cf6;
         transform: translateY(-2px);
         text-decoration: none;
     }
 
     .back-btn i {
         margin-right: 0.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 10px var(--shadow);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px var(--shadow);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #8b5cf6;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .table-container {
@@ -67,6 +109,7 @@
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 10px var(--shadow);
+        min-width: 600px;
     }
 
     .employee-table th {
@@ -86,6 +129,7 @@
         border-bottom: 1px solid var(--border-color);
         color: var(--text-primary);
         font-weight: 500;
+        vertical-align: middle;
     }
 
     .employee-table tbody tr:hover {
@@ -122,6 +166,8 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        display: inline-block;
+        min-width: 120px;
     }
 
     .role-director { background: #fee2e2; color: #dc2626; }
@@ -155,36 +201,6 @@
         margin-right: 0.5rem;
     }
 
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 2px 10px var(--shadow);
-    }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #8b5cf6;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
     .no-employees {
         text-align: center;
         padding: 3rem;
@@ -197,25 +213,74 @@
         opacity: 0.5;
     }
 
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-
     @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+
+        .table-container {
+            padding: 1rem;
+            margin: 0 -1rem;
+            border-radius: 0;
+        }
+
+        .employee-table {
+            min-width: 500px;
+        }
+
         .employee-table th,
         .employee-table td {
             padding: 0.75rem 0.5rem;
             font-size: 0.9rem;
         }
-        
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
+
+        .employee-name {
+            font-size: 1rem;
         }
-        
-        .page-header h1 {
-            font-size: 1.5rem;
+
+        .role-badge {
+            min-width: 100px;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .employee-table {
+            min-width: 400px;
+        }
+
+        .employee-table th,
+        .employee-table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        .employee-id {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .role-badge {
+            min-width: 80px;
+            font-size: 0.75rem;
         }
     }
 </style>
@@ -237,7 +302,7 @@
                 <div class="stat-number">{{ user|length }}</div>
                 <div class="stat-label">Total Employees</div>
             </div>
-           
+        
         </div>
 
         <div class="table-container">
@@ -245,7 +310,7 @@
             <table class="employee-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                  
                         <th>Employee Name</th>
                         <th>Role</th>
                         <th>Actions</th>
@@ -254,9 +319,7 @@
                 <tbody>
                     {% for employee in user %}
                     <tr>
-                        <td>
-                            <span class="employee-id">{{ employee.id }}</span>
-                        </td>
+                        
                         <td>
                             <span class="employee-name">{{ employee.first_name }}</span>
                         </td>

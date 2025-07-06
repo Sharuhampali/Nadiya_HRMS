@@ -2361,7 +2361,7 @@ def attendance_table_mgr():
     )
 
     return render_template(
-        'attendance_table.html',
+        'attendance_table_mgr.html',
         attendances=attendances,
         target_date=target_date,
         prev_date=prev_date.date if prev_date else None,

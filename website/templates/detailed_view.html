@@ -42,8 +42,12 @@
                
                 <td class="x"><strong>Main Entry</strong></td>
                 <td class="x">{{ attendance.entry_time.strftime('%H:%M') if attendance.entry_time else '-' }}</td>
-                <td class="x">{{ attendance.entry_location or '-' }}</td>
-                <td class="x">{{ attendance.site_name_e or '-' }}</td>
+ <td class = "x">
+                            {% if attendance.entry_location %}
+                                <a href="{{ attendance.entry_location | maps_url }}" class="location-link" target="_blank" style="color:white;">{{ attendance.entry_location | extract_area }}</a>
+                            {% else %}-{% endif %}
+                        </td>                     <td class="x">{{ attendance.site_name_e or '-' }}</td>
+
                 <td class="x">{{ attendance.remarks or '-' }}</td>
 
               </tr>
@@ -55,7 +59,11 @@
          
                 <td class="text-capitalize">{{ log.entry_type.replace('_', ' ') }}</td>
                 <td>{{ log.time.strftime('%H:%M') }}</td>
-                <td>{{ log.location }}</td>
+                  <td>
+                            {% if log.location %}
+                                <a href="{{ log.location | maps_url }}" class="location-link" target="_blank">{{ log.location | extract_area }}</a>
+                            {% else %}-{% endif %}
+                        </td>
                 <td>{{ log.site or '-' }}</td>
                 <td>{{ log.remarks or '-' }}</td>
               </tr>
@@ -73,8 +81,12 @@
                     <span class="text-muted">Not recorded</span>
                   {% endif %}
                 </td>
-                <td class="x">{{ attendance.exit_location or '-' }}</td>
-                <td class="x">{{ attendance.site_name or '-' }}</td>
+  <td class = "x">
+                            {% if attendance.exit_location %}
+                                <a href="{{ attendance.exit_location | maps_url }}" class="location-link" target="_blank"style="color:white;">{{ attendance.exit_location | extract_area }}</a>
+                            {% else %}-{% endif %}
+                        </td>           
+                             <td class="x">{{ attendance.site_name or '-' }}</td>
                 <td class="x">{{ attendance.remarks or '-' }}</td>
 
               </tr>
@@ -89,9 +101,10 @@
         </table>
       </div>
 
-      <a href="{{ url_for('views.attendance_table') }}" class="btn btn-secondary mt-3" style="background: green">
-        Back to Attendance
-      </a>
+     <button class="btn btn-secondary mt-3" style="background: green" onclick="history.back();">
+  Back 
+</button>
+
     </div>
   </div>
 </div>

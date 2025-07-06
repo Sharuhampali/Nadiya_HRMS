@@ -14,14 +14,6 @@
         margin: 0;
         text-align: center;
     }
-    .table thead th:nth-child(15),
-.table tbody td:nth-child(15) {
-    min-width: 200px;
-    max-width: 300px;
-    word-wrap: break-word;
-    white-space: normal;
-}
-
 .search-container {
         background: var(--bg-primary);
         padding: 1.5rem;
@@ -536,7 +528,7 @@
 
 <div class="page-header">
     <div class="container">
-        <h1><i class="fas fa-table"></i> My Attendance Records</h1>
+        <h1><i class="fas fa-table"></i> Attendance Records</h1>
     </div>
 </div>
 
@@ -552,6 +544,8 @@
         </div>
     </div>
 
+    <div id="current-day-block">
+        <div class="day-header">Records for {{ target_date.strftime('%Y-%m-%d') }}</div>
         
         <!-- Desktop Table View -->
         <div class="table-container">
@@ -575,7 +569,7 @@
                         <th>Reason</th>
                         <th>View</th>
                         <th>Report</th>
-                  
+                      
                     </tr>
                 </thead>
                 <tbody>
@@ -616,7 +610,7 @@
                         <td>
                             <a href="{{ url_for('views.exit_report_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
                         </td>
-                        
+                     
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -706,7 +700,7 @@
                 <div class="card-actions">
                     <a href="{{ url_for('views.detailed_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
                     <a href="{{ url_for('views.exit_report_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
-                    
+                   
                 </div>
             </div>
             {% endfor %}
@@ -718,6 +712,27 @@
         </div>
     </div>
     
+    <div class="navigation-buttons">
+        {% if prev_date %}
+            <a class="nav-btn" href="{{ url_for('views.attendance_table_mgr', date=prev_date) }}">
+                <i class="fas fa-chevron-left"></i> Previous Day
+            </a>
+        {% else %}
+            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">
+                <i class="fas fa-chevron-left"></i> Previous Day
+            </span>
+        {% endif %}
+        {% if next_date %}
+            <a class="nav-btn" href="{{ url_for('views.attendance_table_mgr', date=next_date) }}">
+                Next Day <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">
+                Next Day <i class="fas fa-chevron-right"></i>
+            </span>
+        {% endif %}
+    </div>
+</div>
 
 
 <script>

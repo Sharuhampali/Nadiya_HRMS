@@ -14,8 +14,7 @@
         margin: 0;
         text-align: center;
     }
-
-    .search-container {
+.search-container {
         background: var(--bg-primary);
         padding: 1.5rem;
         border-radius: 12px;
@@ -124,11 +123,15 @@
         text-decoration: underline;
     }
 
+ 
+
     .status-badge {
         padding: 0.25rem 0.75rem;
         border-radius: 50px;
         font-size: 0.8rem;
         font-weight: 500;
+        display: inline-block;
+        min-width: 60px;
     }
 
     .status-late {
@@ -162,6 +165,7 @@
         color: white;
         border-color: var(--accent-primary);
         transform: translateY(-2px);
+        text-decoration: none;
     }
 
     .back-btn i {
@@ -181,23 +185,12 @@
         font-style: italic;
     }
 
-    @media (max-width: 768px) {
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        .table {
-            min-width: 1200px;
-        }
-        
-        .search-box {
-            max-width: 100%;
-        }
-    }
-      .day-header {
+    .day-header {
         font-size: 1.5rem;
         margin-bottom: 1rem;
         font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
     }
 
     .navigation-buttons {
@@ -205,21 +198,331 @@
         justify-content: space-between;
         margin-bottom: 1rem;
         margin-top: 1rem;
+        gap: 1rem;
     }
 
     .nav-btn {
         background: var(--bg-secondary);
         color: var(--text-primary);
         border: 1px solid var(--border-color);
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1.5rem;
         border-radius: 8px;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-weight: 500;
+        flex: 1;
+        text-align: center;
     }
 
     .nav-btn:hover {
         background: var(--accent-primary);
         color: white;
+        text-decoration: none;
+    }
+
+    .btn {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        border: 1px solid;
+        cursor: pointer;
+    }
+
+    .btn-outline-primary {
+        color: var(--accent-primary);
+        border-color: var(--accent-primary);
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--accent-primary);
+        color: white;
+    }
+
+    .btn-outline-warning {
+        color: #f59e0b;
+        border-color: #f59e0b;
+        background: transparent;
+    }
+
+    .btn-outline-warning:hover {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    /* Mobile Card Layout */
+    .mobile-card-container {
+        display: none;
+    }
+
+    .attendance-card {
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+    }
+
+    .card-date {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .card-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0;
+    }
+
+    .card-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .card-value {
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        text-align: right;
+        max-width: 60%;
+        word-break: break-word;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .card-actions .btn {
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    /* Modal Styles */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-dialog {
+        background: var(--bg-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+    }
+
+    .modal-footer {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .btn-primary {
+        background: var(--accent-primary);
+        color: white;
+        border: 1px solid var(--accent-primary);
+    }
+
+    .btn-primary:hover {
+        background: var(--accent-secondary);
+        border-color: var(--accent-secondary);
+    }
+
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-tertiary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .container {
+            padding: 0 0.5rem;
+        }
+
+        .search-box {
+            max-width: 100%;
+        }
+
+        .day-header {
+            font-size: 1.2rem;
+        }
+
+        .navigation-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            padding: 0.75rem;
+        }
+
+        /* Hide table, show cards on mobile */
+        .table-container {
+            display: none;
+        }
+
+        .mobile-card-container {
+            display: block;
+        }
+
+        .modal-dialog {
+            margin: 0;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+
+        .card-actions {
+            flex-direction: column;
+        }
+
+        .card-actions .btn {
+            flex: none;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table {
+            min-width: 1400px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            padding: 1rem 0;
+        }
+
+        .search-container {
+            padding: 1rem;
+            margin: 0 -0.5rem 1rem -0.5rem;
+            border-radius: 0;
+        }
+
+        .attendance-card {
+            margin: 0 -0.5rem 1rem -0.5rem;
+            border-radius: 0;
+        }
     }
 </style>
 
@@ -241,10 +544,10 @@
         </div>
     </div>
 
-   
-
     <div id="current-day-block">
         <div class="day-header">Records for {{ target_date.strftime('%Y-%m-%d') }}</div>
+        
+        <!-- Desktop Table View -->
         <div class="table-container">
             <table class="table" id="attendanceTable">
                 <thead>
@@ -277,9 +580,8 @@
                         <td>{{ a.day }}</td>
                         <td>{{ a.entry_time }}</td>
                         <td>{{ a.exit_time or '-' }}</td>
-                       <td>{{ a.total_time_worked() | format_timedelta }}</td>
-<td>{{ a.extra_time_worked() | format_timedelta }}</td>
-
+                        <td>{{ a.total_time_worked() | format_timedelta }}</td>
+                        <td>{{ a.extra_time_worked() | format_timedelta }}</td>
                         <td><span class="status-badge status-ontime">{{ a.compoff }}</span></td>
                         <td>
                             {% if a.entry_location %}
@@ -315,9 +617,7 @@
                                         data-user-id="{{ a.user_id }}"
                                         data-date="{{ a.date.strftime('%Y-%m-%d') }}"
                                         data-entry="{{ a.entry_time }}"
-                                        data-exit="{{ a.exit_time }}"
-                                        data-toggle="modal"
-                                        data-target="#editRequestModal">
+                                        data-exit="{{ a.exit_time }}">
                                     Request Edit
                                 </button>
                             {% else %}-{% endif %}
@@ -326,95 +626,232 @@
                     {% endfor %}
                 </tbody>
             </table>
+            
             <div id="noResults" class="no-results" style="display: none;">
                 <i class="fas fa-search"></i>
                 <p>No records found matching your search criteria.</p>
             </div>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-card-container" id="mobileCards">
+            {% for a in attendances %}
+            <div class="attendance-card">
+                <div class="card-header">
+                    <div class="card-name">{{ a.name }}</div>
+                    <div class="card-date">{{ a.date.strftime('%d-%m-%Y') }}</div>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Day:</span>
+                    <span class="card-value">{{ a.day }}</span>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Entry:</span>
+                    <span class="card-value">{{ a.entry_time }}</span>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Exit:</span>
+                    <span class="card-value">{{ a.exit_time or '-' }}</span>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Total Time:</span>
+                    <span class="card-value">{{ a.total_time_worked() | format_timedelta }}</span>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Extra Time:</span>
+                    <span class="card-value">{{ a.extra_time_worked() | format_timedelta }}</span>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Status:</span>
+                    <span class="card-value">
+                        {% if a.entry_time | is_late %}
+                            <span class="status-badge status-late">Late</span>
+                        {% else %}
+                            <span class="status-badge status-ontime">On Time</span>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="card-row">
+                    <span class="card-label">Shift:</span>
+                    <span class="card-value">{{ a.entry_time | determine_shift }}</span>
+                </div>
+                
+                {% if a.entry_location %}
+                <div class="card-row">
+                    <span class="card-label">Entry Location:</span>
+                    <span class="card-value">
+                        <a href="{{ a.entry_location | maps_url }}" class="location-link" target="_blank">{{ a.entry_location | extract_area }}</a>
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if a.exit_location %}
+                <div class="card-row">
+                    <span class="card-label">Exit Location:</span>
+                    <span class="card-value">
+                        <a href="{{ a.exit_location | maps_url }}" class="location-link" target="_blank">{{ a.exit_location | extract_area }}</a>
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if a.reason %}
+                <div class="card-row">
+                    <span class="card-label">Reason:</span>
+                    <span class="card-value">{{ a.reason }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-actions">
+                    <a href="{{ url_for('views.detailed_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                    <a href="{{ url_for('views.exit_report_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
+                    {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
+                        <button class="request-edit-btn btn btn-outline-warning btn-sm"
+                                data-attendance-id="{{ a.id }}"
+                                data-user-id="{{ a.user_id }}"
+                                data-date="{{ a.date.strftime('%Y-%m-%d') }}"
+                                data-entry="{{ a.entry_time }}"
+                                data-exit="{{ a.exit_time }}">
+                            Request Edit
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
             
+            <div id="noResultsMobile" class="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <p>No records found matching your search criteria.</p>
+            </div>
         </div>
     </div>
-     <div class="navigation-buttons" style="text-align:right;margin-bottom:1rem;">
+    
+    <div class="navigation-buttons">
         {% if prev_date %}
-            <a class="nav-btn" href="{{ url_for('views.attendance_table', date=prev_date) }}">Previous Day</a>
+            <a class="nav-btn" href="{{ url_for('views.attendance_table', date=prev_date) }}">
+                <i class="fas fa-chevron-left"></i> Previous Day
+            </a>
         {% else %}
-            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">Previous Day</span>
+            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">
+                <i class="fas fa-chevron-left"></i> Previous Day
+            </span>
         {% endif %}
         {% if next_date %}
-            <a class="nav-btn" href="{{ url_for('views.attendance_table', date=next_date) }}">Next Day</a>
+            <a class="nav-btn" href="{{ url_for('views.attendance_table', date=next_date) }}">
+                Next Day <i class="fas fa-chevron-right"></i>
+            </a>
         {% else %}
-            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">Next Day</span>
+            <span class="nav-btn" style="opacity:0.5;pointer-events:none;">
+                Next Day <i class="fas fa-chevron-right"></i>
+            </span>
         {% endif %}
     </div>
 </div>
 
-
 <!-- Modal for Edit Request -->
-<div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content" style="background: var(--bg-primary); color: var(--text-primary); border: 2px solid var(--border-color);">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editRequestModalLabel">Request Attendance Edit</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: var(--text-primary);">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form method="POST" action="{{ url_for('views.request_edit') }}">
-        <div class="modal-body">
-          <input type="hidden" name="attendance_id" id="edit-attendance-id" value="">
-          <input type="hidden" name="data_user_id" id="edit-user-id" value="">
-          <input type="hidden" name="date" id="edit-date" value="">
-          <div class="form-group">
-            <label for="edit-entry-time">New Entry Time</label>
-            <input type="time" class="form-control" id="edit-entry-time" name="entry_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
-          </div>
-          <div class="form-group">
-            <label for="edit-exit-time">New Exit Time</label>
-            <input type="time" class="form-control" id="edit-exit-time" name="exit_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
-          </div>
-          <div class="form-group">
-            <label for="edit-reason">Reason</label>
-            <textarea class="form-control" id="edit-reason" name="reason" rows="3" required
-                      style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);"></textarea>
-          </div>
+<div class="modal" id="editRequestModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 class="modal-title">Request Attendance Edit</h5>
+            <button type="button" class="close" onclick="closeModal()">
+                <span>&times;</span>
+            </button>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Submit Request</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        </div>
-      </form>
+        <form method="POST" action="{{ url_for('views.request_edit') }}">
+            <div class="modal-body">
+                <input type="hidden" name="attendance_id" id="edit-attendance-id" value="">
+                <input type="hidden" name="data_user_id" id="edit-user-id" value="">
+                <input type="hidden" name="date" id="edit-date" value="">
+                <div class="form-group">
+                    <label for="edit-entry-time">New Entry Time</label>
+                    <input type="time" class="form-control" id="edit-entry-time" name="entry_time">
+                </div>
+                <div class="form-group">
+                    <label for="edit-exit-time">New Exit Time</label>
+                    <input type="time" class="form-control" id="edit-exit-time" name="exit_time">
+                </div>
+                <div class="form-group">
+                    <label for="edit-reason">Reason</label>
+                    <textarea class="form-control" id="edit-reason" name="reason" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Search logic for current day's table
+    // Search logic for both table and cards
     const searchInput = document.getElementById('searchInput');
-    function filterTable() {
+    
+    function filterContent() {
         if (!searchInput) return;
         const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        // Filter table rows
         const table = document.getElementById('attendanceTable');
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.getElementsByTagName('tr'));
-        let visibleRows = 0;
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                row.style.display = '';
-                visibleRows++;
-            } else {
-                row.style.display = 'none';
+        if (table) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            let visibleTableRows = 0;
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleTableRows++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            const noResults = document.getElementById('noResults');
+            if (noResults) {
+                noResults.style.display = visibleTableRows === 0 && searchTerm !== '' ? 'block' : 'none';
             }
-        });
-        const noResults = document.getElementById('noResults');
-        if (noResults) noResults.style.display = visibleRows === 0 && searchTerm !== '' ? 'block' : 'none';
+        }
+        
+        // Filter mobile cards
+        const mobileCards = document.getElementById('mobileCards');
+        if (mobileCards) {
+            const cards = Array.from(mobileCards.getElementsByClassName('attendance-card'));
+            let visibleCards = 0;
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    card.style.display = '';
+                    visibleCards++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            const noResultsMobile = document.getElementById('noResultsMobile');
+            if (noResultsMobile) {
+                noResultsMobile.style.display = visibleCards === 0 && searchTerm !== '' ? 'block' : 'none';
+            }
+        }
     }
+    
     if (searchInput) {
-        searchInput.addEventListener('input', filterTable);
+        searchInput.addEventListener('input', filterContent);
     }
 
-    // Modal population for edit buttons
+    // Modal functionality
+    const modal = document.getElementById('editRequestModal');
     const buttons = document.querySelectorAll('.request-edit-btn');
+    
     buttons.forEach(button => {
         button.addEventListener('click', function () {
             document.getElementById('edit-attendance-id').value = this.getAttribute('data-attendance-id') || '';
@@ -422,10 +859,31 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit-date').value = this.getAttribute('data-date') || '';
             document.getElementById('edit-entry-time').value = (this.getAttribute('data-entry') || '').slice(0,5);
             document.getElementById('edit-exit-time').value = (this.getAttribute('data-exit') || '').slice(0,5);
+            
+            modal.classList.add('show');
         });
     });
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+});
+
+function closeModal() {
+    const modal = document.getElementById('editRequestModal');
+    modal.classList.remove('show');
+}
+
+// Keyboard shortcut for search
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.focus();
+    }
 });
 </script>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
