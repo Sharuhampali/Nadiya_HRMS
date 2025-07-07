@@ -2460,7 +2460,7 @@ def exit_report_form(attendance_id):
 
         try:
             db.session.commit()
-            flash("Exit report submitted successfully.", "success")
+            flash("Exit report saved. But attendance is still active — make sure to do a proper exit to complete it.", "warning")
         except Exception as e:
             db.session.rollback()
             print("Exit report error:", e)
