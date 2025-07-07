@@ -163,19 +163,52 @@
         font-size: 1.1rem;
     }
 
-    @media (max-width: 768px) {
-        .quick-actions {
-            grid-template-columns: 1fr;
-        }
-        
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .dashboard-header {
-            padding: 1.5rem;
-        }
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
     }
+
+    .date-info {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-info-table table {
+        font-size: 0.9rem;
+    }
+
+    .user-info-table th,
+    .user-info-table td {
+        display: block;
+        width: 100%;
+        padding: 0.3rem 0;
+    }
+
+    .user-info-table tr {
+        margin-bottom: 0.5rem;
+        display: block;
+        border-bottom: 1px solid white;
+    }
+}
+@media (max-width: 768px) {
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    .dashboard-header {
+        padding: 1.5rem 1rem;
+    }
+}
+
 </style>
 
 <div class="container-fluid">
@@ -201,7 +234,7 @@
                 </tr>
                  <tr>
                     <th><i class="fas fa-briefcase"></i>&nbsp;Employee ID</th>
-                    <td style="text-transform: capitalize;">{{ user.nad_id }}</td>
+                    <td style="text-transform: capitalize;">{{ user.nad_id  or '-'}}</td>
                 </tr>
             </table>
         </div>
