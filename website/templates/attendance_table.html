@@ -328,24 +328,24 @@
         text-align: center;
     }
 
-    /* Modal Styles */
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-    }
+    /* Modal Styles
+   .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+}
 
-    .modal.show {
-        display: flex;
-    }
+.modal.show {
+    display: flex;
+}
+
 
     .modal-dialog {
         background: var(--bg-primary);
@@ -370,7 +370,7 @@
         color: var(--text-primary);
         font-size: 1.2rem;
         font-weight: 600;
-    }
+    } */
 
     .close {
         background: none;
@@ -388,7 +388,7 @@
 
     .modal-body {
         padding: 1rem;
-    }
+    } 
 
     .form-group {
         margin-bottom: 1rem;
@@ -612,14 +612,12 @@
                         </td>
                         <td>
                             {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
-                                <button class="request-edit-btn btn btn-outline-warning btn-sm"
-                                        data-attendance-id="{{ a.id }}"
-                                        data-user-id="{{ a.user_id }}"
-                                        data-date="{{ a.date.strftime('%Y-%m-%d') }}"
-                                        data-entry="{{ a.entry_time }}"
-                                        data-exit="{{ a.exit_time }}">
-                                    Request Edit
-                                </button>
+                               <button class="request-edit-btn btn btn-outline-warning btn-sm"
+        data-toggle="modal"
+        data-target="#editRequestModal">
+    Request Edit
+</button>
+
                             {% else %}-{% endif %}
                         </td>
                     </tr>
@@ -711,19 +709,25 @@
                 <div class="card-actions">
                     <a href="{{ url_for('views.detailed_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
                     <a href="{{ url_for('views.exit_report_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
-                    {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
-                        <button class="request-edit-btn btn btn-outline-warning btn-sm"
-                                data-attendance-id="{{ a.id }}"
-                                data-user-id="{{ a.user_id }}"
-                                data-date="{{ a.date.strftime('%Y-%m-%d') }}"
-                                data-entry="{{ a.entry_time }}"
-                                data-exit="{{ a.exit_time }}">
-                            Request Edit
-                        </button>
+                   {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
+                  <button type="button" class="request-edit-btn btn btn-outline-warning btn-sm"
+    data-toggle="modal"
+    data-target="#editRequestModal"
+    data-attendance-id="{{ a.id }}"
+    data-user-id="{{ a.user_id }}"
+    data-date="{{ a.date.strftime('%Y-%m-%d') }}"
+data-entry="{{ a.entry_time.strftime('%H:%M') if a.entry_time else '' }}"
+data-exit="{{ a.exit_time.strftime('%H:%M') if a.exit_time else '' }}"
+>
+    Request Edit
+</button>
+
+
                     {% endif %}
                 </div>
             </div>
             {% endfor %}
+              
             
             <div id="noResultsMobile" class="no-results" style="display: none;">
                 <i class="fas fa-search"></i>
@@ -755,40 +759,42 @@
 </div>
 
 <!-- Modal for Edit Request -->
-<div class="modal" id="editRequestModal">
-    <div class="modal-dialog">
-        <div class="modal-header">
-            <h5 class="modal-title">Request Attendance Edit</h5>
-            <button type="button" class="close" onclick="closeModal()">
-                <span>&times;</span>
-            </button>
+<div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background: var(--bg-primary); color: var(--text-primary); border: 2px solid var(--border-color);">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editRequestModalLabel">Request Attendance Edit</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: var(--text-primary);">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" action="{{ url_for('views.request_edit') }}">
+        <div class="modal-body">
+          <input type="hidden" name="attendance_id" id="edit-attendance-id" value="">
+          <input type="hidden" name="data_user_id" id="edit-user-id" value="">
+          <input type="hidden" name="date" id="edit-date" value="">
+          <div class="form-group">
+            <label for="edit-entry-time">New Entry Time</label>
+            <input type="time" class="form-control" id="edit-entry-time" name="entry_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+          </div>
+          <div class="form-group">
+            <label for="edit-exit-time">New Exit Time</label>
+            <input type="time" class="form-control" id="edit-exit-time" name="exit_time" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+          </div>
+          <div class="form-group">
+            <label for="edit-reason">Reason</label>
+            <textarea class="form-control" id="edit-reason" name="reason" rows="3" required
+                      style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);"></textarea>
+          </div>
         </div>
-        <form method="POST" action="{{ url_for('views.request_edit') }}">
-            <div class="modal-body">
-                <input type="hidden" name="attendance_id" id="edit-attendance-id" value="">
-                <input type="hidden" name="data_user_id" id="edit-user-id" value="">
-                <input type="hidden" name="date" id="edit-date" value="">
-                <div class="form-group">
-                    <label for="edit-entry-time">New Entry Time</label>
-                    <input type="time" class="form-control" id="edit-entry-time" name="entry_time">
-                </div>
-                <div class="form-group">
-                    <label for="edit-exit-time">New Exit Time</label>
-                    <input type="time" class="form-control" id="edit-exit-time" name="exit_time">
-                </div>
-                <div class="form-group">
-                    <label for="edit-reason">Reason</label>
-                    <textarea class="form-control" id="edit-reason" name="reason" rows="3" required></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Submit Request</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            </div>
-        </form>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Search logic for both table and cards
@@ -848,42 +854,27 @@ document.addEventListener('DOMContentLoaded', function () {
         searchInput.addEventListener('input', filterContent);
     }
 
-    // Modal functionality
-    const modal = document.getElementById('editRequestModal');
+    // Modal population for edit buttons
     const buttons = document.querySelectorAll('.request-edit-btn');
-    
     buttons.forEach(button => {
-        button.addEventListener('click', function () {
-            document.getElementById('edit-attendance-id').value = this.getAttribute('data-attendance-id') || '';
-            document.getElementById('edit-user-id').value = this.getAttribute('data-user-id') || '';
-            document.getElementById('edit-date').value = this.getAttribute('data-date') || '';
-            document.getElementById('edit-entry-time').value = (this.getAttribute('data-entry') || '').slice(0,5);
-            document.getElementById('edit-exit-time').value = (this.getAttribute('data-exit') || '').slice(0,5);
-            
-            modal.classList.add('show');
-        });
-    });
-    
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
+       button.addEventListener('click', function () {
+    const entry = this.getAttribute('data-entry') || '';
+    const exit = this.getAttribute('data-exit') || '';
+    console.log("Entry time from button:", entry);
+    console.log("Exit time from button:", exit);
+
+    document.getElementById('edit-attendance-id').value = this.getAttribute('data-attendance-id') || '';
+    document.getElementById('edit-user-id').value = this.getAttribute('data-user-id') || '';
+    document.getElementById('edit-date').value = this.getAttribute('data-date') || '';
+    document.getElementById('edit-entry-time').value = entry;
+    document.getElementById('edit-exit-time').value = exit;
 });
 
-function closeModal() {
-    const modal = document.getElementById('editRequestModal');
-    modal.classList.remove('show');
-}
-
-// Keyboard shortcut for search
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.key === 'f') {
-        e.preventDefault();
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) searchInput.focus();
-    }
+    });
 });
 </script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Full version only -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
 {% endblock %}
