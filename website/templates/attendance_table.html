@@ -571,6 +571,7 @@
                         <th>Report</th>
                         <th>Edit</th>
                     </tr>
+
                 </thead>
                 <tbody>
                     {% for a in attendances %}
@@ -610,18 +611,29 @@
                         <td>
                             <a href="{{ url_for('views.exit_report_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
                         </td>
-                        <td>
-                            {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
-                               <button class="request-edit-btn btn btn-outline-warning btn-sm"
-        data-toggle="modal"
-        data-target="#editRequestModal">
-    Request Edit
-</button>
+<td>
+  {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
+    <button class="request-edit-btn btn btn-outline-warning btn-sm"
+            data-toggle="modal"
+            data-target="#editRequestModal"
+            data-attendance-id="{{ a.id }}"
+            data-user-id="{{ a.user_id }}"
+            data-date="{{ a.date.strftime('%Y-%m-%d') }}"
+            data-entry="{{ a.entry_time.strftime('%H:%M') if a.entry_time else '' }}"
+            data-exit="{{ a.exit_time.strftime('%H:%M') if a.exit_time else '' }}">
+      Request Edit
+    </button>
+  {% endif %}
 
-                            {% else %}-{% endif %}
-                        </td>
-                    </tr>
+</td>
+</tr>
                     {% endfor %}
+                    {% if not attendances %}
+                    <tr>
+                        <td colspan="18" class="text-center">No records found for this date.</td>
+                    </tr>
+                    {% endif %}
+
                 </tbody>
             </table>
             
@@ -710,17 +722,17 @@
                     <a href="{{ url_for('views.detailed_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Details</a>
                     <a href="{{ url_for('views.exit_report_view', user_id=a.user_id, date=a.date.strftime('%Y-%m-%d')) }}" class="btn btn-outline-primary btn-sm">View Report</a>
                    {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
-                  <button type="button" class="request-edit-btn btn btn-outline-warning btn-sm"
+                 <button class="request-edit-btn btn btn-outline-warning btn-sm"
     data-toggle="modal"
     data-target="#editRequestModal"
     data-attendance-id="{{ a.id }}"
     data-user-id="{{ a.user_id }}"
     data-date="{{ a.date.strftime('%Y-%m-%d') }}"
-data-entry="{{ a.entry_time.strftime('%H:%M') if a.entry_time else '' }}"
-data-exit="{{ a.exit_time.strftime('%H:%M') if a.exit_time else '' }}"
->
+    data-entry="{{ a.entry_time.strftime('%H:%M') if a.entry_time else '' }}"
+    data-exit="{{ a.exit_time.strftime('%H:%M') if a.exit_time else '' }}">
     Request Edit
 </button>
+
 
 
                     {% endif %}
@@ -856,24 +868,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Modal population for edit buttons
     const buttons = document.querySelectorAll('.request-edit-btn');
+
     buttons.forEach(button => {
-       button.addEventListener('click', function () {
-    const entry = this.getAttribute('data-entry') || '';
-    const exit = this.getAttribute('data-exit') || '';
-    console.log("Entry time from button:", entry);
-    console.log("Exit time from button:", exit);
-
-    document.getElementById('edit-attendance-id').value = this.getAttribute('data-attendance-id') || '';
-    document.getElementById('edit-user-id').value = this.getAttribute('data-user-id') || '';
-    document.getElementById('edit-date').value = this.getAttribute('data-date') || '';
-    document.getElementById('edit-entry-time').value = entry;
-    document.getElementById('edit-exit-time').value = exit;
-});
-
+        button.addEventListener('click', function () {
+            document.getElementById('edit-attendance-id').value = this.getAttribute('data-attendance-id') || '';
+            document.getElementById('edit-user-id').value = this.getAttribute('data-user-id') || '';
+            document.getElementById('edit-date').value = this.getAttribute('data-date') || '';
+            document.getElementById('edit-entry-time').value = (this.getAttribute('data-entry') || '').slice(0,5);
+            document.getElementById('edit-exit-time').value = (this.getAttribute('data-exit') || '').slice(0,5);
+        });
     });
 });
 </script>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Full version only -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 
