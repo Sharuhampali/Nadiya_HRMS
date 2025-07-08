@@ -209,6 +209,54 @@
     }
 }
 
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-dialog {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    padding: 1rem;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-body {
+    margin-top: 1rem;
+    color: var(--text-primary);
+}
+
+.close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
 </style>
 
 <div class="container-fluid">
@@ -253,11 +301,33 @@
             <div class="stat-number">{{ current_user.total_compoff }}</div>
             <div class="stat-label">Comp-off Days</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ 10 - current_user.pay | round(2) }}</div>
-            <div class="stat-label">Leave w/o Pay</div>
+         <div class="stat-card leave-hover-card"
+     onclick="showLeaveModal()"
+     style="cursor: pointer;">
+    <div class="stat-number">{{ leave_count | default(0) }}</div>
+    <div class="stat-label">Total Employees on Leave</div>
+</div>
+    </div>
+    <!-- Leave Modal -->
+<div class="modal" id="leaveModal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 class="modal-title">Employees on Leave Today</h5>
+            <button class="close" onclick="closeLeaveModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            {% if people_on_leave_today %}
+                <ul style="padding-left: 1rem;">
+                    {% for person in people_on_leave_today %}
+                        <li>{{ person.first_name }} {{ person.last_name }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No employees are on leave today.</p>
+            {% endif %}
         </div>
     </div>
+</div>
 
     <div class="quick-actions">
         <div class="quick-action-card attendance-card">
@@ -293,4 +363,22 @@
         </div>
     </div>
 </div>
+<script>
+function showLeaveModal() {
+    const modal = document.getElementById('leaveModal');
+    modal.style.display = 'flex';
+}
+
+function closeLeaveModal() {
+    document.getElementById('leaveModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function (event) {
+    const modal = document.getElementById('leaveModal');
+    if (event.target === modal) {
+        closeLeaveModal();
+    }
+});
+</script>
 {% endblock %}

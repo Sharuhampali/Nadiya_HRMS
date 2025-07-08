@@ -351,8 +351,26 @@
     resize: vertical;
     min-height: 80px;
 }
+.entry-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.entry-table th, .entry-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.entry-table thead {
+    background-color: var(--bg-secondary);
+    font-weight: bold;
+}
 
 </style>
+
 
 <div class="page-header">
     <div class="container">
@@ -382,9 +400,9 @@
 
     {% if leave_requests %}
         {% for leave in leave_requests | reverse %}
-            <div class="leave-request {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}" 
-                 data-status="{% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
-                
+           <div class="leave-request {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}" 
+     data-status="{% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
+
                 <div class="request-header">
                     <div class="employee-info">
                         <div class="employee-avatar">
@@ -392,10 +410,10 @@
                         </div>
                         <div class="employee-details">
                             <h4>{{ leave.user.first_name }}</h4>
-                            <span class="leave-type-badge">{{ leave.ltype }}</span>
+                            <span class="leave-type-badge">{{ leave.leave_entries[0].type if leave.leave_entries else '—' }}</span>
                         </div>
                     </div>
-                    
+
                     {% if leave.approved %}
                         <div class="status-badge status-approved">
                             <i class="fas fa-check-circle"></i> Approved by {{ leave.approved_by }}
@@ -407,35 +425,35 @@
                     {% endif %}
                 </div>
 
-                <div class="leave-details">
-                    <div class="leave-info">
-                        <div class="info-item">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span><strong>From:</strong> {{ leave.start_date }}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span><strong>To:</strong> {{ leave.end_date }}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-clock"></i>
-                            <span><strong>Duration:</strong> {{ leave.days }} day{{ 's' if leave.days > 1 else '' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-calendar-check"></i>
-                            <span><strong>Type:</strong> {{ leave.ltype }}</span>
-                        </div>
+              <div class="leave-details">
+    <table class="entry-table">
+        <thead>
+            <tr>
+                <th><i class="fas fa-calendar-alt"></i> Date</th>
+                <th><i class="fas fa-clock"></i> Duration</th>
+                <th><i class="fas fa-calendar-check"></i> Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in leave.leave_entries %}
+                <tr>
+                    <td>{{ entry.date }}</td>
+                    <td>{{ entry.duration }} day{{ 's' if entry.duration > 1 else '' }}</td>
+                    <td>{{ entry.type }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+                {% if leave.reason %}
+                    <div class="reason-section">
+                        <strong><i class="fas fa-comment"></i> Reason:</strong>
+                        <div class="reason-text">{{ leave.reason }}</div>
                     </div>
+                {% endif %}
 
-                    {% if leave.reason %}
-                        <div class="reason-section">
-                            <strong><i class="fas fa-comment"></i> Reason:</strong>
-                            <div class="reason-text">{{ leave.reason }}</div>
-                        </div>
-                    {% endif %}
-                </div>
-
-                  {% if not leave.approved and not leave.rejected %}
+                {% if not leave.approved and not leave.rejected %}
                     <div class="action-buttons">
                         <form class="approve-form" action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST" style="display: inline;">
                             <button type="submit" class="btn-approve">
@@ -465,12 +483,12 @@
         </div>
     {% endif %}
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filterTabs = document.querySelectorAll('.filter-tab');
     const leaveRequests = document.querySelectorAll('.leave-request');
 
-    // Handle filter tabs
     filterTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             filterTabs.forEach(t => t.classList.remove('active'));
@@ -482,7 +500,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Show remarks textarea when rejecting
     document.querySelectorAll('.show-remarks-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
@@ -492,19 +509,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Confirm approve/reject actions
     document.querySelectorAll('.btn-approve, .btn-reject').forEach(btn => {
         btn.addEventListener('click', function(e) {
-            // Skip confirmation if it's just the show-remarks toggle
             if (this.classList.contains('show-remarks-btn')) return;
-
             const action = this.classList.contains('btn-approve') ? 'approve' : 'reject';
             const confirmed = confirm(`Are you sure you want to ${action} this leave request?`);
-            if (!confirmed) {
-                e.preventDefault();
-            }
+            if (!confirmed) e.preventDefault();
         });
     });
 });
 </script>
+
 {% endblock %}

@@ -35,6 +35,8 @@ from .models import (
     announcement_user, ExitReport
 )
 from leave_calculator import calculate_initial_leaves
+from sqlalchemy import and_
+
 
 #########################################################################################################################################################
 
@@ -63,33 +65,138 @@ ROLES_HIERARCHY = {
 #########################################################################################################################################################
 
 #Home Route - admin and user home views
+# @views.route('/', methods=['GET', 'POST'])
+# @login_required 
+# def home():
+#     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in' :
+#         today = date.today()
+#         people_on_leave_today = Leave.query.filter(
+#         and_(
+#             Leave.approved == True,
+#             Leave.rejected != True,
+#             Leave.from_date <= today,
+#             Leave.to_date >= today
+#         )
+#         ).all()
+
+    
+    
+#         return render_template(
+#             "home.html",
+#             user=current_user,
+#             current_date=current_date,
+#             people_on_leave_today=people_on_leave_today,
+#         leave_count=len(people_on_leave_today)
+            
+#         )
+#     users_count = User.query.count()
+#     pending_leaves = Leave.query.filter(
+#                         (Leave.approved == False) | (Leave.approved == None),
+#                         (Leave.rejected == False) | (Leave.rejected == None)
+#                                             ).count()
+
+#     today_attendance = Attendance.query.filter_by(date=date.today()).count()
+#     announcements_count = Announcement.query.count()
+    
+#     today = date.today()
+#     people_on_leave_today = Leave.query.filter(
+#         and_(
+#             Leave.approved == True,
+#             Leave.rejected != True,
+#             Leave.start_date <= today,
+#             Leave.end_date >= today
+#         )
+#     ).all()
+
+
+    
+ 
+#     return render_template("admin_home.html", user=current_user, current_date= current_date, users_count=users_count,
+#             pending_leaves=pending_leaves,
+#             today_attendance=today_attendance,
+#             announcements_count=announcements_count,
+#             people_on_leave_today=people_on_leave_today,
+#         leave_count=len(people_on_leave_today))
+
 @views.route('/', methods=['GET', 'POST'])
 @login_required 
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in' :
-        
-    
+    today = date.today()
+
+    # For regular users
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
+        # Simple from_date / to_date logic
+        people_on_leave_today = Leave.query.filter(
+            and_(
+                Leave.approved == True,
+                Leave.rejected != True,
+                Leave.start_date <= today,
+                Leave.end_date >= today
+            )
+        ).all()
+        approved_leaves = Leave.query.filter(
+        Leave.approved == True
+    ).all()
+
+    # Now build a list of users who have any entry on today's date
+    people_on_leave_today = set()
+    for leave in approved_leaves:
+        try:
+            leave_data = json.loads(leave.leaves_data)
+            for entry in leave_data:
+                if entry.get('date') == today.strftime('%Y-%m-%d'):
+                    people_on_leave_today.add(leave.user)  # leave.user is the actual User object
+        except Exception as e:
+            print(f"Error parsing leave data: {e}")
+            continue
+
         return render_template(
             "home.html",
             user=current_user,
-            current_date=current_date
-            
+            current_date=current_date,
+            people_on_leave_today=people_on_leave_today,
+            leave_count=len(people_on_leave_today)
         )
+
+    # For Admins
     users_count = User.query.count()
     pending_leaves = Leave.query.filter(
-                        (Leave.approved == False) | (Leave.approved == None),
-                        (Leave.rejected == False) | (Leave.rejected == None)
-                                            ).count()
+        (Leave.approved == False) | (Leave.approved == None),
+        (Leave.rejected == False) | (Leave.rejected == None)
+    ).count()
 
-    today_attendance = Attendance.query.filter_by(date=date.today()).count()
+    today_attendance = Attendance.query.filter_by(date=today).count()
     announcements_count = Announcement.query.count()
-    
- 
-    return render_template("admin_home.html", user=current_user, current_date= current_date, users_count=users_count,
-            pending_leaves=pending_leaves,
-            today_attendance=today_attendance,
-            announcements_count=announcements_count)
+
+    approved_leaves = Leave.query.filter(
+        Leave.approved == True
+    ).all()
+
+    # Now build a list of users who have any entry on today's date
+    people_on_leave_today = set()
+    for leave in approved_leaves:
+        try:
+            leave_data = json.loads(leave.leaves_data)
+            for entry in leave_data:
+                if entry.get('date') == today.strftime('%Y-%m-%d'):
+                    people_on_leave_today.add(leave.user)  # leave.user is the actual User object
+        except Exception as e:
+            print(f"Error parsing leave data: {e}")
+            continue
+
+    return render_template(
+        "admin_home.html",
+        user=current_user,
+        current_date=current_date,
+        users_count=users_count,
+        pending_leaves=pending_leaves,
+        today_attendance=today_attendance,
+        announcements_count=announcements_count,
+        people_on_leave_today=list(people_on_leave_today),
+        leave_count=len(people_on_leave_today)
+    )
 
 #########################################################################################################################################################
 #Attendance Routes
@@ -996,9 +1103,29 @@ def who1_output():
     medic_sum = 0
     pay_sum = 0
 
+    # for leave in approved_leaves:
+    #     leave_data = json.loads(leave.leaves_data)
+    #     for entry in leave_data:
+    #         ltype = entry.get('type')
+    #         duration = float(entry.get('duration', 0))
+    #         if ltype == 'Earned':
+    #             earned_sum += duration
+    #         elif ltype == 'Medical/Sick':
+    #             medic_sum += duration
+    #         elif ltype == 'Leave w/o Pay':
+    #             pay_sum += duration
+    detailed_entries = []
+
     for leave in approved_leaves:
         leave_data = json.loads(leave.leaves_data)
         for entry in leave_data:
+            detailed_entries.append({
+                'type': entry.get('type'),
+                'date': entry.get('date'),
+                'duration': entry.get('duration'),
+                'reason': leave.reason,
+                'approved_by': leave.approved_by,
+            })
             ltype = entry.get('type')
             duration = float(entry.get('duration', 0))
             if ltype == 'Earned':
@@ -1009,7 +1136,16 @@ def who1_output():
                 pay_sum += duration
 
 
-    return render_template('who1_output.html', user=user, approved_leaves=approved_leaves, earned_sum=earned_sum, medic_sum=medic_sum, pay_sum=pay_sum)
+    return render_template(
+    'who1_output.html',
+    user=user,
+    approved_leaves=approved_leaves,
+    earned_sum=earned_sum,
+    medic_sum=medic_sum,
+    pay_sum=pay_sum,
+    detailed_entries=detailed_entries
+)
+# return render_template('who1_output.html', user=user, approved_leaves=approved_leaves, earned_sum=earned_sum, medic_sum=medic_sum, pay_sum=pay_sum)
 
 #manager view for leave requests
 @views.route('/leave_requests')
@@ -1023,9 +1159,16 @@ def leave_requests():
     if not subordinate_roles:
         flash("You do not have permission to view leave requests.", category='error')
         return redirect(url_for('views.home'))
-
+    
     # Fetch leave requests for users with subordinate roles
     leave_requests = Leave.query.join(User).filter(User.role.in_(subordinate_roles)).all()
+    for leave in leave_requests:
+        try:
+            leave.leave_entries = json.loads(leave.leaves_data)
+        except Exception as e:
+            print(f"Error parsing leave data for Leave ID {leave.id}: {e}")
+            leave.leave_entries = []
+
     return render_template('leave_requests.html', leave_requests=leave_requests)
 
 

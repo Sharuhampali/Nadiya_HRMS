@@ -210,17 +210,31 @@
 
     <div class="approved-leaves">
         <h2>Approved Leaves</h2>
-        {% if approved_leaves %}
-            {% for leave in approved_leaves %}
-                <div class="leave-entry">
-                    <div class="card-body">
-                        <p><strong>{{ leave.ltype }} Leave</strong> from <strong>{{ leave.start_date }}</strong> to <strong>{{ leave.end_date }}</strong> for <strong>{{ leave.days }} days</strong> - Approved by <strong>{{ leave.approved_by }}</strong></p>
-                        {% if leave.reason %}
-                            <p style="margin-top: 8px;"><strong>Reason:</strong> {{ leave.reason }}</p>
-                        {% endif %}
-                    </div>
-                </div>
+{% if detailed_entries %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Duration</th>
+                <th>Reason</th>
+                <th>Approved By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in detailed_entries %}
+                <tr>
+                    <td>{{ entry.date }}</td>
+                    <td>{{ entry.type }}</td>
+                    <td>{{ entry.duration }}</td>
+                    <td>{{ entry.reason or '-' }}</td>
+                    <td>{{ entry.approved_by or '-' }}</td>
+                </tr>
             {% endfor %}
+        </tbody>
+    </table>
+
+
         {% else %}
             <div class="no-leaves">
                 <i class="fas fa-calendar-times"></i>
