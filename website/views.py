@@ -324,6 +324,8 @@ def submit_attendance():
     #         db.session.commit()
     try:
         db.session.commit()
+        flash("Exit submitted successfully. Attendance marked for the day.", "success")
+
         # if( entry_exit == 'exit'):
         #      return redirect(url_for('views.exit_report_form', attendance_id=user_attendance.id))
         return redirect(url_for('views.home'))
