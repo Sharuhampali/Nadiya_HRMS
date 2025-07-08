@@ -2431,60 +2431,65 @@ def reset_password(token):
 
     return render_template('reset_password.html', token=token)
 
-@views.route('/export', methods=['POST', 'GET'])
+# @views.route('/export', methods=['POST', 'GET'])
+# @login_required
+# def export_all_data():
+#     output = BytesIO()
+
+#     with pd.ExcelWriter(output, engine='openpyxl') as writer:
+#         tables = {
+#             'Users': User,
+#             'Documents': Document,
+#             'Attendance': Attendance,
+#             'Leaves': Leave,
+#             'Holidays': Holiday,
+#             'Announcements': Announcement
+#         }
+
+#         for sheet_name, model in tables.items():
+#             query = model.query.all()
+#             data = [item.__dict__.copy() for item in query]
+#             for row in data:
+#                 row.pop('_sa_instance_state', None)
+#             df = pd.DataFrame(data)
+#             df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
+
+#     output.seek(0)
+
+#     # Send the email
+#     msg = Message(subject="HRMS System Backup",
+#                   recipients=["sumana@nadiya.in", "maneesh@nadiya.in","support@nadiya.in"])  
+#     msg.body = (
+#             f"Hello,\n\n"
+#             f"Attached is the latest backup of all system tables taken prior to the reset.\n"
+#             f"Please retain this copy for your reference or restoration if required.\n\n"
+#             f"Best regards,\n"
+#             f"HR Team"
+#         )
+
+#     msg.attach("all_data_export.xlsx", 
+#                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#                output.read())
+
+#     try:
+#         mail.send(msg)
+#         flash("Exported data and emailed backup successfully.", "success")
+#     except Exception as e:
+#         flash(f"Exported data, but failed to send email: {str(e)}", "warning")
+
+#     # Reset pointer to allow browser download too (optional)
+#     output.seek(0)
+#     return send_file(
+#         output,
+#         as_attachment=True,
+#         download_name="all_data_export.xlsx",
+#         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+#     )
+from .export_utils import export_all_data  # if you renamed it
+@views.route('/export', methods=['GET', 'POST'])
 @login_required
-def export_all_data():
-    output = BytesIO()
-
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        tables = {
-            'Users': User,
-            'Documents': Document,
-            'Attendance': Attendance,
-            'Leaves': Leave,
-            'Holidays': Holiday,
-            'Announcements': Announcement
-        }
-
-        for sheet_name, model in tables.items():
-            query = model.query.all()
-            data = [item.__dict__.copy() for item in query]
-            for row in data:
-                row.pop('_sa_instance_state', None)
-            df = pd.DataFrame(data)
-            df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
-
-    output.seek(0)
-
-    # Send the email
-    msg = Message(subject="HRMS System Backup",
-                  recipients=["sumana@nadiya.in", "maneesh@nadiya.in","support@nadiya.in"])  
-    msg.body = (
-            f"Hello,\n\n"
-            f"Attached is the latest backup of all system tables taken prior to the reset.\n"
-            f"Please retain this copy for your reference or restoration if required.\n\n"
-            f"Best regards,\n"
-            f"HR Team"
-        )
-
-    msg.attach("all_data_export.xlsx", 
-               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-               output.read())
-
-    try:
-        mail.send(msg)
-        flash("Exported data and emailed backup successfully.", "success")
-    except Exception as e:
-        flash(f"Exported data, but failed to send email: {str(e)}", "warning")
-
-    # Reset pointer to allow browser download too (optional)
-    output.seek(0)
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name="all_data_export.xlsx",
-        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+def export_route():
+    return export_all_data()
 
 #########################################################################################################################################################
 #functions
@@ -2764,54 +2769,3 @@ def exit_report_view(user_id, date):
         reports=reports
     )
 
-def send_announcement_reminders():
-    with current_app.app_context():
-        announcements = Announcement.query.all()
-        today = datetime.now().strftime("%d-%b-%Y")
-
-        for announcement in announcements:
-            recipients = announcement.recipients
-            acknowledged_ids = {ack.user_id for ack in announcement.acknowledgments}
-            unacknowledged_users = [u for u in recipients if u.id not in acknowledged_ids]
-
-            if not unacknowledged_users:
-                continue  # all acknowledged, no action needed
-
-            # 📩 Notify users who have not yet acknowledged
-            for user in unacknowledged_users:
-                send_email(
-                    to=user.email,
-                    subject="Reminder: Acknowledge Announcement",
-                    body=f"""
-Dear {user.first_name},
-
-You have not yet acknowledged the announcement titled: "{announcement.title}" posted on {announcement.date_posted.strftime('%d-%b-%Y')}.
-
-Please visit your dashboard and acknowledge it at the earliest.
-
-Thank you,
-Admin Team
-"""
-                )
-
-            # 📬 Notify Directors and Ops Heads
-            heads = User.query.filter(User.role.in_(['director', 'operations_head'])).all()
-            names = "\n".join([f"- {u.first_name} ({u.email})" for u in unacknowledged_users])
-
-            for head in heads:
-                send_email(
-                    to=head.email,
-                    subject=f"Pending Acknowledgments for: {announcement.title}",
-                    body=f"""
-Dear {head.first_name},
-
-As of {today}, the following users have not acknowledged the announcement titled: "{announcement.title}":
-
-{names}
-
-Please take appropriate action if needed.
-
-Best regards,
-HR Notification System
-"""
-                )

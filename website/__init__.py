@@ -242,7 +242,9 @@ def create_app():
         return "OK", 200
 
     from .scheduler import start_scheduler
-    start_scheduler(app)
+    with app.app_context():
+        start_scheduler(app)
+
     return app
 
 
