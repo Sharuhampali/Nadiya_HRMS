@@ -6,91 +6,59 @@
         margin: 0 auto;
         padding: 24px 12px 40px 12px;
     }
-    
+
     h1, h2 {
         font-weight: 700;
         color: var(--text-primary);
     }
-    
+
     h1 {
         text-align: center;
         margin-top: 20px;
         margin-bottom: 30px;
         font-size: 2rem;
     }
-    
+
     h2 {
         text-align: center;
         margin-bottom: 20px;
         color: var(--accent-primary);
     }
-    
+
     .summary-table, .approved-leaves {
         margin-top: 30px;
     }
-    
-    .table {
-        width: 100%;
-        margin: 0 auto;
-        border: 2px solid var(--border-color);
+
+    .leave-card {
         background: var(--bg-primary);
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px var(--shadow);
-    }
-    
-    .table th, .table td {
-        text-align: center;
-        padding: 12px;
-        color: var(--text-primary);
-    }
-    
-    .table th {
-        background: var(--accent-primary);
-        color: white;
-        font-weight: 700;
-    }
-    
-    .table td {
         border: 1px solid var(--border-color);
-        background: var(--bg-primary);
-    }
-    
-    .table tbody tr:hover td {
-        background: var(--bg-secondary);
-    }
-    
-    .leave-entry {
-        border: none;
-        margin-bottom: 15px;
-        background: var(--bg-primary);
         border-left: 5px solid var(--accent-primary);
-        border-radius: 8px;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
         box-shadow: 0 2px 8px var(--shadow);
-        border: 1px solid var(--border-color);
         transition: all 0.3s ease;
     }
-    
-    .leave-entry:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px var(--shadow);
+
+    .leave-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px var(--shadow);
     }
-    
-    .leave-entry .card-body {
-        padding: 20px;
-        background: var(--bg-primary);
+
+    .leave-card .label {
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+        display: block;
+        font-size: 0.85rem;
     }
-    
-    .leave-entry p {
-        margin: 0;
+
+    .leave-card .value {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
         color: var(--text-primary);
-        font-size: 1.05rem;
     }
-    
-    .leave-entry strong {
-        color: var(--accent-primary);
-    }
-    
+
     .no-leaves {
         text-align: center;
         padding: 3rem;
@@ -100,32 +68,24 @@
         border: 1px solid var(--border-color);
         margin-top: 20px;
     }
-    
+
     .no-leaves i {
         font-size: 3rem;
         margin-bottom: 1rem;
         opacity: 0.5;
     }
-    
+
     @media (max-width: 768px) {
         .container {
             padding: 10px 2vw 28px 2vw;
         }
-        
+
         h1 {
             font-size: 1.5rem;
         }
-        
-        .table th, .table td {
-            padding: 8px 4px;
-            font-size: 0.9rem;
-        }
-        
-        .leave-entry .card-body {
-            padding: 15px;
-        }
     }
-     .page-header {
+
+    .page-header {
         background: linear-gradient(135deg, #4f46e5, #7c3aed);
         color: white;
         padding: 2rem 0;
@@ -138,7 +98,8 @@
         margin: 0;
         text-align: center;
     }
-      .back-btn {
+
+    .back-btn {
         background: var(--bg-primary);
         color: var(--text-primary);
         border: 2px solid var(--border-color);
@@ -163,15 +124,16 @@
         margin-right: 0.5rem;
     }
 
-       .a {
+    .a {
         max-width: 100%;
         margin: 0 auto;
         padding: 0 1rem;
     }
 </style>
+
 <div class="page-header">
     <div class="a">
-        <h1><i class="fas fa-chart-line"></i>Approved Leaves for {{ user.first_name }}</h1>
+        <h1><i class="fas fa-chart-line"></i> Approved Leaves for {{ user.first_name }}</h1>
     </div>
 </div>
 
@@ -179,68 +141,68 @@
     <a href="/leaves-category" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Leaves
     </a>
-<div class="container">
-   
-    
-    <div class="summary-table">
-        <h2>Leave Summary</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Leave Type</th>
-                    <th>Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Earned</td>
-                    <td>{{ earned_sum }}</td>
-                </tr>
-                <tr>
-                    <td>Medical/Sick</td>
-                    <td>{{ medic_sum }}</td>
-                </tr>
-                <tr>
-                    <td>Leave without Pay</td>
-                    <td>{{ pay_sum }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
 
-    <div class="approved-leaves">
-        <h2>Approved Leaves</h2>
-{% if detailed_entries %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Duration</th>
-                <th>Reason</th>
-                <th>Approved By</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in detailed_entries %}
-                <tr>
-                    <td>{{ entry.date }}</td>
-                    <td>{{ entry.type }}</td>
-                    <td>{{ entry.duration }}</td>
-                    <td>{{ entry.reason or '-' }}</td>
-                    <td>{{ entry.approved_by or '-' }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="container">
+        <div class="summary-table">
+            <h2>Leave Summary</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Earned</td>
+                        <td>{{ earned_sum }}</td>
+                    </tr>
+                    <tr>
+                        <td>Medical/Sick</td>
+                        <td>{{ medic_sum }}</td>
+                    </tr>
+                    <tr>
+                        <td>Leave without Pay</td>
+                        <td>{{ pay_sum }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-
-        {% else %}
-            <div class="no-leaves">
-                <i class="fas fa-calendar-times"></i>
-                <p>No approved leaves found for this employee.</p>
-            </div>
-        {% endif %}
+        <div class="approved-leaves">
+            <h2>Approved Leaves</h2>
+            {% if detailed_entries %}
+                {% for entry in detailed_entries %}
+                    <div class="leave-card">
+                        <div>
+                            <span class="label">Date</span>
+                            <div class="value">{{ entry.date }}</div>
+                        </div>
+                        <div>
+                            <span class="label">Type</span>
+                            <div class="value">{{ entry.type }}</div>
+                        </div>
+                        <div>
+                            <span class="label">Duration</span>
+                            <div class="value">{{ entry.duration }}</div>
+                        </div>
+                        <div>
+                            <span class="label">Reason</span>
+                            <div class="value">{{ entry.reason or '-' }}</div>
+                        </div>
+                        <div>
+                            <span class="label">Approved By</span>
+                            <div class="value">{{ entry.approved_by or '-' }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-leaves">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No approved leaves found for this employee.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

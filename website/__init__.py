@@ -241,7 +241,8 @@ def create_app():
     def health():
         return "OK", 200
 
-
+    from .scheduler import start_scheduler
+    start_scheduler(app)
     return app
 
 

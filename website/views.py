@@ -1512,10 +1512,7 @@ def pending_compoffs():
 def holidays_category():
     return render_template('holidays_category.html', user=current_user)
 
-@views.route('/announcements-category')
-@login_required
-def announcements_category():
-    return render_template('announcements_category.html', user=current_user)
+
 
 @views.route('/set_holidays', methods=['GET', 'POST'])
 @login_required
@@ -1649,6 +1646,11 @@ def holiday_saturdays():
 #########################################################################################################################################################
 #Announcement Routes
 #########################################################################################################################################################
+@views.route('/announcements-category')
+@login_required
+def announcements_category():
+    return render_template('announcements_category.html', user=current_user)
+
 @views.route('/announcements')
 @login_required
 def announcements():
@@ -2762,3 +2764,54 @@ def exit_report_view(user_id, date):
         reports=reports
     )
 
+def send_announcement_reminders():
+    with current_app.app_context():
+        announcements = Announcement.query.all()
+        today = datetime.now().strftime("%d-%b-%Y")
+
+        for announcement in announcements:
+            recipients = announcement.recipients
+            acknowledged_ids = {ack.user_id for ack in announcement.acknowledgments}
+            unacknowledged_users = [u for u in recipients if u.id not in acknowledged_ids]
+
+            if not unacknowledged_users:
+                continue  # all acknowledged, no action needed
+
+            # 📩 Notify users who have not yet acknowledged
+            for user in unacknowledged_users:
+                send_email(
+                    to=user.email,
+                    subject="Reminder: Acknowledge Announcement",
+                    body=f"""
+Dear {user.first_name},
+
+You have not yet acknowledged the announcement titled: "{announcement.title}" posted on {announcement.date_posted.strftime('%d-%b-%Y')}.
+
+Please visit your dashboard and acknowledge it at the earliest.
+
+Thank you,
+Admin Team
+"""
+                )
+
+            # 📬 Notify Directors and Ops Heads
+            heads = User.query.filter(User.role.in_(['director', 'operations_head'])).all()
+            names = "\n".join([f"- {u.first_name} ({u.email})" for u in unacknowledged_users])
+
+            for head in heads:
+                send_email(
+                    to=head.email,
+                    subject=f"Pending Acknowledgments for: {announcement.title}",
+                    body=f"""
+Dear {head.first_name},
+
+As of {today}, the following users have not acknowledged the announcement titled: "{announcement.title}":
+
+{names}
+
+Please take appropriate action if needed.
+
+Best regards,
+HR Notification System
+"""
+                )
