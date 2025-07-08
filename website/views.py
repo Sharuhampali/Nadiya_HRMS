@@ -119,39 +119,108 @@ ROLES_HIERARCHY = {
 #             people_on_leave_today=people_on_leave_today,
 #         leave_count=len(people_on_leave_today))
 
+# @views.route('/', methods=['GET', 'POST'])
+# @login_required 
+# def home():
+#     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
+#     today = date.today()
+
+#     # For regular users
+#     if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
+#         # Simple from_date / to_date logic
+#         people_on_leave_today = Leave.query.filter(
+#             and_(
+#                 Leave.approved == True,
+#                 Leave.rejected != True,
+#                 Leave.start_date <= today,
+#                 Leave.end_date >= today
+#             )
+#         ).all()
+#         approved_leaves = Leave.query.filter(
+#         Leave.approved == True
+#     ).all()
+
+#     # Now build a list of users who have any entry on today's date
+#     people_on_leave_today = set()
+#     for leave in approved_leaves:
+#         try:
+#             leave_data = json.loads(leave.leaves_data)
+#             for entry in leave_data:
+#                 if entry.get('date') == today.strftime('%Y-%m-%d'):
+#                     people_on_leave_today.add(leave.user)  # leave.user is the actual User object
+#         except Exception as e:
+#             print(f"Error parsing leave data: {e}")
+#             continue
+
+#         return render_template(
+#             "home.html",
+#             user=current_user,
+#             current_date=current_date,
+#             people_on_leave_today=people_on_leave_today,
+#             leave_count=len(people_on_leave_today)
+#         )
+
+#     # For Admins
+#     users_count = User.query.count()
+#     pending_leaves = Leave.query.filter(
+#         (Leave.approved == False) | (Leave.approved == None),
+#         (Leave.rejected == False) | (Leave.rejected == None)
+#     ).count()
+
+#     today_attendance = Attendance.query.filter_by(date=today).count()
+#     announcements_count = Announcement.query.count()
+
+#     approved_leaves = Leave.query.filter(
+#         Leave.approved == True
+#     ).all()
+
+#     # Now build a list of users who have any entry on today's date
+#     people_on_leave_today = set()
+#     for leave in approved_leaves:
+#         try:
+#             leave_data = json.loads(leave.leaves_data)
+#             for entry in leave_data:
+#                 if entry.get('date') == today.strftime('%Y-%m-%d'):
+#                     people_on_leave_today.add(leave.user)  # leave.user is the actual User object
+#         except Exception as e:
+#             print(f"Error parsing leave data: {e}")
+#             continue
+
+#     return render_template(
+#         "admin_home.html",
+#         user=current_user,
+#         current_date=current_date,
+#         users_count=users_count,
+#         pending_leaves=pending_leaves,
+#         today_attendance=today_attendance,
+#         announcements_count=announcements_count,
+#         people_on_leave_today=list(people_on_leave_today),
+#         leave_count=len(people_on_leave_today)
+#     )
 @views.route('/', methods=['GET', 'POST'])
 @login_required 
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
     today = date.today()
 
+    # Common function to get people on leave today
+    def get_people_on_leave():
+        approved_leaves = Leave.query.filter(Leave.approved == True).all()
+        people_on_leave_today = set()
+        for leave in approved_leaves:
+            try:
+                leave_data = json.loads(leave.leaves_data)
+                for entry in leave_data:
+                    if entry.get('date') == today.strftime('%Y-%m-%d'):
+                        people_on_leave_today.add(leave.user)
+            except Exception as e:
+                print(f"Error parsing leave data: {e}")
+                continue
+        return approved_leaves, people_on_leave_today
+
     # For regular users
     if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
-        # Simple from_date / to_date logic
-        people_on_leave_today = Leave.query.filter(
-            and_(
-                Leave.approved == True,
-                Leave.rejected != True,
-                Leave.start_date <= today,
-                Leave.end_date >= today
-            )
-        ).all()
-        approved_leaves = Leave.query.filter(
-        Leave.approved == True
-    ).all()
-
-    # Now build a list of users who have any entry on today's date
-    people_on_leave_today = set()
-    for leave in approved_leaves:
-        try:
-            leave_data = json.loads(leave.leaves_data)
-            for entry in leave_data:
-                if entry.get('date') == today.strftime('%Y-%m-%d'):
-                    people_on_leave_today.add(leave.user)  # leave.user is the actual User object
-        except Exception as e:
-            print(f"Error parsing leave data: {e}")
-            continue
-
+        approved_leaves, people_on_leave_today = get_people_on_leave()
         return render_template(
             "home.html",
             user=current_user,
@@ -166,25 +235,10 @@ def home():
         (Leave.approved == False) | (Leave.approved == None),
         (Leave.rejected == False) | (Leave.rejected == None)
     ).count()
-
     today_attendance = Attendance.query.filter_by(date=today).count()
     announcements_count = Announcement.query.count()
 
-    approved_leaves = Leave.query.filter(
-        Leave.approved == True
-    ).all()
-
-    # Now build a list of users who have any entry on today's date
-    people_on_leave_today = set()
-    for leave in approved_leaves:
-        try:
-            leave_data = json.loads(leave.leaves_data)
-            for entry in leave_data:
-                if entry.get('date') == today.strftime('%Y-%m-%d'):
-                    people_on_leave_today.add(leave.user)  # leave.user is the actual User object
-        except Exception as e:
-            print(f"Error parsing leave data: {e}")
-            continue
+    approved_leaves, people_on_leave_today = get_people_on_leave()
 
     return render_template(
         "admin_home.html",
