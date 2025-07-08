@@ -440,15 +440,18 @@
                         </select>
                     </div>
 
-                    <div id="exit-report-link" class="exit-report-container" style="display: none;">
-                        <h4>
-                            <i class="fas fa-exclamation-triangle"></i> Action Required
-                        </h4>
-                        <p>Please complete your exit report before marking exit attendance.</p>
-                        <a href="/exit_report/{{ attendance_id }}" class="btn-exit-report">
-                            <i class="fas fa-file-alt"></i> Fill Exit Report to Proceed
-                        </a>
-                    </div>
+                   {% if attendance and not attendance.exit_report_submitted %}
+    <div id="exit-report-link" class="exit-report-container" style="display: none;">
+        <h4>
+            <i class="fas fa-exclamation-triangle"></i> Action Required
+        </h4>
+        <p>Please complete your exit report before marking exit attendance.</p>
+        <a href="/exit_report/{{ attendance.id }}" class="btn-exit-report">
+            <i class="fas fa-file-alt"></i> Fill Exit Report to Proceed
+        </a>
+    </div>
+{% endif %}
+
 
                     <div class="form-group">
                         <label for="reason">Remarks (Optional)</label>
