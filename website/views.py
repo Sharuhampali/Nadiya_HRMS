@@ -32,7 +32,7 @@ from . import db, mail
 from .models import (
     User, Attendance, Leave, Document, Holiday, Announcement,
     IntermediateLog, AnnouncementAcknowledgment, EditRequest,
-    announcement_user, ExitReport
+    announcement_user, ExitReport, CompOffRequest
 )
 from leave_calculator import calculate_initial_leaves
 from sqlalchemy import and_
@@ -982,10 +982,15 @@ def reject(leave_id):
             continue
 
         if ltype == 'Compoff':
-            for att in user.attendances:
-                if att.date and att.date.strftime('%Y-%m-%d') == date:
-                    att.compoff += duration
+            rollback = duration
+            used_requests = CompOffRequest.query.filter_by(user_id=user.id, status='approved', used=True).order_by(CompOffRequest.requested_on.desc()).all()
+
+            for req in used_requests:
+                if rollback <= 0:
                     break
+                req.used = False
+                rollback -= req.value
+
             else:
                 if user.attendances:
                     user.attendances[0].compoff += duration
@@ -1037,11 +1042,26 @@ def reject(leave_id):
 
 
 #display approved leaves 
+import json
+
 @views.route('/approved_leaves')
 @login_required
 def approved_leaves():
-    approved_leaves = Leave.query.filter_by(user_id=current_user.id, ).all()
-    return render_template('approved_leaves.html', leaves=approved_leaves)
+    leaves = Leave.query.filter_by(user_id=current_user.id).order_by(Leave.start_date.desc()).all()
+    structured_leaves = []
+
+    for leave in leaves:
+        try:
+            entries = json.loads(leave.leaves_data or "[]")
+        except Exception:
+            entries = []
+
+        structured_leaves.append({
+            "leave": leave,
+            "entries": entries
+        })
+
+    return render_template("approved_leaves.html", leaves=structured_leaves)
 
 # @views.route('/reset_leaves', methods=['GET', 'POST'])
 # @login_required
@@ -1095,8 +1115,11 @@ def reset_leaves():
 
         # Reset compoff in attendance
         for user in users:
-            for attendance in Attendance.query.filter_by(user_id=user.id).all():
-                attendance.compoff = 0
+            # Mark all approved comp offs as used
+            all_requests = CompOffRequest.query.filter_by(status='approved', used=False).all()
+            for req in all_requests:
+                req.used = True
+
 
         # Reset other leave counters
         for user in users:
@@ -1276,14 +1299,21 @@ def apply_leave():
                 'type': ltype
             })
 
-        # Deduct compoff from attendance
+        # Deduct compoff from approved requests
         if summary['Compoff'] > 0:
             remaining = summary['Compoff']
-            for att in current_user.attendances:
-                if att.compoff >= remaining:
-                    att.compoff -= remaining
-                    db.session.commit()
+            requests = CompOffRequest.query.filter_by(user_id=current_user.id, status='approved', used=False).order_by(CompOffRequest.requested_on).all()
+            
+            for req in requests:
+                if remaining <= 0:
                     break
+                if req.value <= remaining:
+                    req.used = True
+                    remaining -= req.value
+                else:
+                    # If comp off request is larger than needed, skip for now (or implement split logic)
+                    continue
+
 
         # Apply to user leave counts
         current_user.medic += summary['Medical/Sick']
@@ -1386,122 +1416,83 @@ def add_compoff():
         return redirect(url_for('views.home'))
 
     return render_template('add_compoff.html', users=users)
-
-@views.route('/approve_compoff/<int:attendance_id>', methods=['POST'])
+@views.route('/approve_compoff/<int:request_id>', methods=['POST'])
 @login_required
-def approve_compoff(attendance_id):
-    attendance = Attendance.query.get(attendance_id)
-    if not attendance:
-        flash("Attendance record not found.", "error")
-        return redirect(url_for('views.pending_compoffs'))
-
-    submitter = User.query.get(attendance.user_id)
-    if not submitter:
-        flash("User not found for this record.", "error")
-        return redirect(url_for('views.pending_compoffs'))
+def approve_compoff(request_id):
+    request_obj = CompOffRequest.query.get_or_404(request_id)
+    submitter = request_obj.user
 
     if not has_approval_authority(current_user.role, submitter.role):
-        flash("Not authorized.", "error")
+        flash("Not authorized to approve this request.", "error")
         return redirect(url_for('views.home'))
 
-    if attendance.compoff_pending:
-        attendance.compoff = attendance.compoff_requested
-        # attendance.compoff_requested = 0
-        attendance.compoff_pending = False
-        attendance.approved_by_id = current_user.id
-        db.session.commit()
+    request_obj.status = 'approved'
+    request_obj.approved_by = current_user.email
+    db.session.commit()
 
-        # Optional: Notify user
-        send_email(
-            subject="Comp Off Approved",
-            recipient=submitter.email,
-            body=(
-                f"Dear {submitter.first_name},\n\n"
-                f"Your Comp Off request for {attendance.date.strftime('%d-%m-%Y')} has been approved.\n"
-                f"Approved by: {current_user.first_name} ({current_user.email})\n\n"
-                f"Regards,\nHR Team"
-            )
+    send_email(
+        subject="✅ Comp Off Approved",
+        recipient=submitter.email,
+        body=(
+            f"Dear {submitter.first_name},\n\n"
+            f"Your Comp Off request for {request_obj.attendance.date.strftime('%d-%m-%Y')} "
+            f"({request_obj.value} day) has been approved.\n\n"
+            f"Approved by: {current_user.first_name} ({current_user.email})\n\n"
+            f"Regards,\nHR Team"
         )
+    )
 
-        flash("Comp off approved and user notified.", "success")
-
+    flash("Comp Off approved and user notified.", "success")
     return redirect(url_for('views.pending_compoffs'))
 
-@views.route('/reject_compoff/<int:attendance_id>', methods=['POST'])
+@views.route('/reject_compoff/<int:request_id>', methods=['POST'])
 @login_required
-def reject_compoff(attendance_id):
-    attendance = Attendance.query.get(attendance_id)
-    submitter = User.query.get(attendance.user_id)
+def reject_compoff(request_id):
+    request_obj = CompOffRequest.query.get_or_404(request_id)
+    submitter = request_obj.user
 
     if not has_approval_authority(current_user.role, submitter.role):
-        flash("Not authorized.", "error")
+        flash("Not authorized to reject this request.", "error")
         return redirect(url_for('views.home'))
 
     remarks = request.form.get("remarks", "").strip()
+    request_obj.status = 'rejected'
+    request_obj.reason = remarks
+    request_obj.approved_by = current_user.email
+    db.session.commit()
 
-    if attendance.compoff_pending:
-        attendance.compoff = 0
-        attendance.compoff_pending = False
-        # attendance.compoff_requested = 0
-        attendance.approved_by_id = current_user.id
-        db.session.commit()
-
-        # Format the email
-        subject = 'Comp Off Request Rejected'
-        body = (
+    send_email(
+        subject="❌ Comp Off Request Rejected",
+        recipient=submitter.email,
+        body=(
             f"Dear {submitter.first_name},\n\n"
-            f"Your Comp Off request for the date: {attendance.date.strftime('%d-%m-%Y')} has been rejected.\n\n"
-            f"Reason:\n{remarks}\n\n"
+            f"Your Comp Off request for the date {request_obj.attendance.date.strftime('%d-%m-%Y')} "
+            f"({request_obj.value} day) has been rejected.\n\n"
+            f"Remarks:\n{remarks or 'None'}\n\n"
             f"Rejected by: {current_user.first_name} ({current_user.email})\n"
-            f"If you have any questions, please reach out to your reporting manager or HR.\n\n"
+            f"If you have questions, please contact your manager or HR.\n\n"
             f"Regards,\nHR Team"
         )
+    )
 
-        # Send email
-        send_email(
-            subject=subject,
-            recipient=submitter.email,
-            body=body
-        )
-
-        flash("Comp Off rejected. Notification sent to the user.", "info")
-    else:
-        flash("No pending Comp Off request found for this record.", "warning")
-
+    flash("Comp Off rejected and user notified.", "info")
     return redirect(url_for('views.pending_compoffs'))
-
-#compoff requests view
 @views.route('/pending_compoffs')
 @login_required
 def pending_compoffs():
-    all_records = Attendance.query.filter(
-        (Attendance.compoff_pending == True) |
-        (Attendance.compoff > 0) |
-        ((Attendance.compoff == 0) & (Attendance.compoff_requested > 0))
-    ).all()
+    # Get all comp off requests (not just pending)
+    all_requests = CompOffRequest.query.order_by(CompOffRequest.requested_on.desc()).all()
 
     approvable = []
-
-    for record in all_records:
-        submitter = User.query.get(record.user_id)
-
+    for req in all_requests:
+        submitter = req.user
         if submitter and has_approval_authority(current_user.role, submitter.role):
-            # Attach user object for use in template
-            record.user = submitter
-
-            # Determine compoff status inline
-            if record.compoff_pending:
-                record.compoff_status = 'pending'
-            elif record.compoff and record.compoff > 0:
-                record.compoff_status = 'approved'
-            elif not record.compoff_pending and record.compoff_requested > 0 and (record.compoff == 0 or record.compoff is None):
-                record.compoff_status = 'rejected'
-            else:
-                record.compoff_status = 'unknown'  # fallback for edge cases
-
-            approvable.append(record)
+            req.user = submitter
+            req.compoff_status = req.status  # could be 'pending', 'approved', 'rejected'
+            approvable.append(req)
 
     return render_template('pending_compoffs.html', records=approvable)
+
 
 #########################################################################################################################################################
 #Holiday Routes

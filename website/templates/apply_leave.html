@@ -343,18 +343,20 @@
                 </div>
                 <div class="form-group">
                     <label for="type_{{ i }}">Leave Type</label>
-                    <select class="form-control leave-type" name="leave_types" id="type_{{ i }}"
-                        {% if i < current_user.total_compoff %} disabled {% endif %}>
-                        <option value="">Select Leave Type</option>
-                        <option value="Compoff" {% if i < current_user.total_compoff %}selected{% endif %}>Compoff Leave</option>
-                        {% if i >= current_user.total_compoff %}
-                            <option value="Earned">Earned Leave</option>
-                            <option value="Medical/Sick">Medical/Sick Leave</option>
-                            {% if (15 - user.earned) <= 0 and (6 - user.medic) <= 0 %}
-                                <option value="Leave w/o Pay">Leave w/o Pay</option>
-                            {% endif %}
-                        {% endif %}
-                    </select>
+                   <select class="form-control leave-type" name="leave_types" id="type_{{ i }}">
+    <option value="">Select Leave Type</option>
+    {% if current_user.total_compoff >= 0.5 %}
+        <option value="Compoff">Compoff Leave</option>
+    {% endif %}
+    {% if (15 - user.earned) > 0 %}
+        <option value="Earned">Earned Leave</option>
+    {% endif %}
+    {% if (6 - user.medic) > 0 %}
+        <option value="Medical/Sick">Medical/Sick Leave</option>
+    {% endif %}
+    <option value="Leave w/o Pay">Leave w/o Pay</option>
+</select>
+
                 </div>
             </div>
             {% endfor %}
@@ -377,24 +379,33 @@
                 <tr>
                     <th>Leave Type</th>
                     <th>Available Days</th>
+                    <th>Total Days</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>Earned Leave</td>
                     <td><strong>{{ 15 - user.earned | round(2) }}</strong></td>
+                    <td>15</td>
                 </tr>
                 <tr>
                     <td>Medical/Sick Leave</td>
                     <td><strong>{{ 6 - user.medic | round(2) }}</strong></td>
+                                        <td>6</td>
+
                 </tr>
                 <tr>
                     <td>Leave without Pay</td>
                     <td><strong>{{ 10 - user.pay | round(2) }}</strong></td>
+                                        <td>10</td>
+
                 </tr>
                 <tr>
                     <td>Compoff Leaves</td>
                     <td><strong>{{ current_user.total_compoff }}</strong></td>
+                                    <td>-</td>
+
+
                 </tr>
             </tbody>
         </table>
