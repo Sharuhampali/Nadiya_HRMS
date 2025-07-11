@@ -219,7 +219,7 @@ def home():
         return approved_leaves, people_on_leave_today
 
     # For regular users
-    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in", "accounts@nadiya.in"]:
         approved_leaves, people_on_leave_today = get_people_on_leave()
         return render_template(
             "home.html",
@@ -517,7 +517,7 @@ from datetime import timedelta
 @views.route('/attendance_table')
 @login_required
 def attendance_table():
-    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in', 'support@nadiya.in']:
+    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in', 'support@nadiya.in', "accounts@nadiya.in"]:
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
@@ -1377,6 +1377,25 @@ def apply_leave():
         return redirect(url_for('views.apply_leave'))
 
     return render_template('apply_leave.html', user=current_user, today=datetime.today().date().strftime("%d-%m-%y"))
+
+@views.route('/all_leaves')
+@login_required
+def all_leaves():
+    leaves = Leave.query.filter_by(approved=True).order_by(Leave.start_date.desc()).all()
+    structured_leaves = []
+
+    for leave in leaves:
+        try:
+            entries = json.loads(leave.leaves_data or "[]")
+        except Exception:
+            entries = []
+
+        structured_leaves.append({
+            "leave": leave,
+            "entries": entries
+        })
+
+    return render_template("all_leaves.html", leaves=structured_leaves)
 
 @views.route('/add_compoff', methods=['GET', 'POST'])
 @login_required
@@ -2268,7 +2287,7 @@ def all():
 @views.route('/display_compoff', methods=['GET'])
 @login_required
 def display_compoff():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in'and current_user.email!='support@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in'and current_user.email!='support@nadiya.in' and current_user.email!="accounts@nadiya.in":
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 

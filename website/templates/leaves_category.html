@@ -170,7 +170,7 @@
             </a>
         </div>
 
-            {% if current_user.email == 'sumana@nadiya.in' or current_user.email== 'maneesh@nadiya.in'%}
+            {% if current_user.email == 'sumana@nadiya.in' or current_user.email== 'maneesh@nadiya.in' or current_user.email == 'acoounts@nadiya.in'%}
         <div class="option-card">
             <a href="/who1">
                 <i class="fas fa-chart-line"></i>
@@ -188,12 +188,19 @@
             </a>
         </div>
 
-          {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'maneesh@nadiya.in' %}
+          {% if current_user.email == 'sumana@nadiya.in' or current_user.email == 'maneesh@nadiya.in' or current_user.email == 'acoounts@nadiya.in' %}
         <div class="option-card">
             <a href="/display_compoff">
                 <i class="fas fa-clock"></i>
                 <h3>Comp-off Balance</h3>
                 <p>View compensatory off-day balances for all employees based on overtime work.</p>
+            </a>
+        </div>
+         <div class="option-card">
+            <a href="/all_leaves">
+                <i class="fas fa-list-check"></i>
+                <h3>Employee Leave History</h3>
+                <p>View complete leave history for all users.</p>
             </a>
         </div>
         {% endif %}

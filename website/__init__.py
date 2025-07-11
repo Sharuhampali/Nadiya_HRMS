@@ -107,7 +107,7 @@ def create_app():
 
     app.jinja_env.filters['format_timedelta'] = format_timedelta
 
-
+    
 
     def extract_area(address):
         if not address:
@@ -131,6 +131,15 @@ def create_app():
 
 
     app.jinja_env.filters['extract_area'] = extract_area
+
+    import pytz
+    def convert_to_ist(dt):
+        if not dt:
+            return ""
+        india_tz = pytz.timezone('Asia/Kolkata')
+        return dt.replace(tzinfo=pytz.utc).astimezone(india_tz).strftime('%Y-%m-%d %H:%M')
+    app.jinja_env.filters['ist'] = convert_to_ist
+
 
 
     def generate_maps_url(address):

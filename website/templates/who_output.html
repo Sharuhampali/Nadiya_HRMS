@@ -588,7 +588,13 @@
                         <td>{{ a.exit_time or '-' }}</td>
                         <td>{{ a.total_time_worked() | format_timedelta }}</td>
                         <td>{{ a.extra_time_worked() | format_timedelta }}</td>
-                        <td><span class="status-badge status-ontime">{{ a.compoff }}</span></td>
+                         <td>
+  {% if a.compoff_request and a.compoff_request.status == 'approved' %}
+    {{ a.compoff_request.value }} day
+  {% else %}
+    0.0
+  {% endif %}
+</td>
                         <td>
                             {% if a.entry_location %}
                                 <a href="{{ a.entry_location | maps_url }}" class="location-link" target="_blank">{{ a.entry_location | extract_area }}</a>

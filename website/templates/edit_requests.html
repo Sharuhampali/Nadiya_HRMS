@@ -25,7 +25,7 @@
             <td>{{ req.entry_time or "—" }}</td>
             <td>{{ req.exit_time or "—" }}</td>
             <td>{{ req.reason }}</td>
-            <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ req.created_at|ist }}</td>
           <td class="text-center">
     <div class="btn-group" role="group" aria-label="Edit Request Actions">
         <form action="{{ url_for('views.approve_edit_request', request_id=req.id) }}" method="post">
