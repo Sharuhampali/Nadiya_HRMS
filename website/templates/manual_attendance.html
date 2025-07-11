@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .manual-attendance-container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--bg-primary);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 128, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .manual-attendance-container h2 {
+        text-align: center;
+        color: #059669;
+        font-weight: 700;
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-control {
+        padding: 0.75rem;
+        border-radius: 10px;
+        border: 2px solid var(--border-color);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .form-control:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    @media (max-width: 576px) {
+        .manual-attendance-container {
+            padding: 1.25rem;
+        }
+
+        .btn-submit {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<div class="manual-attendance-container">
+    <h2><i class="fas fa-user-clock"></i> Manual Attendance Entry</h2>
+    <form method="POST">
+        {% if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] %}
+        <div class="mb-3">
+            <label class="form-label">User</label>
+            <select name="user_id" class="form-control" required>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.first_name }} ({{ user.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Entry Time</label>
+            <input type="time" name="entry_time" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Exit Time</label>
+            <input type="time" name="exit_time" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Site Visited (Entry)</label>
+            <input type="text" name="site_name_e" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Site Visited (Exit)</label>
+            <input type="text" name="site_name" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Reason (Optional)</label>
+            <input type="text" name="reason" class="form-control">
+        </div>
+        <div class="form-check mb-4">
+            <input type="checkbox" name="holiday" class="form-check-input" id="holidayCheck">
+            <label class="form-check-label" for="holidayCheck">Mark as Holiday</label>
+        </div>
+        <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Submit Attendance</button>
+    </form>
+</div>
+{% endblock %}

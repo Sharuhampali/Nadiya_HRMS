@@ -2779,3 +2779,58 @@ def exit_report_view(user_id, date):
         reports=reports
     )
 
+@views.route('/manual_attendance', methods=['GET', 'POST'])
+@login_required
+def manual_attendance():
+    if current_user.email not in ['sumana@nadiya.in', 'maneesh@nadiya.in']:
+        flash("Access denied: Admin access only.", "danger")
+        return redirect(url_for('views.home'))
+    if request.method == 'POST':
+        user_id = request.form.get('user_id') or current_user.id
+        entry_time = request.form.get('entry_time')
+        exit_time = request.form.get('exit_time')
+        date = request.form.get('date')
+        site_name_e = request.form.get('site_name_e')
+        site_name = request.form.get('site_name')
+        reason = request.form.get('reason', '')
+        hol = request.form.get('holiday')
+
+        try:
+            entry_time = datetime.strptime(entry_time, "%H:%M").time()
+            exit_time = datetime.strptime(exit_time, "%H:%M").time()
+            date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+
+            selected_user = User.query.get(int(user_id))
+            if not selected_user:
+                flash("User not found.", "error")
+                return redirect(url_for('views.manual_attendance'))
+
+            attendance = Attendance(
+                user_id=selected_user.id,
+                name=selected_user.first_name,
+                entry_time=entry_time,
+                exit_time=exit_time,
+                date=date_obj,
+                day=date_obj.strftime('%A'),
+                site_name=site_name,
+                site_name_e=site_name_e,
+                reason=reason,
+                hol=10000 if hol == 'on' else 0,
+                entry_location="Manual Entry",
+                exit_location="Manual Entry",
+            )
+
+            db.session.add(attendance)
+            db.session.commit()
+
+            # Trigger comp off calculation
+            attendance.calculate_comp_off()
+            flash(f"Manual attendance for {selected_user.first_name} submitted.", "success")
+        except Exception as e:
+            print(e)
+            flash("Failed to submit manual attendance.", "error")
+
+        return redirect(url_for('views.manual_attendance'))
+
+    users = User.query.all() if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] else [current_user]
+    return render_template("manual_attendance.html", users=users)
