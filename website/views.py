@@ -335,7 +335,10 @@ def submit_attendance():
     now = datetime.now(india_tz)
     now_time = now.time()
 
-    user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
+    # user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
+    today = now.date()
+    user_attendance = Attendance.query.filter_by(user_id=user_id, date=today).first()
+
 
     # Handle stale entries with no exit for > 20 hours
     if user_attendance and user_attendance.exit_time is None:
@@ -349,7 +352,10 @@ def submit_attendance():
                 print(e)
                 flash('There was an issue updating your attendance record.', 'error')
                 return redirect(url_for('views.home'))
-            user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
+            # user_attendance = Attendance.query.filter_by(user_id=user_id).order_by(Attendance.id.desc()).first()
+            today = now.date()
+            user_attendance = Attendance.query.filter_by(user_id=user_id, date=today).first()
+
 
     # Determine last known state
     today = now.date()
