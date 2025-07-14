@@ -201,7 +201,7 @@ ROLES_HIERARCHY = {
 @login_required 
 def home():
     current_date = datetime.now(india_tz).date().strftime("%d-%m-%y")
-    today = date.today()
+    today = datetime.now(india_tz).date()
 
     # Common function to get people on leave today
     def get_people_on_leave():
