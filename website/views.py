@@ -2904,15 +2904,14 @@ def my_compoffs():
         compoffs=compoffs,
         leave_dates=leave_dates
     )
-
 @views.route('/hr_policies')
 @login_required
 def hr_policies():
     # Only show policies sent to the current user
-    policies = Announcement.query\
-        .join(announcement_user)\
-        .filter(announcement_user.c.user_id == current_user.id)\
-        .order_by(Announcement.date_posted.desc())\
+    policies = HRPolicy.query\
+        .join(hr_policy_user)\
+        .filter(hr_policy_user.c.user_id == current_user.id)\
+        .order_by(HRPolicy.date_posted.desc())\
         .all()
 
     return render_template('hr_policies.html', policies=policies)
@@ -2942,7 +2941,7 @@ def post_hr_policy():
             doc_url = upload_file_to_gcs(doc_file, doc_filename, subfolder='uploads/docs')
 
         # Create the HR policy
-        policy = Announcement(
+        policy = HRPolicy(
             title=title,
             content=content,
             image_url=image_url,
@@ -2990,12 +2989,12 @@ def post_hr_policy():
     return render_template('post_hr_policy.html', users=users)
 
 
-@views.route('/delete_hr_policy/<int:announcement_id>', methods=['POST'])
+@views.route('/delete_hr_policy/<int:policy_id>', methods=['POST'])
 @login_required
-def delete_hr_policy(announcement_id):
+def delete_hr_policy(policy_id):
     confirmation_id = request.form.get('confirmation_id')
     if (current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in") and confirmation_id == '24':
-        policy = Announcement.query.get(announcement_id)
+        policy = HRPolicy.query.get(policy_id)
         if policy:
             db.session.delete(policy)
             db.session.commit()
@@ -3007,17 +3006,17 @@ def delete_hr_policy(announcement_id):
     return redirect(url_for('views.hr_policies'))
 
 
-@views.route('/acknowledge_hr_policy/<int:announcement_id>', methods=['POST'])
+@views.route('/acknowledge_hr_policy/<int:policy_id>', methods=['POST'])
 @login_required
-def acknowledge_hr_policy(announcement_id):
-    existing = AnnouncementAcknowledgment.query.filter_by(
+def acknowledge_hr_policy(policy_id):
+    existing = HRPolicyAcknowledgment.query.filter_by(
         user_id=current_user.id,
-        announcement_id=announcement_id
+        hr_policy_id=policy_id
     ).first()
     if not existing:
-        ack = AnnouncementAcknowledgment(
+        ack = HRPolicyAcknowledgment(
             user_id=current_user.id,
-            announcement_id=announcement_id
+            hr_policy_id=policy_id
         )
         db.session.add(ack)
         db.session.commit()
@@ -3027,14 +3026,14 @@ def acknowledge_hr_policy(announcement_id):
     return redirect(url_for('views.hr_policies'))
 
 
-@views.route('/hr-policy-read-status/<int:announcement_id>')
+@views.route('/hr-policy-read-status/<int:policy_id>')
 @login_required
-def hr_policy_read_status(announcement_id):
+def hr_policy_read_status(policy_id):
     if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
         flash("Access denied.", "danger")
         return redirect(url_for('views.hr_policies'))
 
-    policy = Announcement.query.get_or_404(announcement_id)
+    policy = HRPolicy.query.get_or_404(policy_id)
     recipients = policy.recipients
     acknowledgments = {ack.user_id for ack in policy.acknowledgments}
 

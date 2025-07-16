@@ -242,3 +242,35 @@ class ExitReport(db.Model):
 
     user = db.relationship('User', backref='exit_reports')
     attendance = db.relationship('Attendance', backref='exit_report')
+
+class HRPolicy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    image_url = db.Column(db.String(300))
+    doc_url = db.Column(db.String(300))
+    recipients = db.relationship(
+        'User',
+        secondary='hr_policy_user',
+        backref=db.backref('hr_policies_received', lazy='dynamic'),
+        passive_deletes=True,
+        lazy='dynamic'
+    )
+
+
+hr_policy_user = db.Table(
+    'hr_policy_user',
+    db.Column('hr_policy_id', db.Integer, db.ForeignKey('hr_policy.id', ondelete='CASCADE')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+)
+
+
+class HRPolicyAcknowledgment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    hr_policy_id = db.Column(db.Integer, db.ForeignKey('hr_policy.id'))
+    acknowledged_on = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='hr_acknowledgments')
+    hr_policy = db.relationship('HRPolicy', backref='acknowledgments')
