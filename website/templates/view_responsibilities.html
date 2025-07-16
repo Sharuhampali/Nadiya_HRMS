@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header i {
+        margin-right: 0.75rem;
+        font-size: 1.8rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .responsibilities-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .responsibility-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .responsibility-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .responsibility-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px var(--shadow);
+    }
+
+    .responsibility-header {
+        background: var(--bg-secondary);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .responsibility-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .role-badge {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .responsibility-content {
+        padding: 2rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+
+    .responsibility-content h1,
+    .responsibility-content h2,
+    .responsibility-content h3,
+    .responsibility-content h4,
+    .responsibility-content h5,
+    .responsibility-content h6 {
+        color: var(--text-primary);
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .responsibility-content h1 { font-size: 1.8rem; }
+    .responsibility-content h2 { font-size: 1.5rem; }
+    .responsibility-content h3 { font-size: 1.3rem; }
+
+    .responsibility-content ul,
+    .responsibility-content ol {
+        margin: 1rem 0;
+        padding-left: 1.5rem;
+    }
+
+    .responsibility-content li {
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .responsibility-content ul li::marker {
+        color: var(--accent-primary);
+    }
+
+    .responsibility-content ol li::marker {
+        color: var(--accent-primary);
+        font-weight: 600;
+    }
+
+    .responsibility-content p {
+        margin-bottom: 1rem;
+    }
+
+    .responsibility-content strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .responsibility-content blockquote {
+        border-left: 4px solid var(--accent-primary);
+        background: var(--bg-tertiary);
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+    }
+
+    .responsibility-content code {
+        background: var(--bg-tertiary);
+        color: var(--accent-primary);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .responsibility-content pre {
+        background: var(--bg-tertiary);
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 1rem 0;
+        border: 1px solid var(--border-color);
+    }
+
+    .no-responsibilities {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-primary);
+        border: 2px dashed var(--border-color);
+        border-radius: 16px;
+        color: var(--text-muted);
+        margin: 2rem 0;
+    }
+
+    .no-responsibilities i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .no-responsibilities p {
+        font-size: 1.2rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .content-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .print-btn {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .print-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        text-decoration: none;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem 0;
+        }
+
+        .page-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .page-header i {
+            font-size: 1.4rem;
+        }
+
+        .responsibilities-container {
+            padding: 0 0.5rem;
+        }
+
+        .responsibility-header {
+            padding: 1rem 1.5rem;
+        }
+
+        .responsibility-title {
+            font-size: 1.3rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .responsibility-content {
+            padding: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .responsibility-content h1 { font-size: 1.5rem; }
+        .responsibility-content h2 { font-size: 1.3rem; }
+        .responsibility-content h3 { font-size: 1.1rem; }
+
+        .content-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .no-responsibilities {
+            padding: 3rem 1.5rem;
+        }
+
+        .no-responsibilities i {
+            font-size: 3rem;
+        }
+
+        .no-responsibilities p {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .responsibility-header {
+            padding: 1rem;
+        }
+
+        .responsibility-content {
+            padding: 1rem;
+        }
+
+        .back-btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .responsibility-card {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .page-header,
+        .back-btn,
+        .print-btn {
+            display: none;
+        }
+
+        .responsibility-card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+            break-inside: avoid;
+        }
+
+        .responsibility-content {
+            color: #000;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-briefcase"></i> Job Responsibilities</h1>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="responsibilities-container">
+        {% if responsibility %}
+            <div class="responsibility-card">
+                <div class="responsibility-header">
+                    <h5 class="responsibility-title">
+                        <i class="fas fa-user-tie"></i>
+                        {{ responsibility.role | title }} Responsibilities
+                        <span class="role-badge">{{ responsibility.role | upper }}</span>
+                    </h5>
+                </div>
+                <div class="responsibility-content">
+                    {{ responsibility.content | safe }}
+                    
+                    <div class="content-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+            <span>Last Updated: {{ responsibility.updated_on.strftime('%d %B %Y, %I:%M %p') }}</span>
+
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>Role: {{ responsibility.role | title }}</span>
+                        </div>
+                        <a href="javascript:window.print()" class="print-btn">
+                            <i class="fas fa-print"></i>
+                            Print
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="no-responsibilities">
+                <i class="fas fa-briefcase"></i>
+                <p>No responsibilities found for your role.</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.7;">
+                    Please contact your administrator to set up job responsibilities.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

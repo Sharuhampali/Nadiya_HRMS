@@ -33,7 +33,7 @@ from .models import (
     User, Attendance, Leave, Document, Holiday, Announcement,
     IntermediateLog, AnnouncementAcknowledgment, EditRequest,
     announcement_user, ExitReport, CompOffRequest, HRPolicy, HRPolicyAcknowledgment,
-    hr_policy_user
+    hr_policy_user, JobResponsibility
 )
 from leave_calculator import calculate_initial_leaves
 from sqlalchemy import and_
@@ -2223,6 +2223,10 @@ def profile(user_id):
                 new_document = Document(user_id=user.id, filename=doc_url, document_type=document_type)
                 user.documents.append(new_document)
                 db.session.add(new_document)
+        if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in']:  # Same HR check
+            user.blood_grp = request.form.get('blood_grp')  # NEW
+            user.emergency_contact = request.form.get('emergency_contact')  # NEW
+
 
         db.session.commit()
         flash('Profile updated successfully')
@@ -3045,3 +3049,59 @@ def hr_policy_read_status(policy_id):
                            policy=policy,
                            read_users=read_users,
                            unread_users=unread_users)
+
+@views.route('/manage_responsibilities', methods=['GET', 'POST'])
+@login_required
+def manage_responsibilities():
+    # Access Restriction
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in"]:
+        abort(403)
+
+    # Get role if selected via GET or POST
+    role = request.form.get('role') if request.method == 'POST' else request.args.get('role')
+
+    responsibility = None
+
+    if request.method == 'POST':
+        content = request.form.get('content')
+
+        if not role or not content:
+            flash("Role and responsibility content are required.", 'warning')
+            return redirect(url_for('views.manage_responsibilities'))
+
+        try:
+            responsibility = JobResponsibility.query.filter_by(role=role).first()
+            if responsibility:
+                responsibility.content = content
+            else:
+                responsibility = JobResponsibility(role=role, content=content)
+                db.session.add(responsibility)
+            db.session.commit()
+            flash(f'Responsibilities for "{role}" saved successfully.', 'success')
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash("An error occurred while saving. Please try again.", 'danger')
+
+        return redirect(url_for('views.manage_responsibilities', role=role))
+
+    # GET request: user chose role via dropdown or query param
+    if role:
+        responsibility = JobResponsibility.query.filter_by(role=role).first()
+
+    return render_template("manage_responsibilities.html", responsibility=responsibility)
+
+
+@views.route('/responsibilities')
+@login_required
+def view_responsibilities():
+    if not current_user.role:
+        flash("Your role is not defined in the system.", "warning")
+        return redirect(url_for('views.dashboard'))  # or any appropriate fallback
+
+    resp = JobResponsibility.query.filter_by(role=current_user.role).first()
+
+    if not resp:
+        flash(f"No responsibilities defined for your role: {current_user.role}", "info")
+
+    return render_template('view_responsibilities.html', responsibility=resp)
+

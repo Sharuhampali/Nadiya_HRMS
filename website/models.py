@@ -21,6 +21,8 @@ class User(db.Model, UserMixin):
     probation = db.Column(db.Boolean, default=0)
     photo = db.Column(db.String(150))
     reset_token = db.Column(db.String(36), nullable=True)
+    blood_grp = db.Column(db.String(3), nullable=True)  # Example values: 'A+', 'O-', etc.
+    emergency_contact = db.Column(db.String(15), nullable=True)  # Supports international formats
 
     documents = db.relationship('Document', backref='user', lazy=True)
     attendances = db.relationship('Attendance', backref='user', lazy=True)
@@ -274,3 +276,9 @@ class HRPolicyAcknowledgment(db.Model):
 
     user = db.relationship('User', backref='hr_acknowledgments')
     hr_policy = db.relationship('HRPolicy', backref='acknowledgments')
+
+class JobResponsibility(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(100), unique=True, nullable=False)
+    content = db.Column(db.Text, nullable=False)  # Rich HTML content
+    updated_on = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
