@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
+
+    .back-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: var(--purple);
+        color: white;
+        border-color: var(--purple);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+
+    .form-container {
+        background: var(--bg-primary);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--border-color);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        border-left: 6px solid #8b5cf6;
+        padding-left: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+        transition: all 0.3s ease;
+        resize: vertical;
+    }
+
+    .form-control:focus {
+        border-color: var(--purple);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        background: var(--bg-primary);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        font-family: inherit;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .instructions {
+        background: rgba(139, 92, 246, 0.1);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+    }
+
+    .instructions h4 {
+        color: var(--purple);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .instructions ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .character-count {
+        text-align: right;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    .preview-section {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        display: none;
+    }
+
+    .preview-section.show {
+        display: block;
+    }
+
+    .preview-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .preview-content {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .btn-preview {
+        background: transparent;
+        color: var(--purple);
+        border: 2px solid var(--purple);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-right: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-preview:hover {
+        background: var(--purple);
+        color: white;
+    }
+
+ @media (max-width: 768px) {
+    .form-container {
+        padding: 1rem;
+        border-radius: 16px;
+    }
+
+    .page-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .form-title {
+        font-size: 1.2rem;
+        padding-left: 0.75rem;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-control {
+        font-size: 0.95rem;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .submit-btn, .btn-preview {
+        width: 100%;
+        margin-top: 0.5rem;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .instructions {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+
+    .instructions h4 {
+        font-size: 1rem;
+    }
+
+    .character-count {
+        font-size: 0.8rem;
+    }
+
+    .form-check {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .form-check-input {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .form-check-label {
+        font-size: 0.9rem;
+    }
+
+    .recipient-container {
+        padding: 0.75rem;
+        max-height: 200px;
+    }
+
+    .preview-content {
+        padding: 1rem;
+    }
+
+    #imagePreviewContainer img {
+        max-height: 200px;
+    }
+}
+
+/* Scrollable container for checkboxes */
+.recipient-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    margin-top: 0.5rem;
+    box-shadow: inset 0 0 6px var(--shadow);
+    transition: all 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent;
+}
+
+/* Custom scrollbar (for WebKit) */
+.recipient-container::-webkit-scrollbar {
+    width: 6px;
+}
+.recipient-container::-webkit-scrollbar-thumb {
+    background-color: var(--accent-primary);
+    border-radius: 6px;
+}
+.recipient-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+
+.form-check:hover {
+    background-color: var(--hover-secondary); /* Should be a subtle hover background */
+}
+
+/* Custom checkbox */
+.form-check-input {
+    margin-right: 0.75rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+/* Label text */
+.form-check-label {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+
+</style>
+
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-file-alt"></i> Publish New HR Policy</h1>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/announcement-policies" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to HR Policies
+    </a>
+
+    <div class="form-container">
+        <h2 class="form-title">Draft HR Policy</h2>
+
+        <div class="instructions">
+            <h4><i class="fas fa-info-circle"></i> Policy Posting Guidelines</h4>
+            <ul>
+                <li>Use a clear and official policy title (max 100 characters)</li>
+                <li>Ensure the content is thorough, precise, and compliant</li>
+                <li>All relevant employees will be notified via email</li>
+                <li>Use formal, inclusive language and accurate formatting</li>
+            </ul>
+        </div>
+
+        <form action="/post_policy" method="POST" id="policyForm" enctype="multipart/form-data">
+
+            <div class="form-group">
+                <label for="title">
+                    <i class="fas fa-heading"></i> Policy Title
+                </label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="title" 
+                    name="title" 
+                    placeholder="Enter official policy title..."
+                    maxlength="100"
+                    required
+                >
+                <div class="character-count">
+                    <span id="titleCount">0</span>/100 characters
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="content">
+                    <i class="fas fa-align-left"></i> Policy Content
+                </label>
+                <textarea 
+                    class="form-control" 
+                    id="content" 
+                    name="content" 
+                    rows="6"
+                    placeholder="Describe the policy in detail..."
+                    maxlength="2000"
+                    required
+                ></textarea>
+                <div class="character-count">
+                    <span id="contentCount">0</span>/2000 characters
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="attachments">
+                    <i class="fas fa-paperclip"></i> Attach Image
+                </label>
+                <input type="file" name="attachments" id="attachments" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                <small style="color: var(--text-muted); font-size: 0.85rem;">
+                    Accepted formats: PDF, DOC, DOCX, JPG, PNG, GIF
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="attachments1">
+                    <i class="fas fa-paperclip"></i> Attach File/Document
+                </label>
+                <input type="file" name="attachments1" id="attachments1" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                <small style="color: var(--text-muted); font-size: 0.85rem;">
+                    Accepted formats: PDF, DOC, DOCX, JPG, PNG, GIF
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-users"></i> Select Recipients (Visible & Notified)</label>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="select-all" onclick="toggleAllRecipients(this)">
+                    <label class="form-check-label" for="select-all"><strong>Select All</strong></label>
+                </div>
+
+                <div class="recipient-container">
+                    {% for user in users %}
+                        <div class="form-check">
+                            <input class="form-check-input recipient-checkbox" type="checkbox" name="recipients" value="{{ user.id }}" id="recipient_{{ user.id }}">
+                            <label class="form-check-label" for="recipient_{{ user.id }}">
+                                {{ user.first_name }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-preview" onclick="togglePreview()">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Publish Policy
+                </button>
+            </div>
+        </form>
+
+        <div class="preview-section" id="previewSection">
+            <div class="preview-title">
+                <i class="fas fa-eye"></i> HR Policy Preview
+            </div>
+            <div class="preview-content">
+                <h4 id="previewTitle">Policy Title</h4>
+                <p id="previewContent">Policy content will appear here...</p>
+                <div id="imagePreviewContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSelectAll(selectId, checkbox) {
+    const select = document.getElementById(selectId);
+    const allOptions = Array.from(select.options);
+    allOptions.forEach(option => option.selected = checkbox.checked);
+}
+
+function toggleAllRecipients(source) {
+    const checkboxes = document.querySelectorAll('.recipient-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+}
+
+document.getElementById('title').addEventListener('input', function () {
+    const count = this.value.length;
+    document.getElementById('titleCount').textContent = count;
+    document.getElementById('titleCount').style.color = count > 80 ? '#ef4444' : 'var(--text-muted)';
+});
+
+document.getElementById('content').addEventListener('input', function () {
+    const count = this.value.length;
+    document.getElementById('contentCount').textContent = count;
+    document.getElementById('contentCount').style.color = count > 1800 ? '#ef4444' : 'var(--text-muted)';
+});
+
+function togglePreview() {
+    const previewSection = document.getElementById('previewSection');
+    const title = document.getElementById('title').value || 'Policy Title';
+    const content = document.getElementById('content').value || 'Policy content will appear here...';
+
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewContent').textContent = content;
+
+    previewSection.classList.toggle('show');
+
+    const btn = document.querySelector('.btn-preview');
+    btn.innerHTML = previewSection.classList.contains('show')
+        ? '<i class="fas fa-eye-slash"></i> Hide Preview'
+        : '<i class="fas fa-eye"></i> Preview';
+}
+
+document.getElementById('attachments').addEventListener('change', function (e) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    previewContainer.innerHTML = '';
+
+    const files = e.target.files;
+    if (!files.length) return;
+
+    Array.from(files).forEach(file => {
+        const fileType = file.type;
+        const fileName = file.name;
+
+        if (fileType.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const imgDiv = document.createElement('div');
+                imgDiv.style.marginTop = '1rem';
+                imgDiv.innerHTML = `
+                    <strong>Image:</strong><br>
+                    <img src="${event.target.result}" style="max-width: 100%; max-height: 300px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 0.5rem;">
+                `;
+                previewContainer.appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            const fileDiv = document.createElement('div');
+            fileDiv.style.marginTop = '1rem';
+            fileDiv.innerHTML = `<strong>File:</strong> ${fileName}`;
+            previewContainer.appendChild(fileDiv);
+        }
+    });
+});
+
+document.getElementById('policyForm').addEventListener('submit', function (e) {
+    const title = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
+
+    if (!title || !content) {
+        e.preventDefault();
+        alert('Please fill in both title and content fields.');
+        return false;
+    }
+
+    if (title.length < 5) {
+        e.preventDefault();
+        alert('Title must be at least 5 characters long.');
+        return false;
+    }
+
+    if (content.length < 10) {
+        e.preventDefault();
+        alert('Content must be at least 10 characters long.');
+        return false;
+    }
+
+    if (!confirm('Are you sure you want to publish this policy? All selected employees will be notified.')) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+{% endblock %}

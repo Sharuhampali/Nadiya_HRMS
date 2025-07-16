@@ -2904,3 +2904,144 @@ def my_compoffs():
         compoffs=compoffs,
         leave_dates=leave_dates
     )
+
+@views.route('/hr_policies')
+@login_required
+def hr_policies():
+    # Only show policies sent to the current user
+    policies = Announcement.query\
+        .join(announcement_user)\
+        .filter(announcement_user.c.user_id == current_user.id)\
+        .order_by(Announcement.date_posted.desc())\
+        .all()
+
+    return render_template('hr_policies.html', policies=policies)
+
+
+@views.route('/post_hr_policy', methods=['GET', 'POST'])
+@login_required
+def post_hr_policy():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        recipient_ids = request.form.getlist('recipients')
+
+        image_url = None
+        doc_url = None
+
+        # Handle image upload to GCS
+        image_file = request.files.get('attachments')
+        if image_file and image_file.filename != '':
+            image_filename = f"{uuid.uuid4().hex}_{secure_filename(image_file.filename)}"
+            image_url = upload_file_to_gcs(image_file, image_filename, subfolder='uploads/photos')
+
+        # Handle document upload to GCS
+        doc_file = request.files.get('attachments1') or request.files.get('document')
+        if doc_file and doc_file.filename != '':
+            doc_filename = f"{uuid.uuid4().hex}_{secure_filename(doc_file.filename)}"
+            doc_url = upload_file_to_gcs(doc_file, doc_filename, subfolder='uploads/docs')
+
+        # Create the HR policy
+        policy = Announcement(
+            title=title,
+            content=content,
+            image_url=image_url,
+            doc_url=doc_url
+        )
+        db.session.add(policy)
+
+        # Collect valid emails and associate recipients
+        valid_emails = []
+        for user_id in recipient_ids:
+            user = User.query.get(int(user_id))
+            if user:
+                policy.recipients.append(user)
+                if user.email:
+                    valid_emails.append(user.email)
+
+        # Send one BCC email if there are valid emails
+        if valid_emails:
+            try:
+                msg = Message(
+                    subject='New HR Policy Posted',
+                    sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                    recipients=[current_app.config['MAIL_DEFAULT_SENDER']],
+                    bcc=valid_emails
+                )
+                policy_link = url_for('views.hr_policies', _external=True)
+                msg.body = (
+                    f"Dear All,\n\n"
+                    f"A new HR policy has been posted on the portal.\n\n"
+                    f"Title: {title}\n\n"
+                    f"{content}\n\n"
+                    f"View HR Policies: {policy_link}\n\n"
+                    f"Regards,\n"
+                    f"HR Team"
+                )
+                mail.send(msg)
+            except Exception as e:
+                print(f"[!] Failed to send HR policy email: {str(e)}")
+
+        db.session.commit()
+        flash('HR policy posted successfully and notifications sent to selected users!', 'success')
+        return redirect(url_for('views.hr_policies'))
+
+    users = User.query.order_by(User.first_name.asc()).all()
+    return render_template('post_hr_policy.html', users=users)
+
+
+@views.route('/delete_hr_policy/<int:announcement_id>', methods=['POST'])
+@login_required
+def delete_hr_policy(announcement_id):
+    confirmation_id = request.form.get('confirmation_id')
+    if (current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in") and confirmation_id == '24':
+        policy = Announcement.query.get(announcement_id)
+        if policy:
+            db.session.delete(policy)
+            db.session.commit()
+            flash('HR policy deleted successfully', 'success')
+        else:
+            flash('HR policy not found', 'danger')
+    else:
+        flash('Invalid confirmation ID or insufficient permissions', 'danger')
+    return redirect(url_for('views.hr_policies'))
+
+
+@views.route('/acknowledge_hr_policy/<int:announcement_id>', methods=['POST'])
+@login_required
+def acknowledge_hr_policy(announcement_id):
+    existing = AnnouncementAcknowledgment.query.filter_by(
+        user_id=current_user.id,
+        announcement_id=announcement_id
+    ).first()
+    if not existing:
+        ack = AnnouncementAcknowledgment(
+            user_id=current_user.id,
+            announcement_id=announcement_id
+        )
+        db.session.add(ack)
+        db.session.commit()
+        flash('Acknowledged successfully.', 'success')
+    else:
+        flash('You have already acknowledged this HR policy.', 'info')
+    return redirect(url_for('views.hr_policies'))
+
+
+@views.route('/hr-policy-read-status/<int:announcement_id>')
+@login_required
+def hr_policy_read_status(announcement_id):
+    if current_user.email not in ["sumana@nadiya.in", "maneesh@nadiya.in", "support@nadiya.in"]:
+        flash("Access denied.", "danger")
+        return redirect(url_for('views.hr_policies'))
+
+    policy = Announcement.query.get_or_404(announcement_id)
+    recipients = policy.recipients
+    acknowledgments = {ack.user_id for ack in policy.acknowledgments}
+
+    read_users = [user for user in recipients if user.id in acknowledgments]
+    unread_users = [user for user in recipients if user.id not in acknowledgments]
+
+    return render_template("hr_policy_status.html",
+                           policy=policy,
+                           read_users=read_users,
+                           unread_users=unread_users)

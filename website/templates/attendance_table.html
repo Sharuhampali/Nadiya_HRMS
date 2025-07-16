@@ -543,6 +543,49 @@
             <input type="text" id="searchInput" placeholder="Search by name, date, location, or any field...">
         </div>
     </div>
+<form method="GET" action="{{ url_for('views.attendance_table') }}" style="margin-bottom: 2rem;">
+  <div style="
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+  ">
+    <label for="datePicker" style="font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0;">
+      <i class="fa fa-calendar-alt"></i> Jump to Date:
+    </label>
+
+    <input type="date"
+           id="datePicker"
+           name="date"
+           class="form-control"
+           required
+           value="{{ target_date.strftime('%Y-%m-%d') }}"
+           style="
+              background: var(--bg-primary);
+              color: var(--text-primary);
+              border: 1px solid var(--border-color);
+              padding: 0.6rem 1rem;
+              border-radius: 8px;
+              font-size: 0.95rem;
+              max-width: 200px;
+              flex: 1;
+           ">
+
+    <button type="submit" class="btn btn-outline-primary" style="border-radius: 8px; min-width: 80px;">
+      <i class="fa fa-search"></i> Go
+    </button>
+
+    <a href="{{ url_for('views.attendance_table') }}" class="btn btn-outline-secondary" style="border-radius: 8px; min-width: 80px;">
+      <i class="fa fa-clock"></i> Today
+    </a>
+  </div>
+</form>
+
 
     <div id="current-day-block">
         <div class="day-header">Records for {{ target_date.strftime('%Y-%m-%d') }}</div>
