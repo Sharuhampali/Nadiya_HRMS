@@ -23,6 +23,11 @@ class User(db.Model, UserMixin):
     reset_token = db.Column(db.String(36), nullable=True)
     blood_grp = db.Column(db.String(3), nullable=True)  # Example values: 'A+', 'O-', etc.
     emergency_contact = db.Column(db.String(15), nullable=True)  # Supports international formats
+    ifsc = db.Column(db.String(15), nullable=True) 
+    bank_name = db.Column(db.String(15), nullable=True) 
+    branch = db.Column(db.String(15), nullable=True)
+    acc_no = db.Column(db.String(15), nullable=True)  
+    
 
     documents = db.relationship('Document', backref='user', lazy=True)
     attendances = db.relationship('Attendance', backref='user', lazy=True)

@@ -2226,7 +2226,10 @@ def profile(user_id):
         if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in']:  # Same HR check
             user.blood_grp = request.form.get('blood_grp')  # NEW
             user.emergency_contact = request.form.get('emergency_contact')  # NEW
-
+            user.ifsc = request.form.get('ifsc')
+            user.bank_name = request.form.get('bank_name')
+            user.branch = request.form.get('branch')
+            user.acc_no = request.form.get('acc_no')
 
         db.session.commit()
         flash('Profile updated successfully')
