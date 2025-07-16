@@ -32,7 +32,8 @@ from . import db, mail
 from .models import (
     User, Attendance, Leave, Document, Holiday, Announcement,
     IntermediateLog, AnnouncementAcknowledgment, EditRequest,
-    announcement_user, ExitReport, CompOffRequest
+    announcement_user, ExitReport, CompOffRequest, HRPolicy, HRPolicyAcknowledgment,
+    hr_policy_user
 )
 from leave_calculator import calculate_initial_leaves
 from sqlalchemy import and_
