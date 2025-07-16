@@ -206,24 +206,25 @@
                     <th><i class="fas fa-calendar-plus"></i> Comp-off Days</th>
                 </tr>
             </thead>
-            <tbody>
-                {% set total_compoff = 0 %}
-                {% set employees_with_compoff = 0 %}
-                {% for user_compoff in user_compoffs %}
-                    {% set total_compoff = total_compoff + user_compoff.total_compoff %}
-                    {% if user_compoff.total_compoff > 0 %}
-                        {% set employees_with_compoff = employees_with_compoff + 1 %}
-                    {% endif %}
-                    <tr>
-                        <td class="employee-name">{{ user_compoff.name }}</td>
-                        <td>
-                            <span class="compoff-badge {% if user_compoff.total_compoff == 0 %}zero{% elif user_compoff.total_compoff > 5 %}high{% endif %}">
-                                {{ user_compoff.total_compoff }}
-                            </span>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
+           <tbody>
+    {% set total_compoff = 0 %}
+    {% set employees_with_compoff = 0 %}
+    {% for user_compoff in user_compoffs %}
+        {% set total_compoff = total_compoff + user_compoff.total %}
+        {% if user_compoff.total > 0 %}
+            {% set employees_with_compoff = employees_with_compoff + 1 %}
+        {% endif %}
+        <tr>
+            <td class="employee-name">{{ user_compoff.name }}</td>
+            <td>
+                <span class="compoff-badge {% if user_compoff.total == 0 %}zero{% elif user_compoff.total > 5 %}high{% endif %}">
+                    {{ user_compoff.total }}
+                </span>
+            </td>
+        </tr>
+    {% endfor %}
+</tbody>
+
         </table>
         
         <div class="stats-row">
@@ -240,7 +241,7 @@
                 <div class="stat-label">Total Comp-off Days</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">{{ (total_compoff / user_compoffs|length) | round(1) if user_compoffs|length > 0 else 0 }}</div>
+<div class="stat-number">{{ (total_compoff / user_compoffs|length) | round(1) if user_compoffs|length > 0 else 0 }}</div>
                 <div class="stat-label">Average per Employee</div>
             </div>
         </div>

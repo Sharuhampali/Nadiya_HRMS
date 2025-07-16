@@ -378,31 +378,37 @@
             <thead>
                 <tr>
                     <th>Leave Type</th>
-                    <th>Available Days</th>
-                    <th>Total Days</th>
+                    <th>Balance Days</th>
+                    <th>Eligible Days</th>
+                    <th>Availed Days</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>Earned Leave</td>
-                    <td><strong>{{ 15 - user.earned | round(2) }}</strong></td>
+                    <td> {{ 15 - user.earned | round(2) }} </td>
                     <td>15</td>
+                    <td> {{user.earned | round(2) }} </td>
+
                 </tr>
                 <tr>
                     <td>Medical/Sick Leave</td>
-                    <td><strong>{{ 6 - user.medic | round(2) }}</strong></td>
+                    <td> {{ 6 - user.medic | round(2) }} </td>
                                         <td>6</td>
+                    <td> {{ user.medic | round(2) }} </td>
 
                 </tr>
                 <tr>
                     <td>Leave without Pay</td>
-                    <td><strong>{{ 10 - user.pay | round(2) }}</strong></td>
+                    <td> {{ 10 - user.pay | round(2) }} </td>
                                         <td>10</td>
+                    <td> {{ user.pay | round(2) }} </td>
 
                 </tr>
                 <tr>
                     <td>Compoff Leaves</td>
-                    <td><strong>{{ current_user.total_compoff }}</strong></td>
+                    <td> {{ current_user.total_compoff }} </td>
+                                    <td>-</td>
                                     <td>-</td>
 
 

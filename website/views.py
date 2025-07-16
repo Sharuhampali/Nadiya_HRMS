@@ -2290,16 +2290,57 @@ def all():
     except Exception as e:
         return str(e)
 
+# @views.route('/display_compoff', methods=['GET'])
+# @login_required
+# def display_compoff():
+#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in'and current_user.email!='support@nadiya.in' and current_user.email!="accounts@nadiya.in":
+#         flash("You do not have permission to view this page.", category='error')
+#         return redirect(url_for('views.home'))
+
+#     # Fetch all users with their total_compoff
+#     users = User.query.all()
+#     user_compoffs = [{'name': f'{user.first_name}', 'total_compoff': user.total_compoff} for user in users]
+
+#     return render_template('display_compoff.html', user_compoffs=user_compoffs)
+from sqlalchemy import func
+
 @views.route('/display_compoff', methods=['GET'])
 @login_required
 def display_compoff():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in'and current_user.email!='support@nadiya.in' and current_user.email!="accounts@nadiya.in":
+    if current_user.email not in [
+        "sumana@nadiya.in",
+        "maneesh@nadiya.in",
+        "support@nadiya.in",
+        "accounts@nadiya.in"
+    ]:
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
 
-    # Fetch all users with their total_compoff
+    # Fetch total comp offs from approved and unused requests, grouped by user
+    from .models import db, CompOffRequest, User
+
+    compoff_totals = (
+        db.session.query(
+            CompOffRequest.user_id,
+            func.sum(CompOffRequest.value).label('total')
+        )
+        .filter(CompOffRequest.status == 'approved', CompOffRequest.used == False)
+        .group_by(CompOffRequest.user_id)
+        .all()
+    )
+
+    # Convert to dict for easier lookup
+    totals_dict = {user_id: total for user_id, total in compoff_totals}
+
+    # Fetch all users and build the list
     users = User.query.all()
-    user_compoffs = [{'name': f'{user.first_name}', 'total_compoff': user.total_compoff} for user in users]
+    user_compoffs = [
+        {
+            'name': user.first_name,
+            'total': round(totals_dict.get(user.id, 0), 2)
+        }
+        for user in users
+    ]
 
     return render_template('display_compoff.html', user_compoffs=user_compoffs)
 
@@ -2840,3 +2881,26 @@ def manual_attendance():
 
     users = User.query.all() if current_user.email in ['sumana@nadiya.in', 'maneesh@nadiya.in'] else [current_user]
     return render_template("manual_attendance.html", users=users)
+
+from sqlalchemy.orm import joinedload
+
+@views.route('/my-compoffs')
+@login_required
+def my_compoffs():
+    compoffs = CompOffRequest.query.options(
+        joinedload(CompOffRequest.attendance)
+    ).filter_by(user_id=current_user.id).order_by(CompOffRequest.requested_on.desc()).all()
+
+    # Optional: if you want to find the date it was used (leave date)
+    leave_dates = {}
+    for leave in Leave.query.filter_by(user_id=current_user.id).all():
+        if leave.ltype == "Comp Off":
+            for compoff in compoffs:
+                if compoff.used:
+                    leave_dates[compoff.id] = leave.start_date.strftime("%d-%m-%Y")
+
+    return render_template(
+        "my_compoffs.html",
+        compoffs=compoffs,
+        leave_dates=leave_dates
+    )

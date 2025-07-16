@@ -149,22 +149,31 @@
                 <thead>
                     <tr>
                         <th>Leave Type</th>
-                        <th>Count</th>
+                        <th>Eligible Days</th>
+            <th>Availed Days</th>
+            <th>Balance</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Earned</td>
-                        <td>{{ earned_sum }}</td>
+                        <tr>
+            <td>Earned</td>
+            <td>{{ 15 }}</td>
+            <td>{{ earned_sum }}</td>
+            <td>{{ 15 - earned_sum }}</td>
+        </tr>
                     </tr>
-                    <tr>
-                        <td>Medical/Sick</td>
-                        <td>{{ medic_sum }}</td>
-                    </tr>
-                    <tr>
-                        <td>Leave without Pay</td>
-                        <td>{{ pay_sum }}</td>
-                    </tr>
+                     <td>Medical/Sick</td>
+            <td>{{ 6 }}</td>
+            <td>{{ medic_sum }}</td>
+            <td>{{ 6 - medic_sum }}</td>
+        </tr>
+        <tr>
+            <td>Leave without Pay</td>
+            <td>{{ 10 }}</td>
+            <td>{{ pay_sum }}</td>
+            <td>{{ 10 - pay_sum }}</td>
+        </tr>
                 </tbody>
             </table>
         </div>

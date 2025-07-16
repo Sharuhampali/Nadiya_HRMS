@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="page-header bg-success text-white p-3 rounded">
+        <h2 class="text-center fs-4">My Comp Off Records</h2>
+    </div>
+
+    <!-- Responsive table wrapper -->
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr class="text-center">
+                    <th scope="col">Date Earned</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Setoff</th>
+                    <th scope="col">Date Used</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comp in compoffs %}
+                <tr class="text-center">
+                    <td>{{ comp.attendance.date.strftime("%d-%m-%Y") if comp.attendance.date else "-" }}</td>
+                    <td>{{ comp.value }}</td>
+                    <td class="text-capitalize">{{ comp.status }}</td>
+                    <td>
+                        {% if comp.used %}
+                            <span class="text-success fw-semibold">Yes</span>
+                        {% else %}
+                            <span class="text-danger fw-semibold">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ leave_dates.get(comp.id, '-') }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No comp off records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
