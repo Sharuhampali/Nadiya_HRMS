@@ -185,6 +185,23 @@
                 <p>Read and download all company policies.</p>
             </a>
         </div>
+        {% if current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in" %}
+        <div class="option-card">
+            <a href="/manage_responsibilities">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Post Job Responsibilities</h3>
+                <p>Create and publish Job Roles and Responsibilities.</p>
+            </a>
+        </div>
+        {% endif %}
+        <div class="option-card">
+            <a href="/view_responsibilities">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Job Responsibilities</h3>
+                <p>View my Job Roles and Responsibilities.</p>
+            </a>
+        </div>
+
     </div>
 </div>
 {% endblock %}
