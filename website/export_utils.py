@@ -1,4 +1,4 @@
-# views.py (or utils.py if you're modularizing)
+# export_utils.py
 from flask import send_file, flash
 from flask_mail import Message
 from io import BytesIO
@@ -6,6 +6,7 @@ import pandas as pd
 from .models import User, Document, Attendance, Leave, Holiday, Announcement
 from . import mail
 
+# USERS SHEET
 def format_users():
     users = User.query.all()
     return pd.DataFrame([{
@@ -17,9 +18,11 @@ def format_users():
         "Medical Leaves": u.medic,
         "Pay Days": u.pay,
         "On Probation": "Yes" if u.probation else "No",
-        "Joining Date": u.joining_date.strftime("%Y-%m-%d")
+        "Joining Date": u.joining_date.strftime("%Y-%m-%d") if u.joining_date else ""
     } for u in users])
 
+
+# ATTENDANCE SHEET
 def format_attendance():
     records = Attendance.query.all()
     return pd.DataFrame([{
@@ -33,23 +36,27 @@ def format_attendance():
         "Site (In)": a.site_name or "",
         "Site (Out)": a.site_name_e or "",
         "Total Hours": str(a.total_time_worked()) if a.total_time_worked() else "",
-        "Compoff Earned": a.compoff or 0,
+        "Exit Report Submitted": "Yes" if a.exit_report_submitted else "No",
         "Reason": a.reason or ""
     } for a in records])
 
+
+# LEAVES SHEET
 def format_leaves():
     leaves = Leave.query.all()
     return pd.DataFrame([{
         "Name": l.user.first_name if l.user else "",
-        "Leave Type": l.ltype,
-        "Start Date": l.start_date.strftime("%Y-%m-%d"),
-        "End Date": l.end_date.strftime("%Y-%m-%d"),
+        "Leave Type": l.ltype or "",
+        "Start Date": l.start_date.strftime("%Y-%m-%d") if l.start_date else "",
+        "End Date": l.end_date.strftime("%Y-%m-%d") if l.end_date else "",
         "Days": l.days,
         "Status": "Approved" if l.approved else "Rejected" if l.rejected else "Pending",
         "Approved By": l.approved_by or "",
         "Reason": l.reason or ""
     } for l in leaves])
 
+
+# DOCUMENTS SHEET
 def format_documents():
     docs = Document.query.all()
     return pd.DataFrame([{
@@ -58,13 +65,17 @@ def format_documents():
         "Filename": d.filename
     } for d in docs])
 
+
+# HOLIDAYS SHEET
 def format_holidays():
     holidays = Holiday.query.all()
     return pd.DataFrame([{
         "Holiday Name": h.name,
-        "Date": h.date.strftime("%Y-%m-%d")
+        "Date": h.date.strftime("%Y-%m-%d") if h.date else ""
     } for h in holidays])
 
+
+# ANNOUNCEMENTS SHEET
 def format_announcements():
     anns = Announcement.query.all()
     data = []
@@ -73,12 +84,14 @@ def format_announcements():
         acknowledged = ", ".join([ack.user.first_name for ack in a.acknowledgments])
         data.append({
             "Title": a.title,
-            "Date Posted": a.date_posted.strftime("%Y-%m-%d"),
+            "Date Posted": a.date_posted.strftime("%Y-%m-%d") if a.date_posted else "",
             "Recipients": recipients,
             "Acknowledged By": acknowledged,
         })
     return pd.DataFrame(data)
 
+
+# EXPORT REPORT TO EXCEL
 def export_hr_report():
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -91,6 +104,8 @@ def export_hr_report():
     output.seek(0)
     return output
 
+
+# EMAIL THE REPORT
 def send_hr_report_email(output):
     msg = Message(
         subject="HRMS System Report",
@@ -104,7 +119,8 @@ def send_hr_report_email(output):
     )
     mail.send(msg)
 
-# This is your view function
+
+# VIEW / ROUTE FUNCTION
 def export_all_data():
     output = export_hr_report()
     try:
