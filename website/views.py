@@ -2287,6 +2287,11 @@ def misc_category():
         return redirect(url_for('views.home'))
     return render_template('misc_category.html', user=current_user)
 
+@views.route('/hr-emp')
+@login_required
+def hr_emp():
+    return render_template('hr-emp.html', user=current_user)
+
 
 @views.route('/all', methods=['GET'])
 def all():

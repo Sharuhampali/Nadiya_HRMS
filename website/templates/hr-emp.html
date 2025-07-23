@@ -2,7 +2,7 @@
 {% block content %}
 <style>
     .page-header {
-        background: linear-gradient(135deg, #dc2626, #ef4444);
+        background: linear-gradient(135deg, #3271ee, #9ca3af);
         color: white;
         padding: 3rem 0;
         margin-bottom: 3rem;
@@ -35,9 +35,9 @@
     }
 
     .back-btn:hover {
-        background: var(--danger);
+        background: #3271ee;
         color: white;
-        border-color: var(--danger);
+        border-color: #3271ee;
         transform: translateY(-2px);
     }
 
@@ -49,7 +49,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 2rem;
-        max-width: 800px;
+        max-width: 1200px;
         margin: 0 auto;
     }
 
@@ -72,7 +72,7 @@
         left: 0;
         right: 0;
         height: 5px;
-        background: linear-gradient(90deg, #dc2626, #ef4444);
+        background: linear-gradient(90deg, #3271ee, #9ca3af);
         transform: scaleX(0);
         transition: transform 0.3s ease;
     }
@@ -84,7 +84,7 @@
     .option-card:hover {
         transform: translateY(-10px);
         box-shadow: 0 8px 40px var(--shadow);
-        border-color: var(--danger);
+        border-color: #3271ee;
     }
 
     .option-card a {
@@ -96,14 +96,14 @@
 
     .option-card i {
         font-size: 3rem;
-        color: var(--danger);
+        color: #3271ee;
         margin-bottom: 1.5rem;
         transition: all 0.3s ease;
     }
 
     .option-card:hover i {
         transform: scale(1.2);
-        color: #dc2626;
+        color: #4b5563;
     }
 
     .option-card h3 {
@@ -117,6 +117,22 @@
         color: var(--text-secondary);
         font-size: 0.95rem;
         line-height: 1.6;
+    }
+
+    .danger-card {
+        border-color: var(--danger);
+    }
+
+    .danger-card::before {
+        background: linear-gradient(90deg, var(--danger), #f87171);
+    }
+
+    .danger-card i {
+        color: var(--danger);
+    }
+
+    .danger-card:hover i {
+        color: #dc2626;
     }
 
     .container {
@@ -140,10 +156,11 @@
         }
     }
 </style>
+
 <div class="page-header">
     <div class="container">
-        <h1><i class="fas fa-bullhorn"></i> Communication Center</h1>
-        <p>Company announcements and communication hub</p>
+        <h1><i class="fas fa-users-cog"></i> HR Employee Management</h1>
+        <p>Human resources and administrative operations</p>
     </div>
 </div>
 
@@ -151,26 +168,43 @@
     <a href="/" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Dashboard
     </a>
-
-    <div class="options-grid">
         {% if current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in" %}
-            <div class="option-card">
-                <a href="/post_announcement">
-                    <i class="fas fa-bullhorn"></i>
-                    <h3>Post Announcement</h3>
-                    <p>Create and publish company-wide announcements with automatic email notifications to all employees.</p>
-                </a>
-            </div>
-        {% endif %}
-
-        <div class="option-card">
-            <a href="/announcements">
-                <i class="fas fa-bell"></i>
-                <h3>View Announcements</h3>
-                <p>Read all company announcements, updates, and important communications from management.</p>
+    <div class="options-grid">
+      <div class="option-card">
+            <a href="/post_hr_policy">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Post Policy</h3>
+                <p>Create and publish company-wide policies with automatic email notifications to all employees.</p>
             </a>
         </div>
+        {% endif %}
+   <div class="option-card">
+            <a href="/hr_policies">
+                <i class="fas fa-bell"></i>
+                <h3>View Policies</h3>
+                <p>Read and download all company policies.</p>
+            </a>
+        </div>
+        {% if current_user.email == "sumana@nadiya.in" or current_user.email == "maneesh@nadiya.in" %}
+        <div class="option-card">
+            <a href="/manage_responsibilities">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Post Job Responsibilities</h3>
+                <p>Create and publish Job Roles and Responsibilities.</p>
+            </a>
+        </div>
+        {% endif %}
+        <div class="option-card">
+            <a href="/responsibilities">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Job Responsibilities</h3>
+                <p>View my Job Roles and Responsibilities.</p>
+            </a>
+        </div>
+
     </div>
 </div>
+</div>
 
+   
 {% endblock %}
