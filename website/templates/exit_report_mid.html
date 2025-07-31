@@ -68,6 +68,7 @@
         box-shadow: 0 4px 20px var(--shadow);
         border: 1px solid var(--border-color);
         border-top: 4px solid var(--accent-primary);
+        margin-bottom: 2rem;
     }
 
     .section-title {
@@ -82,6 +83,34 @@
 
     .section-title i {
         color: var(--accent-primary);
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success);
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border-left: 4px solid var(--danger);
+    }
+
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border-left: 4px solid var(--warning);
     }
 
     .form-section {
@@ -290,14 +319,76 @@
 </div>
 
 <div class="container">
-    <a href="/attendance-category" class="back-btn">
-        <i class="fas fa-arrow-left"></i> Back to Attendance
+    <a href="{{ url_for('views.exit_report_entry') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Reports
     </a>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {% if category == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif category == 'danger' %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                    {% elif category == 'warning' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Display existing entries -->
+    {% if existing_entries %}
+    <div class="report-container">
+        <div class="section-title">
+            <i class="fas fa-history"></i>
+            Previously Submitted Entries
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-clock"></i> Start</th>
+                        <th><i class="fas fa-clock"></i> End</th>
+                        {% if current_user.role in ['service_member', 'service_manager', 'director'] %}
+                        <th><i class="fas fa-map-marker-alt"></i> Site</th>
+                        {% elif current_user.role in ['accounts_member', 'accounts_manager', 'business_development_manager'] %}
+                        <th><i class="fas fa-user-tie"></i> Customer</th>
+                        {% endif %}
+                        <th><i class="fas fa-tasks"></i> Activities</th>
+                        <th><i class="fas fa-calendar-plus"></i> Tomorrow's Plan</th>
+                        <th><i class="fas fa-comment"></i> Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in existing_entries %}
+                    <tr>
+                        <td><strong>{{ entry.start_time.strftime('%H:%M') }}</strong></td>
+                        <td><strong>{{ entry.end_time.strftime('%H:%M') }}</strong></td>
+                        {% if current_user.role in ['service_member', 'service_manager', 'director'] %}
+                        <td>{{ entry.site_name }}</td>
+                        {% elif current_user.role in ['accounts_member', 'accounts_manager', 'business_development_manager'] %}
+                        <td>{{ entry.customer_name }}</td>
+                        {% endif %}
+                        <td>{{ entry.activities_completed }}</td>
+                        <td>{{ entry.tomorrow_plan }}</td>
+                        <td>{{ entry.remarks }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Entry form -->
     <div class="report-container">
         <div class="section-title">
             <i class="fas fa-plus-circle"></i>
-            Create Exit Report
+            Add New Entry
         </div>
 
         <div class="location-status" id="location-status">
@@ -308,7 +399,6 @@
         </div>
 
         <form method="POST" id="reportForm">
-            <!-- Hidden location fields -->
             <input type="hidden" name="latitude" id="latitude">
             <input type="hidden" name="longitude" id="longitude">
 
@@ -323,10 +413,9 @@
                         <tr>
                             <th><i class="fas fa-clock"></i> Start Time</th>
                             <th><i class="fas fa-clock"></i> End Time</th>
-                            {% if current_user.role == 'service_member' or current_user.role == 'service_manager' or current_user.role == 'director' %}
+                            {% if current_user.role in ['service_member', 'service_manager', 'director'] %}
                             <th><i class="fas fa-map-marker-alt"></i> Site Name</th>
-                            {% endif %}
-                            {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' or current_user.role=='business_development_manager' %}
+                            {% elif current_user.role in ['accounts_member', 'accounts_manager', 'business_development_manager'] %}
                             <th><i class="fas fa-user-tie"></i> Customer Name</th>
                             {% endif %}
                             <th><i class="fas fa-tasks"></i> Activities Completed</th>
@@ -339,10 +428,9 @@
                         <tr>
                             <td><input type="time" name="start_time" class="form-control"></td>
                             <td><input type="time" name="end_time" class="form-control"></td>
-                            {% if current_user.role == 'service_member' or current_user.role == 'service_manager' or current_user.role == 'director' %}
+                            {% if current_user.role in ['service_member', 'service_manager', 'director'] %}
                             <td><input type="text" name="site_name" class="form-control" placeholder="Enter site name"></td>
-                            {% endif %}
-                            {% if current_user.role == 'accounts_member' or current_user.role == 'accounts_manager' or current_user.role=='business_development_manager' %}
+                            {% elif current_user.role in ['accounts_member', 'accounts_manager', 'business_development_manager'] %}
                             <td><input type="text" name="customer_name" class="form-control" placeholder="Enter customer name"></td>
                             {% endif %}
                             <td><textarea name="activities_completed" class="form-control" placeholder="Describe activities completed"></textarea></td>

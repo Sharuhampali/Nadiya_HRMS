@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Your Payslips</h2>
+<table>
+  <tr>
+    <th>Month</th><th>Net Salary</th><th>Basic</th><th>HRA</th><th>Other</th>
+    <th>PT</th><th>TDS</th><th>ESI</th><th>EPF</th><th>Bank</th>
+    {% if is_hr %}<th>Email</th>{% endif %}
+  </tr>
+  {% for slip in payslips %}
+  <tr>
+    <td>{{ slip.salary_month.strftime('%B %Y') }}</td>
+    <td>{{ slip.net_salary }}</td>
+    <td>{{ slip.basic }}</td>
+    <td>{{ slip.hra }}</td>
+    <td>{{ slip.other_allowance }}</td>
+    <td>{{ slip.professional_tax }}</td>
+    <td>{{ slip.tds }}</td>
+    <td>{{ slip.esi }}</td>
+    <td>{{ slip.epf }}</td>
+    <td>{{ slip.bank_name }}</td>
+    {% if is_hr %}<td>{{ slip.employee_email }}</td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -33,10 +33,10 @@ from .models import (
     User, Attendance, Leave, Document, Holiday, Announcement,
     IntermediateLog, AnnouncementAcknowledgment, EditRequest,
     announcement_user, ExitReport, CompOffRequest, HRPolicy, HRPolicyAcknowledgment,
-    hr_policy_user, JobResponsibility
+    hr_policy_user, JobResponsibility, Payslip
 )
 from leave_calculator import calculate_initial_leaves
-from sqlalchemy import and_
+from sqlalchemy import and_, extract
 
 
 #########################################################################################################################################################
@@ -2740,7 +2740,7 @@ def exit_report_form(attendance_id):
         except Exception as e:
             db.session.rollback()
             print("Exit report error:", e)
-            flash("Error saving report. Please try again.", "error")
+            flash("Error saving report. Please try again. Error: {e}", "error")
 
         return redirect(url_for('views.attendance_form'))
 
@@ -3113,3 +3113,241 @@ def view_responsibilities():
 
     return render_template('view_responsibilities.html', responsibility=resp)
 
+@views.route('/generate_payslip', methods=['GET', 'POST'])
+@login_required
+def generate_payslip():
+    if current_user.email != "sumana@nadiya.in":
+        flash("Access denied.", category='error')
+        return redirect(url_for('views.home'))
+
+    employees = User.query.all()
+
+    if request.method == 'POST':
+        user_id = (request.form.get('employee'))
+        user = User.query.get(user_id)
+
+        # Personal and static fields
+        sl_no = int(request.form.get('sl_no') or 0)
+        empl_id = request.form.get('empl_id')
+        designation = request.form.get('designation')
+        doj = datetime.strptime(request.form.get('doj'), '%Y-%m-%d')
+        month = request.form.get('month')
+        year = (request.form.get('year'))
+
+        # Salary structure
+        actual_ctc = float(request.form.get('actual_ctc') or 0)
+        gross_salary = float(request.form.get('gross_salary') or 0)
+        basic = float(request.form.get('basic') or 0)
+        hra = float(request.form.get('hra') or 0)
+        conveyance = float(request.form.get('conveyance') or 0)
+        medi_allowance = float(request.form.get('medi_allowance') or 0)
+        perf_bonus = float(request.form.get('perf_bonus') or 0)
+        total_salary = basic + hra + conveyance + medi_allowance + perf_bonus
+
+        # Attendance
+        total_days = int(request.form.get('total_days') or 30)
+        worked_days = int(request.form.get('worked_days') or 0)
+        absent_days = total_days - worked_days
+
+        # Earnings (you may compute these from attendance or provide directly)
+        earned_basic = round(basic * worked_days / total_days, 2)
+        earned_hra = round(hra * worked_days / total_days, 2)
+        earned_conveyance = round(conveyance * worked_days / total_days, 2)
+        earned_medi = round(medi_allowance * worked_days / total_days, 2)
+        earned_bonus = round(perf_bonus * worked_days / total_days, 2)
+        arrears = float(request.form.get('arrears') or 0)
+        gross_payable = earned_basic + earned_hra + earned_conveyance + earned_medi + earned_bonus + arrears
+
+        # Deductions
+        pt = float(request.form.get('pt') or 0)
+        tds = float(request.form.get('tds') or 0)
+        pf = round(0.12 * earned_basic, 2)
+        esi = round(0.0075 * gross_payable, 2)
+        advance_due = float(request.form.get('advance_due') or 0)
+        loan_or_salary_adv = float(request.form.get('loan_or_salary_adv') or 0)
+
+        # Additions
+        reimbursement = float(request.form.get('reimbursement') or 0)
+        loyalty_bonus = float(request.form.get('loyalty_bonus') or 0)
+
+        # Net Pay and Employer Contributions
+        net_pay = gross_payable - (pt + tds + pf + esi + advance_due + loan_or_salary_adv) + reimbursement + loyalty_bonus
+        epf_employer = round(0.12 * earned_basic, 2)
+        esi_employer = round(0.0325 * gross_payable, 2)
+        ctc_total = gross_payable + epf_employer + esi_employer + reimbursement + loyalty_bonus
+
+        payslip = Payslip(
+            user_id=user_id,
+            sl_no=sl_no,
+            empl_id=empl_id,
+            name=user.first_name,
+            designation=designation,
+            doj=doj,
+            actual_ctc=actual_ctc,
+            gross_salary=gross_salary,
+            basic=basic,
+            hra=hra,
+            conveyance=conveyance,
+            medi_allowance=medi_allowance,
+            perf_bonus=perf_bonus,
+            total_salary=total_salary,
+            total_days=total_days,
+            worked_days=worked_days,
+            absent_days=absent_days,
+            earned_basic=earned_basic,
+            earned_hra=earned_hra,
+            earned_conveyance=earned_conveyance,
+            earned_medi=earned_medi,
+            earned_bonus=earned_bonus,
+            arrears=arrears,
+            gross_payable=gross_payable,
+            pt=pt,
+            tds=tds,
+            pf=pf,
+            esi=esi,
+            advance_due=advance_due,
+            loan_or_salary_adv=loan_or_salary_adv,
+            reimbursement=reimbursement,
+            loyalty_bonus=loyalty_bonus,
+            net_pay=net_pay,
+            epf_employer=epf_employer,
+            esi_employer=esi_employer,
+            ctc_total=ctc_total,
+            month=month,
+            year=year
+        )
+
+        db.session.add(payslip)
+        db.session.commit()
+        flash('Payslip generated successfully.', category='success')
+        return redirect(url_for('views.view_all_payslips'))
+
+    return render_template('upload_payslip.html', employees=employees)
+
+@views.route('/get_employee_details/<int:user_id>')
+@login_required
+def get_employee_details(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    return jsonify({
+        'name': user.first_name,
+        'designation': user.designation,
+        'doj': user.doj.strftime('%Y-%m-%d') if user.doj else '',
+        'empl_id': user.empl_id,
+    })
+
+
+@views.route('/my_payslips')
+@login_required
+def my_payslips():
+    last_12_months = datetime.now().date().replace(day=1)
+    payslips = Payslip.query.filter(
+        Payslip.employee_email == current_user.email,
+        extract('year', Payslip.salary_month) >= last_12_months.year - 1
+    ).order_by(Payslip.salary_month.desc()).all()
+    return render_template('payslips.html', payslips=payslips)
+
+@views.route('/view_all_payslips')
+@login_required
+def view_all_payslips():
+    if current_user.email != "sumana@nadiya.in":
+        flash("Access denied.", category='error')
+        return redirect(url_for('views.home'))
+
+    payslips = Payslip.query.order_by(Payslip.salary_month.desc()).all()
+    return render_template('all_payslips.html', payslips=payslips)
+
+
+@views.route('/exit_report_mid/<int:attendance_id>', methods=['GET', 'POST'])
+@login_required
+def exit_report_form_mid(attendance_id):
+    attendance = Attendance.query.get_or_404(attendance_id)
+
+    if attendance.user_id != current_user.id:
+        flash("You are not authorized to access this exit report.", "error")
+        return redirect(url_for('views.home'))
+
+    # Fetch existing reports for this attendance
+    previous_reports = ExitReport.query.filter_by(attendance_id=attendance.id).order_by(ExitReport.id.asc()).all()
+
+    if request.method == 'POST':
+        start_times = request.form.getlist('start_time')
+        end_times = request.form.getlist('end_time')
+        activities = request.form.getlist('activities_completed')
+        plans = request.form.getlist('tomorrow_plan')
+
+        site_names = request.form.getlist('site_name') or []
+        customer_names = request.form.getlist('customer_name') or []
+        remarks_list = request.form.getlist('remarks') or []
+
+        if not any(start_times):
+            flash("You must submit at least one completed row.", "warning")
+            return redirect(request.url)
+
+        saved_any = False
+        row_count = len(start_times)
+
+        for i in range(row_count):
+            start = start_times[i].strip()
+            end = end_times[i].strip()
+            activity = activities[i].strip()
+            plan = plans[i].strip()
+
+            site = site_names[i].strip() if i < len(site_names) else ''
+            customer = customer_names[i].strip() if i < len(customer_names) else ''
+            remarks = remarks_list[i].strip() if i < len(remarks_list) else ''
+
+            if i == 0:
+                if not start or not end or not activity or not plan:
+                    flash("Row 1 must be completely filled.", "warning")
+                    return redirect(request.url)
+            else:
+                if not start and not end and not activity and not plan and not site and not customer and not remarks:
+                    continue  # skip empty row
+
+            try:
+                start_time = datetime.strptime(start, "%H:%M").time() if start else None
+                end_time = datetime.strptime(end, "%H:%M").time() if end else None
+            except ValueError:
+                continue
+
+            report = ExitReport(
+                user_id=current_user.id,
+                attendance_id=attendance.id,
+                site_name=site,
+                customer_name=customer,
+                start_time=start_time,
+                end_time=end_time,
+                activities_completed=activity,
+                tomorrow_plan=plan,
+                remarks=remarks
+            )
+            db.session.add(report)
+            saved_any = True
+
+        if not saved_any:
+            flash("Please submit at least one valid row.", "warning")
+            return redirect(request.url)
+
+        try:
+            db.session.commit()
+            flash("Exit report saved.", "success")
+        except Exception as e:
+            db.session.rollback()
+            print("Exit report error:", e)
+            flash(f"Error saving report. Please try again. Error: {e}", "error")
+
+        return redirect(url_for('views.attendance_form'))
+
+    return render_template('exit_report_mid.html', attendance=attendance, existing_entries=previous_reports)
+
+
+
+@views.route('/exit_rep_entry')
+@login_required
+def exit_report_entry():
+    # Get current user's attendance records (you can filter further if needed)
+    attendance_records = Attendance.query.filter_by(user_id=current_user.id).order_by(Attendance.date.desc()).all()
+    return render_template('exit_report_entry.html', attendance_records=attendance_records)

@@ -287,3 +287,54 @@ class JobResponsibility(db.Model):
     role = db.Column(db.String(100), unique=True, nullable=False)
     content = db.Column(db.Text, nullable=False)  # Rich HTML content
     updated_on = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+class Payslip(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    sl_no = db.Column(db.Integer)
+    empl_id = db.Column(db.String(100))
+    name = db.Column(db.String(150))
+    designation = db.Column(db.String(100))
+    doj = db.Column(db.Date)
+
+    actual_ctc = db.Column(db.Float)
+    gross_salary = db.Column(db.Float)
+    basic = db.Column(db.Float)
+    hra = db.Column(db.Float)
+    conveyance = db.Column(db.Float)
+    medi_allowance = db.Column(db.Float)
+    perf_bonus = db.Column(db.Float)
+    total_salary = db.Column(db.Float)
+
+    total_days = db.Column(db.Integer)
+    worked_days = db.Column(db.Integer)
+    absent_days = db.Column(db.Integer)
+
+    earned_basic = db.Column(db.Float)
+    earned_hra = db.Column(db.Float)
+    earned_conveyance = db.Column(db.Float)
+    earned_medi = db.Column(db.Float)
+    earned_bonus = db.Column(db.Float)
+    arrears = db.Column(db.Float)
+    gross_payable = db.Column(db.Float)
+
+    pt = db.Column(db.Float)
+    tds = db.Column(db.Float)
+    pf = db.Column(db.Float)
+    esi = db.Column(db.Float)
+    advance_due = db.Column(db.Float)
+    loan_or_salary_adv = db.Column(db.Float)
+
+    reimbursement = db.Column(db.Float)
+    loyalty_bonus = db.Column(db.Float)
+
+    net_pay = db.Column(db.Float)
+    epf_employer = db.Column(db.Float)
+    esi_employer = db.Column(db.Float)
+    ctc_total = db.Column(db.Float)
+
+    month = db.Column(db.String(20))
+    year = db.Column(db.Integer)
+    generated_on = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='detailed_payslips')

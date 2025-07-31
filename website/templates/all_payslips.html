@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>My Payslips (Last 12 Months)</h3>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Month</th>
+        <th>Basic</th>
+        <th>HRA</th>
+        <th>Net Salary</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in payslips %}
+      <tr>
+        <td>{{ p.salary_month.strftime('%B %Y') }}</td>
+        <td>{{ p.basic }}</td>
+        <td>{{ p.hra }}</td>
+        <td>{{ p.net_salary }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

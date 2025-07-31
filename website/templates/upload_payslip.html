@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Payslip</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Upload Payslip</h2>
+        <form action="{{ url_for('views.generate_payslip') }}" method="POST">
+            <!-- Employee Dropdown -->
+            <div class="form-group mb-3">
+                <label for="employee">Select Employee</label>
+                <select class="form-control" name="employee" id="employee" required>
+                    <option value="" disabled selected>-- Select --</option>
+                    {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.first_name }} ({{ emp.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Autofilled Fields -->
+            <div class="form-group mb-3">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" name="name" id="name" readonly>
+            </div>
+            <div class="form-group mb-3">
+                <label for="designation">Designation</label>
+                <input type="text" class="form-control" name="designation" id="designation" readonly>
+            </div>
+            <div class="form-group mb-3">
+                <label for="doj">Date of Joining</label>
+                <input type="date" class="form-control" name="doj" id="doj" readonly>
+            </div>
+            <div class="form-group mb-3">
+                <label for="empl_id">Employee ID</label>
+                <input type="text" class="form-control" name="empl_id" id="empl_id" readonly>
+            </div>
+
+            <!-- Static Inputs for Salary Components -->
+            <div class="form-group mb-3"><label>Month</label><input type="month" name="month" class="form-control" required></div>
+            <div class="form-group mb-3"><label>Basic</label><input type="number" name="basic" class="form-control"></div>
+            <div class="form-group mb-3"><label>HRA</label><input type="number" name="hra" class="form-control"></div>
+            <div class="form-group mb-3"><label>Conveyance</label><input type="number" name="conveyance" class="form-control"></div>
+            <div class="form-group mb-3"><label>Medical</label><input type="number" name="medical" class="form-control"></div>
+            <div class="form-group mb-3"><label>Bonus</label><input type="number" name="bonus" class="form-control"></div>
+            <div class="form-group mb-3"><label>Total Days</label><input type="number" name="total_days" class="form-control"></div>
+            <div class="form-group mb-3"><label>Present Days</label><input type="number" name="present_days" class="form-control"></div>
+            <div class="form-group mb-3"><label>Earned Salary</label><input type="number" name="earned_salary" class="form-control"></div>
+            <div class="form-group mb-3"><label>Leave Deduction</label><input type="number" name="leave_deduction" class="form-control"></div>
+            <div class="form-group mb-3"><label>Advance Deduction</label><input type="number" name="advance_deduction" class="form-control"></div>
+            <div class="form-group mb-3"><label>Professional Tax</label><input type="number" name="pt" class="form-control"></div>
+            <div class="form-group mb-3"><label>Income Tax</label><input type="number" name="it" class="form-control"></div>
+            <div class="form-group mb-3"><label>Other Deduction</label><input type="number" name="other_deduction" class="form-control"></div>
+            <div class="form-group mb-3"><label>Arrears</label><input type="number" name="arrears" class="form-control"></div>
+            <div class="form-group mb-3"><label>Reimbursement</label><input type="number" name="reimbursement" class="form-control"></div>
+            <div class="form-group mb-3"><label>Loyalty Bonus</label><input type="number" name="loyalty_bonus" class="form-control"></div>
+            <div class="form-group mb-3"><label>Net Pay</label><input type="number" name="net_pay" class="form-control"></div>
+            <div class="form-group mb-3"><label>EPF</label><input type="number" name="epf" class="form-control"></div>
+            <div class="form-group mb-3"><label>ESI</label><input type="number" name="esi" class="form-control"></div>
+            <div class="form-group mb-3"><label>CTC</label><input type="number" name="ctc" class="form-control"></div>
+
+            <button type="submit" class="btn btn-primary">Upload Payslip</button>
+        </form>
+    </div>
+
+    <!-- JS for Autofill -->
+    <script>
+        document.getElementById('employee').addEventListener('change', function () {
+            const userId = this.value;
+            if (!userId) return;
+
+            fetch(`/get_employee_details/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        document.getElementById('name').value = data.name || '';
+                        document.getElementById('designation').value = data.designation || '';
+                        document.getElementById('doj').value = data.doj || '';
+                        document.getElementById('empl_id').value = data.empl_id || '';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching employee details:', err);
+                    alert('Failed to fetch employee data');
+                });
+        });
+    </script>
+</body>
+</html>
