@@ -2740,8 +2740,7 @@ def exit_report_form(attendance_id):
         except Exception as e:
             db.session.rollback()
             print("Exit report error:", e)
-            flash("Error saving report. Please try again. Error: {e}", "error")
-
+            flash(f"Error saving report: {str(e)}", "error")
         return redirect(url_for('views.attendance_form'))
 
 
@@ -3337,8 +3336,7 @@ def exit_report_form_mid(attendance_id):
         except Exception as e:
             db.session.rollback()
             print("Exit report error:", e)
-            flash(f"Error saving report. Please try again. Error: {e}", "error")
-
+            flash(f"Error saving report: {str(e)}", "error")
         return redirect(url_for('views.attendance_form'))
 
     return render_template('exit_report_mid.html', attendance=attendance, existing_entries=previous_reports)
