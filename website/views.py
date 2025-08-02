@@ -955,7 +955,6 @@ def approve_leave(leave_id):
         flash("Leave approved, but email could not be sent.", "warning")
 
     return redirect(url_for('views.leave_requests'))
-
 @views.route('/reject/<int:leave_id>', methods=['POST'])
 @login_required
 def reject(leave_id):
@@ -972,6 +971,7 @@ def reject(leave_id):
     remarks = request.form.get('remarks') or "No remarks provided."
     leave.approved_by = current_user.email
     leave.rejected = True
+    leave.approved = False  # 🔧 This is the missing line
     leave.remarks = remarks
 
     try:
@@ -990,7 +990,9 @@ def reject(leave_id):
 
         if ltype == 'Compoff':
             rollback = duration
-            used_requests = CompOffRequest.query.filter_by(user_id=user.id, status='approved', used=True).order_by(CompOffRequest.requested_on.desc()).all()
+            used_requests = CompOffRequest.query.filter_by(
+                user_id=user.id, status='approved', used=True
+            ).order_by(CompOffRequest.requested_on.desc()).all()
 
             for req in used_requests:
                 if rollback <= 0:
@@ -1045,7 +1047,6 @@ def reject(leave_id):
 
     flash("Leave request rejected and leave balances restored.", "info")
     return redirect(url_for('views.leave_requests'))
-
 
 
 #display approved leaves 
@@ -2282,7 +2283,7 @@ def upload():
 @views.route('/misc-category')
 @login_required
 def misc_category():
-    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in':
+    if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!= 'support@nadiya.in':
         flash("You do not have permission to view this page.", category='error')
         return redirect(url_for('views.home'))
     return render_template('misc_category.html', user=current_user)
@@ -3231,10 +3232,9 @@ def get_employee_details(user_id):
         return jsonify({'error': 'User not found'}), 404
 
     return jsonify({
-        'name': user.first_name,
-        'designation': user.designation,
-        'doj': user.doj.strftime('%Y-%m-%d') if user.doj else '',
-        'empl_id': user.empl_id,
+        'name': user.first_name ,
+        'designation': user.role if user.role else '',
+        'doj': user.joining_date.strftime('%Y-%m-%d') if user.joining_date else '',
     })
 
 
@@ -3346,6 +3346,48 @@ def exit_report_form_mid(attendance_id):
 @views.route('/exit_rep_entry')
 @login_required
 def exit_report_entry():
-    # Get current user's attendance records (you can filter further if needed)
-    attendance_records = Attendance.query.filter_by(user_id=current_user.id).order_by(Attendance.date.desc()).all()
+    cutoff_time = datetime.now() - timedelta(hours=48)
+    
+    attendance_records = (
+        Attendance.query
+        .filter(Attendance.user_id == current_user.id, Attendance.date >= cutoff_time)
+        .order_by(Attendance.date.desc())
+        .all()
+    )
+
     return render_template('exit_report_entry.html', attendance_records=attendance_records)
+
+
+from flask import jsonify
+from datetime import date, timedelta
+import calendar
+
+@views.route('/calculate_working_days', methods=['GET'])
+def calculate_working_days():
+    month = int(request.args.get('month'))
+    year = int(request.args.get('year'))
+
+    # Get all dates of the month
+    total_days_in_month = calendar.monthrange(year, month)[1]
+    all_dates = [date(year, month, day) for day in range(1, total_days_in_month + 1)]
+
+    # Identify Sundays
+    sundays = [d for d in all_dates if d.weekday() == 6]
+
+    # 2nd and 4th Saturdays
+    saturdays = [d for d in all_dates if d.weekday() == 5]
+    second_fourth_sats = [saturdays[1], saturdays[3]] if len(saturdays) >= 4 else saturdays[1:3]
+
+    # Holidays from DB
+    holidays = Holiday.query.filter(
+        db.extract('month', Holiday.date) == month,
+        db.extract('year', Holiday.date) == year
+    ).with_entities(Holiday.date).all()
+    holiday_dates = [h.date for h in holidays]
+
+    # Set of dates to exclude
+    excluded = set(sundays + second_fourth_sats + holiday_dates)
+
+    working_days = [d for d in all_dates if d not in excluded]
+
+    return jsonify({"working_days": len(working_days)})

@@ -453,7 +453,7 @@
                     </div>
                 {% endif %}
 
-                {% if not leave.approved and not leave.rejected %}
+                {% if not leave.rejected %}
                     <div class="action-buttons">
                         <form class="approve-form" action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST" style="display: inline;">
                             <button type="submit" class="btn-approve">
