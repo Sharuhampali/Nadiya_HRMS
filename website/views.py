@@ -1071,38 +1071,6 @@ def approved_leaves():
 
     return render_template("approved_leaves.html", leaves=structured_leaves)
 
-# @views.route('/reset_leaves', methods=['GET', 'POST'])
-# @login_required
-# def reset_leaves():
-#     if current_user.email != "sumana@nadiya.in" and current_user.email!= 'maneesh@nadiya.in' and current_user.email!='support@nadiya.in':
-#         flash("You do not have permission to reset leaves.", category='error')
-#         return redirect(url_for('views.home'))
-
-#     users = User.query.all()
-#     for user in users:
-#         attendances = Attendance.query.filter_by(user_id=user.id).all()
-
-#         # Reset compoff for each attendance record
-#         for attendance in attendances:
-#             attendance.compoff = 0
-
-#     for user in users:
-#         e = min(10, 15 - user.earned)
-
-#     for user in users:
-#         user.medic = 0
-#         user.pay = 0
-#         user.earned = 0 - e
-#         # Add other leave types if applicable
-
-#     # Delete all contents of the Holiday table
-#     holidays = Holiday.query.all()
-#     for holiday in holidays:
-#         db.session.delete(holiday)
-
-#     db.session.commit()
-#     flash("All users' leave counts have been reset to zero, and all holidays have been deleted.", category='success')
-#     return redirect(url_for('views.home'))
 @views.route('/reset_leaves', methods=['GET', 'POST'])
 @login_required
 def reset_leaves():

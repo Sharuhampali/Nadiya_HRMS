@@ -400,8 +400,11 @@
 
     {% if leave_requests %}
         {% for leave in leave_requests | reverse %}
-           <div class="leave-request {% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}" 
-     data-status="{% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
+            <div class="leave-request 
+                {% if leave.approved %}approved
+                {% elif leave.rejected %}rejected
+                {% else %}pending{% endif %}"
+                data-status="{% if leave.approved %}approved{% elif leave.rejected %}rejected{% else %}pending{% endif %}">
 
                 <div class="request-header">
                     <div class="employee-info">
@@ -410,7 +413,9 @@
                         </div>
                         <div class="employee-details">
                             <h4>{{ leave.user.first_name }}</h4>
-                            <span class="leave-type-badge">{{ leave.leave_entries[0].type if leave.leave_entries else '—' }}</span>
+                            <span class="leave-type-badge">
+                                {{ leave.leave_entries[0].type if leave.leave_entries else '—' }}
+                            </span>
                         </div>
                     </div>
 
@@ -425,26 +430,26 @@
                     {% endif %}
                 </div>
 
-              <div class="leave-details">
-    <table class="entry-table">
-        <thead>
-            <tr>
-                <th><i class="fas fa-calendar-alt"></i> Date</th>
-                <th><i class="fas fa-clock"></i> Duration</th>
-                <th><i class="fas fa-calendar-check"></i> Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in leave.leave_entries %}
-                <tr>
-                    <td>{{ entry.date }}</td>
-                    <td>{{ entry.duration }} day{{ 's' if entry.duration > 1 else '' }}</td>
-                    <td>{{ entry.type }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                <div class="leave-details">
+                    <table class="entry-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar-alt"></i> Date</th>
+                                <th><i class="fas fa-clock"></i> Duration</th>
+                                <th><i class="fas fa-calendar-check"></i> Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in leave.leave_entries %}
+                                <tr>
+                                    <td>{{ entry.date }}</td>
+                                    <td>{{ entry.duration }} day{{ 's' if entry.duration > 1 else '' }}</td>
+                                    <td>{{ entry.type }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
                 {% if leave.reason %}
                     <div class="reason-section">
@@ -453,18 +458,18 @@
                     </div>
                 {% endif %}
 
-                {% if not leave.rejected %}
-                    <div class="action-buttons">
-                        <form class="approve-form" action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST" style="display: inline;">
+                <div class="action-buttons">
+                    {% if not leave.approved and not leave.rejected %}
+                        <!-- Pending: Approve + Reject -->
+                        <form action="{{ url_for('views.approve_leave', leave_id=leave.id) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn-approve">
                                 <i class="fas fa-check"></i> Approve
                             </button>
                         </form>
-
-                        <form class="reject-form" action="{{ url_for('views.reject', leave_id=leave.id) }}" method="POST" style="display: inline;">
-                            <div style="display: none;" class="remarks-wrapper mt-2">
-                                <textarea name="remarks" required placeholder="Why is this being rejected?" class="form-control mt-2 mb-2"></textarea>
-                                <button type="submit" class="btn-reject mt-1">
+                        <form class="reject-form" action="{{ url_for('views.reject', leave_id=leave.id) }}" method="POST" style="display:inline;">
+                            <div style="display:none;" class="remarks-wrapper">
+                                <textarea name="remarks" required placeholder="Why is this being rejected?" class="form-control"></textarea>
+                                <button type="submit" class="btn-reject">
                                     <i class="fas fa-times"></i> Confirm Reject
                                 </button>
                             </div>
@@ -472,8 +477,21 @@
                                 <i class="fas fa-times"></i> Reject
                             </button>
                         </form>
-                    </div>
-                {% endif %}
+                    {% elif leave.approved %}
+                        <!-- Approved: Show Revoke button -->
+                        <form class="reject-form" action="{{ url_for('views.reject', leave_id=leave.id) }}" method="POST" style="display:inline;">
+                            <div style="display:none;" class="remarks-wrapper">
+                                <textarea name="remarks" required placeholder="Why is this approval being revoked?" class="form-control"></textarea>
+                                <button type="submit" class="btn-reject">
+                                    <i class="fas fa-ban"></i> Confirm Revoke
+                                </button>
+                            </div>
+                            <button type="button" class="btn-reject show-remarks-btn">
+                                <i class="fas fa-ban"></i> Revoke Approval
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
             </div>
         {% endfor %}
     {% else %}
@@ -519,5 +537,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 {% endblock %}
